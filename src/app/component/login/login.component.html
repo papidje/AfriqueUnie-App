@@ -1,0 +1,18 @@
+<h2>Login</h2>
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+  <div>
+    <label>Email</label>
+    <input type="email" formControlName="userName">
+  </div>
+  <div>
+    <label>Password</label>
+    <input type="password" formControlName="password">
+  </div>
+  <button type="submit">Login</button>
+
+  <div>
+    <a href="/register">Creer un compte</a>
+    <span> / </span>
+    <a href="/activate">Activer votre compte</a>
+  </div>
+</form>

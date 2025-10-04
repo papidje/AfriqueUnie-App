@@ -1,0 +1,12 @@
+<h2>Activate</h2>
+<form [formGroup]="activateForm" (ngSubmit)="onSubmit()">
+  <div>
+    <label>Email</label>
+    <input type="email" formControlName="userMail">
+  </div>
+  <div>
+    <label>Code</label>
+    <input type="text" formControlName="code">
+  </div>
+  <button type="submit">Login</button>
+</form>
