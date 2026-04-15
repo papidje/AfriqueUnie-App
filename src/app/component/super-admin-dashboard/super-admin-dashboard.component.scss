@@ -1,0 +1,41 @@
+.page {
+  padding: 1rem 1.25rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 1.35rem;
+  margin: 0 0 0.35rem;
+}
+
+.subtitle {
+  color: #64748b;
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+}
+
+.state {
+  padding: 2rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.state.error {
+  color: #b91c1c;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.tenants-table {
+  width: 100%;
+  background: #fff;
+}
+
+.empty {
+  margin-top: 1rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}

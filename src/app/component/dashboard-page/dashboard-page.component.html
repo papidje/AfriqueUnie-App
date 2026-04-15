@@ -1,0 +1,60 @@
+<section class="dashboard-wrapper">
+  <header class="dashboard-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Vue d'ensemble de votre etablissement</p>
+    </div>
+  </header>
+
+  <div *ngIf="loading" class="loading-state">
+    <mat-spinner diameter="42"></mat-spinner>
+    <span>Chargement des indicateurs...</span>
+  </div>
+
+  <app-api-unavailable
+    *ngIf="!loading && hasError"
+    title="Dashboard indisponible"
+    message="Le service de statistiques est temporairement inaccessible."
+    (retry)="loadSummary()">
+  </app-api-unavailable>
+
+  <ng-container *ngIf="!loading && summary as data">
+    <div class="kpi-grid">
+      <mat-card class="kpi-card">
+        <div class="kpi-icon students">
+          <mat-icon>groups</mat-icon>
+        </div>
+        <div>
+          <p class="kpi-label">Nombre d'eleves</p>
+          <h2>{{ data.studentsCount }}</h2>
+        </div>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <div class="kpi-icon revenue">
+          <mat-icon>payments</mat-icon>
+        </div>
+        <div>
+          <p class="kpi-label">Frais percus ce mois</p>
+          <h2>{{ data.monthlyTuitionCollected | currency:'GNF':'symbol':'1.0-0' }}</h2>
+        </div>
+      </mat-card>
+    </div>
+
+    <mat-card class="recent-card">
+      <div class="recent-header">
+        <h3>Derniers inscrits</h3>
+      </div>
+
+      <mat-list>
+        <mat-list-item *ngFor="let student of data.recentEnrollments">
+          <mat-icon matListIcon>person_add</mat-icon>
+          <div matLine class="student-name">{{ student.fullName }}</div>
+          <div matLine class="student-meta">
+            {{ student.className }} - {{ student.enrolledAt | date:'mediumDate' }}
+          </div>
+        </mat-list-item>
+      </mat-list>
+    </mat-card>
+  </ng-container>
+</section>

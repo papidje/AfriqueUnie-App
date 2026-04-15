@@ -1,0 +1,13 @@
+<mat-card class="api-unavailable-card">
+  <div class="icon-wrap">
+    <mat-icon>cloud_off</mat-icon>
+  </div>
+
+  <h3>{{ title }}</h3>
+  <p>{{ message }}</p>
+
+  <button mat-raised-button color="primary" (click)="onRetry()">
+    <mat-icon>refresh</mat-icon>
+    Reessayer
+  </button>
+</mat-card>

@@ -2,3 +2,8 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Panneau porté par CDK overlay (hors :host du composant) — liste des niveaux pour « Ouvrir une classe » */
+.school-class-level-select-panel.mat-mdc-select-panel {
+  max-height: min(75vh, 560px) !important;
+}

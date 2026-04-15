@@ -1,0 +1,60 @@
+<div class="page">
+  <div class="toolbar">
+    <a mat-stroked-button routerLink="/classes">Retour aux classes</a>
+    <a mat-stroked-button [routerLink]="['/classes', classId, 'emploi-du-temps']" *ngIf="classId != null">
+      Emploi du temps
+    </a>
+    <a mat-stroked-button [routerLink]="['/classes', classId, 'matieres']" *ngIf="classId != null">
+      Gérer les matières
+    </a>
+  </div>
+
+  <h1>{{ pageTitle }}</h1>
+  <app-class-workspace-context-bar
+    workspaceSegment="planning"
+    [classLabelHint]="view?.className ?? null"
+  ></app-class-workspace-context-bar>
+  <p class="intro" *ngIf="classId != null">{{ introLine }}</p>
+
+  <div *ngIf="loading" class="loading">Chargement…</div>
+
+  <mat-card *ngIf="!loading && view" class="card">
+    <mat-card-content>
+      <table class="tbl" *ngIf="view.subjects.length">
+        <thead>
+          <tr>
+            <th>Matière</th>
+            <th class="coef">Coefficient</th>
+            <th class="prof">Professeur</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of view.subjects">
+            <td>
+              {{ row.subjectName }}
+              <span class="muted">({{ row.subjectCode }})</span>
+            </td>
+            <td class="coef">{{ row.coefficient }}</td>
+            <td class="prof">
+              <ng-container *ngIf="!canEditTeachers">
+                {{ row.teacherFullname ?? '—' }}
+              </ng-container>
+              <mat-form-field *ngIf="canEditTeachers" appearance="outline" class="teacher-field" subscriptSizing="dynamic">
+                <mat-label>Professeur</mat-label>
+                <mat-select
+                  [value]="row.teacherId"
+                  [disabled]="isRowSaving(row)"
+                  (selectionChange)="onTeacherChange(row, $event.value)"
+                >
+                  <mat-option [value]="null">— Non assigné —</mat-option>
+                  <mat-option *ngFor="let t of teachers" [value]="t.id">{{ t.fullname }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="!view.subjects.length" class="empty">Aucune matière n’est encore affectée à cette classe.</p>
+    </mat-card-content>
+  </mat-card>
+</div>

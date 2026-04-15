@@ -1,0 +1,47 @@
+.context-root {
+  margin-bottom: 16px;
+}
+
+.notice {
+  margin-bottom: 12px;
+}
+
+.class-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 24px;
+  padding: 12px 16px;
+  background: rgba(63, 81, 181, 0.06);
+  border-radius: 8px;
+  border: 1px solid rgba(63, 81, 181, 0.12);
+}
+
+.class-select {
+  min-width: 260px;
+  margin: 0;
+}
+
+.active-class {
+  font-size: 15px;
+  line-height: 1.4;
+
+  strong {
+    margin-left: 6px;
+  }
+}
+
+.year-pill {
+  font-size: 13px;
+  margin-left: auto;
+}
+
+.opt-level {
+  color: rgba(0, 0, 0, 0.55);
+  font-weight: 400;
+}
+
+.muted {
+  color: rgba(0, 0, 0, 0.55);
+  margin-right: 4px;
+}

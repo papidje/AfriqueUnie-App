@@ -1,0 +1,108 @@
+<div class="page">
+  <h1>Classes</h1>
+  <p class="intro">
+    Les classes sont rattachées à l’année scolaire <strong>active</strong> de l’établissement sélectionné dans l’en-tête.
+  </p>
+
+  <mat-card *ngIf="schoolId == null" class="notice">
+    <mat-card-content>
+      <p>Sélectionnez d’abord un établissement (menu en haut à droite) pour gérer les classes.</p>
+    </mat-card-content>
+  </mat-card>
+
+  <ng-container *ngIf="schoolId != null">
+    <mat-card *ngIf="!activeYear && !loadingClasses" class="notice no-year">
+      <mat-card-content>
+        <p>Aucune année scolaire n’est activée pour cet établissement.</p>
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          [routerLink]="['/annee-scolaire/nouvelle']"
+          [queryParams]="{ schoolId: schoolId, returnUrl: '/classes' }"
+        >
+          Créer une année scolaire
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="form-card">
+      <mat-card-title>Ouvrir une classe</mat-card-title>
+      <mat-card-subtitle *ngIf="activeYear">Année active : {{ activeYear.label }}</mat-card-subtitle>
+      <mat-card-subtitle *ngIf="!activeYear && !loadingClasses" class="warn">
+        Aucune année scolaire active — créez ou activez une année avant d’ouvrir une classe.
+      </mat-card-subtitle>
+
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="submitOpenClass()" class="open-class-form">
+          <mat-form-field appearance="outline" class="field-level">
+            <mat-label>Niveau (référentiel)</mat-label>
+            <mat-select
+              formControlName="levelId"
+              [disabled]="!canUseForm()"
+              panelClass="school-class-level-select-panel"
+            >
+              <mat-optgroup *ngFor="let g of levelGroups" [label]="g.groupLabel">
+                <mat-option *ngFor="let lv of g.levels" [value]="lv.id">
+                  {{ lv.name }}
+                </mat-option>
+              </mat-optgroup>
+            </mat-select>
+            <mat-error *ngIf="form.controls.levelId.hasError('required')">Choisissez un niveau.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="field-name">
+            <mat-label>Nom de la classe</mat-label>
+            <input matInput formControlName="name" placeholder="ex. 7ème A" autocomplete="off" />
+            <mat-hint>Libellé affiché dans l’établissement (ex. 7ème A, Terminale S2).</mat-hint>
+            <mat-error *ngIf="form.controls.name.hasError('required')">Nom requis.</mat-error>
+            <mat-error *ngIf="form.controls.name.hasError('maxlength')">50 caractères maximum.</mat-error>
+          </mat-form-field>
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="!canUseForm() || form.invalid || saving || loadingClasses"
+          >
+            {{ saving ? 'Création…' : 'Créer la classe' }}
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="list-card">
+      <mat-card-title>Classes de l’année active</mat-card-title>
+      <mat-card-content>
+        <div *ngIf="loadingClasses" class="loading">Chargement…</div>
+        <p *ngIf="!loadingClasses && !classes.length && activeYear" class="empty">Aucune classe pour cette année.</p>
+        <table *ngIf="classes.length" class="classes-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Niveau</th>
+              <th class="col-mat">Planning</th>
+              <th class="col-mat">Emploi du temps</th>
+              <th class="col-mat">Matières</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of classes">
+              <td>{{ row.name }}</td>
+              <td>{{ row.level?.name ?? '—' }}</td>
+              <td class="col-mat">
+                <a mat-stroked-button [routerLink]="['/classes', row.id, 'planning']">Voir</a>
+              </td>
+              <td class="col-mat">
+                <a mat-stroked-button [routerLink]="['/classes', row.id, 'emploi-du-temps']">Éditer</a>
+              </td>
+              <td class="col-mat">
+                <a mat-stroked-button [routerLink]="['/classes', row.id, 'matieres']">Gérer</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

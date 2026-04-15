@@ -1,0 +1,27 @@
+<h2 mat-dialog-title>Affecter un administrateur</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Rechercher un utilisateur</mat-label>
+    <input matInput [formControl]="searchCtrl" placeholder="Nom ou email..." />
+  </mat-form-field>
+
+  <mat-nav-list *ngIf="results.length">
+    <a
+      mat-list-item
+      *ngFor="let user of results"
+      (click)="assign(user.id)"
+      class="admin-item"
+    >
+      <mat-icon>person_add</mat-icon>
+      <div matLine>{{ user.fullname }}</div>
+      <div matLine>{{ user.email }}</div>
+    </a>
+  </mat-nav-list>
+
+  <p *ngIf="!results.length" class="empty">Aucun résultat</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="dialogRef.close()">Fermer</button>
+</mat-dialog-actions>

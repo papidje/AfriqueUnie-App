@@ -1,0 +1,38 @@
+.school-card,
+.admin-card {
+  margin-bottom: 20px;
+  padding: 16px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+mat-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+mat-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.secondary {
+  font-size: 13px;
+  color: gray;
+}
+
+.empty {
+  color: #666;
+  font-style: italic;
+  padding: 8px;
+}
+
+.loader {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}

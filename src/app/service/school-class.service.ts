@@ -1,0 +1,26 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../core/api-base';
+import { SchoolClassDto } from '../models/academic.models';
+
+export interface CreateSchoolClassRequest {
+  name: string;
+  year: { id: number };
+  level: { id: number };
+}
+
+@Injectable({ providedIn: 'root' })
+export class SchoolClassService {
+  private readonly base = `${API_BASE_URL}/api/school-classes`;
+
+  constructor(private readonly http: HttpClient) {}
+
+  listForActiveSchoolYear(schoolId: number): Observable<SchoolClassDto[]> {
+    return this.http.get<SchoolClassDto[]>(`${this.base}/school/${schoolId}/active-year`);
+  }
+
+  create(body: CreateSchoolClassRequest): Observable<SchoolClassDto> {
+    return this.http.post<SchoolClassDto>(this.base, body);
+  }
+}

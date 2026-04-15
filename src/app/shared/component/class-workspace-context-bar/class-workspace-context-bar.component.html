@@ -1,0 +1,48 @@
+<div class="context-root">
+  <mat-card *ngIf="!loadingContext && schoolId == null" class="notice">
+    <mat-card-content>
+      <p>Sélectionnez un établissement dans l’en-tête pour lister les classes de l’année active.</p>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="!loadingContext && schoolId != null && !activeYear" class="notice">
+    <mat-card-content>
+      <p>Aucune année scolaire active pour cet établissement.</p>
+      <a
+        mat-raised-button
+        color="primary"
+        [routerLink]="['/annee-scolaire/nouvelle']"
+        [queryParams]="{ schoolId: schoolId, returnUrl: returnUrlForYearSetup() }"
+      >
+        Créer ou activer une année
+      </a>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="!loadingContext && schoolId != null && activeYear && !classes.length" class="notice">
+    <mat-card-content>
+      <p>
+        Aucune classe pour cette année scolaire. Créez une classe depuis la page
+        <a routerLink="/classes">Classes</a>.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="class-bar" *ngIf="!loadingContext && schoolId != null && activeYear && classes.length">
+    <mat-form-field appearance="outline" class="class-select">
+      <mat-label>Classe</mat-label>
+      <mat-select [value]="classId" (selectionChange)="onClassSelected($event.value)">
+        <mat-option *ngFor="let c of classes" [value]="c.id">
+          {{ c.name }}<span *ngIf="c.level?.name" class="opt-level"> — {{ c.level?.name }}</span>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="active-class" *ngIf="classId != null">
+      <span class="muted">Classe affichée :</span>
+      <strong>{{ activeClassLabel }}</strong>
+    </div>
+    <div class="year-pill" *ngIf="activeYear as y">
+      <span class="muted">Année active :</span> {{ y.label }}
+    </div>
+  </div>
+</div>

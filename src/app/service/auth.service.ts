@@ -1,28 +1,160 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {Observable, of, tap, catchError} from "rxjs";
+import {jwtDecode} from "jwt-decode";
+import {AppRoles} from "../core/app-roles";
+import {ACTIVE_SCHOOL_ID_SESSION_KEY} from "../core/storage-keys";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:8080/api/rest'; // URL de ton backend
+  private apiUrl = 'http://localhost:8080/api/rest'; // URL de ton backend
+  private readonly ROLE_KEY = 'role';
+  private readonly TENANT_KEY = 'tenantId';
+  private readonly HEADER_TITLE_KEY = 'headerTitle';
+  private readonly superAdminHeaderTitle = 'Gestion des écoles';
 
   constructor(private http: HttpClient) { }
 
-  login(credentials: {userName: string, password: string}): Observable<any> {
-    return this.http.post(`${this.baseUrl}/auth/login`, credentials);
+  getToken(): string | null {
+    return localStorage.getItem('jwt');
   }
 
-  register(data: {fullname: string, username: string, email: string, password: string}): Observable<any> {
-    return this.http.post(`${this.baseUrl}/users/registery`, data);
+  getRefreshToken(): string | null {
+    return localStorage.getItem('refresh');
+  }
+
+  saveTokens(jwt: string, refresh: string): void {
+    localStorage.setItem('jwt', jwt);
+    localStorage.setItem('refresh', refresh);
+    this.saveClaims(jwt);
+  }
+
+  clearTokens(): void {
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('refresh');
+    localStorage.removeItem(this.ROLE_KEY);
+    localStorage.removeItem(this.TENANT_KEY);
+    localStorage.removeItem(this.HEADER_TITLE_KEY);
+    sessionStorage.removeItem(ACTIVE_SCHOOL_ID_SESSION_KEY);
+  }
+
+  /** Titre barre d’app : super admin = libellé global, sinon nom école / tenant depuis le JWT. */
+  getHeaderDisplayTitle(): string {
+    const role = localStorage.getItem(this.ROLE_KEY);
+    if (role === AppRoles.SUPER_ADMIN) {
+      return this.superAdminHeaderTitle;
+    }
+    return localStorage.getItem(this.HEADER_TITLE_KEY) || 'Mon organisation';
+  }
+
+  refreshToken(): Observable<any> {
+    const refresh = this.getRefreshToken();
+    return this.http.post(`${this.apiUrl}/auth/refresh-token`, { refresh: refresh }).pipe(
+      tap((response: any) => {
+        this.saveTokens(response.bearer, response.refresh);
+      })
+    );
+  }
+
+  login(credentials: {userName: string, password: string}): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/login`, credentials);
   }
 
   activate(data: {userMail: string, code: string}): Observable<any> {
-    return this.http.post(`${this.baseUrl}/auth/activate`, data);
+    return this.http.post(`${this.apiUrl}/auth/activate`, data);
   }
 
-  getUsers(): Observable<any> {
-    return  this.http.get(`${this.baseUrl}/users`);
+  logout(): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/auth/logout`, {});
+  }
+
+  resetPassword(data: {email: string}): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/auth/reset-password`, data);
+  }
+
+  newPassword(data: {email: string, code: string, password: string}): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/new-password`, data);
+  }
+
+  registerSchoolAdmin(data: {
+    username: string;
+    fullname: string;
+    email: string;
+    password: string;
+    tenantName: string;
+    schoolName: string;
+    tenantAddress: string;
+    tenantLogo: string;
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/register-school-admin`, data);
+  }
+
+  async initializeAuthState(): Promise<void> {
+    const token = this.getToken();
+    if (!token) {
+      this.clearTokens();
+      return;
+    }
+
+    if (this.isTokenValid(token)) {
+      this.saveClaims(token);
+      return;
+    }
+
+    const refresh = this.getRefreshToken();
+    if (!refresh) {
+      this.clearTokens();
+      return;
+    }
+
+    await new Promise<void>((resolve) => {
+      this.refreshToken().pipe(
+        catchError(() => {
+          this.clearTokens();
+          return of(null);
+        })
+      ).subscribe({
+        next: () => resolve(),
+        error: () => resolve()
+      });
+    });
+  }
+
+  private isTokenValid(token: string): boolean {
+    try {
+      const decoded = jwtDecode<any>(token);
+      const now = Date.now() / 1000;
+      return !!decoded?.exp && decoded.exp > now;
+    } catch {
+      return false;
+    }
+  }
+
+  private saveClaims(jwt: string): void {
+    try {
+      const decoded = jwtDecode<any>(jwt);
+      const roles = (decoded?.roles || []) as Array<{ authority?: string }>;
+      const firstRole = roles[0]?.authority;
+      if (firstRole) {
+        localStorage.setItem(this.ROLE_KEY, firstRole);
+      }
+      if (decoded?.tenant_id !== undefined && decoded?.tenant_id !== null) {
+        localStorage.setItem(this.TENANT_KEY, String(decoded.tenant_id));
+      } else {
+        localStorage.removeItem(this.TENANT_KEY);
+      }
+      const ht = decoded?.header_title ?? decoded?.school_display_name;
+      if (typeof ht === 'string' && ht.trim().length > 0) {
+        localStorage.setItem(this.HEADER_TITLE_KEY, ht.trim());
+      } else {
+        localStorage.removeItem(this.HEADER_TITLE_KEY);
+      }
+    } catch {
+      localStorage.removeItem(this.ROLE_KEY);
+      localStorage.removeItem(this.TENANT_KEY);
+      localStorage.removeItem(this.HEADER_TITLE_KEY);
+    }
   }
 }

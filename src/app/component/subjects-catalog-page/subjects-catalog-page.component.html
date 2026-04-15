@@ -1,0 +1,76 @@
+<div class="page">
+  <h1>Référentiel des matières</h1>
+  <p class="intro">Codes et libellés utilisés lors de l’affectation aux classes.</p>
+
+  <mat-card class="card">
+    <mat-card-title>Nouvelle matière</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="createForm" (ngSubmit)="submitCreate()" class="row-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Code</mat-label>
+          <input matInput formControlName="code" maxlength="50" autocomplete="off" />
+          <mat-error>Code requis.</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="grow">
+          <mat-label>Nom</mat-label>
+          <input matInput formControlName="name" maxlength="200" autocomplete="off" />
+          <mat-error>Nom requis.</mat-error>
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit" [disabled]="saving || createForm.invalid">
+          Ajouter
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="card">
+    <mat-card-title>Liste</mat-card-title>
+    <mat-card-content>
+      <div *ngIf="loading" class="muted">Chargement…</div>
+      <table *ngIf="!loading && subjects.length" class="tbl">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Nom</th>
+            <th class="actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let s of subjects">
+            <tr *ngIf="editing?.id !== s.id">
+              <td>{{ s.code }}</td>
+              <td>{{ s.name }}</td>
+              <td class="actions">
+                <button mat-icon-button type="button" (click)="startEdit(s)" aria-label="Modifier">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button type="button" (click)="delete(s)" aria-label="Supprimer">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="editing?.id === s.id" class="edit-row">
+              <td colspan="3">
+                <form [formGroup]="editForm" (ngSubmit)="submitEdit()" class="row-form edit-inline">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Code</mat-label>
+                    <input matInput formControlName="code" maxlength="50" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="grow">
+                    <mat-label>Nom</mat-label>
+                    <input matInput formControlName="name" maxlength="200" />
+                  </mat-form-field>
+                  <button mat-button type="button" (click)="cancelEdit()">Annuler</button>
+                  <button mat-raised-button color="primary" type="submit" [disabled]="saving || editForm.invalid">
+                    Enregistrer
+                  </button>
+                </form>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+      <p *ngIf="!loading && !subjects.length" class="muted">Aucune matière.</p>
+    </mat-card-content>
+  </mat-card>
+</div>

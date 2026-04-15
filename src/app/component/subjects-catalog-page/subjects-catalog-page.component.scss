@@ -1,0 +1,59 @@
+.page {
+  padding: 16px 24px 32px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+}
+
+.intro {
+  margin: 0 0 16px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+}
+
+.card {
+  margin-bottom: 20px;
+}
+
+.row-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.grow {
+  flex: 1 1 220px;
+  min-width: 200px;
+}
+
+.edit-inline {
+  padding: 8px 0;
+}
+
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th,
+  td {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  th.actions,
+  td.actions {
+    width: 120px;
+    text-align: right;
+  }
+}
+
+.muted {
+  color: rgba(0, 0, 0, 0.55);
+}

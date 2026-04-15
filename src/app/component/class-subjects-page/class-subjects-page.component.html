@@ -1,0 +1,98 @@
+<div class="page">
+  <div class="toolbar">
+    <a mat-button routerLink="/classes">
+      <mat-icon>arrow_back</mat-icon>
+      Retour aux classes
+    </a>
+    <a mat-stroked-button *ngIf="classId != null" [routerLink]="['/classes', classId, 'planning']">
+      Planning de la classe
+    </a>
+    <a mat-stroked-button *ngIf="classId != null" [routerLink]="['/classes', classId, 'emploi-du-temps']">
+      Emploi du temps
+    </a>
+  </div>
+
+  <h1>{{ pageTitle }}</h1>
+  <app-class-workspace-context-bar
+    workspaceSegment="matieres"
+    [classLabelHint]="className"
+  ></app-class-workspace-context-bar>
+  <p class="intro" *ngIf="classId != null">{{ introLine }}</p>
+
+  <mat-card *ngIf="classId == null" class="notice">
+    <mat-card-content>Identifiant de classe invalide.</mat-card-content>
+  </mat-card>
+
+  <ng-container *ngIf="classId != null">
+    <mat-card class="card">
+      <mat-card-title>Ajouter une matière</mat-card-title>
+      <mat-card-content>
+        <form [formGroup]="addForm" (ngSubmit)="submitAdd()" class="add-form">
+          <mat-form-field appearance="outline" class="subject-field">
+            <mat-label>Matière</mat-label>
+            <mat-select formControlName="subjectId" panelClass="school-class-level-select-panel">
+              <mat-option *ngFor="let s of availableSubjects()" [value]="s.id">
+                {{ s.code }} — {{ s.name }}
+              </mat-option>
+            </mat-select>
+            <mat-hint *ngIf="!availableSubjects().length">Toutes les matières sont déjà affectées (ou catalogue vide).</mat-hint>
+            <mat-error>Choisissez une matière.</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Coefficient</mat-label>
+            <input matInput type="number" formControlName="coefficient" min="1" max="20" />
+            <mat-error>Entre 1 et 20.</mat-error>
+          </mat-form-field>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="saving || addForm.invalid || !availableSubjects().length"
+          >
+            Ajouter
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="card">
+      <mat-card-title>Matières affectées</mat-card-title>
+      <mat-card-content>
+        <div *ngIf="loading" class="muted">Chargement…</div>
+        <table *ngIf="!loading && rows.length" class="tbl">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Matière</th>
+              <th>Coefficient</th>
+              <th class="actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of rows">
+              <td>{{ row.subjectCode }}</td>
+              <td>{{ row.subjectName }}</td>
+              <td class="coef">
+                <input
+                  matInput
+                  type="number"
+                  class="coef-input"
+                  [value]="row.coefficient"
+                  min="1"
+                  max="20"
+                  (blur)="onCoeffBlur(row, $event)"
+                />
+              </td>
+              <td class="actions">
+                <button mat-icon-button type="button" (click)="remove(row)" aria-label="Retirer">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p *ngIf="!loading && !rows.length" class="muted">Aucune matière pour cette classe.</p>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

@@ -1,0 +1,35 @@
+.school-container {
+  padding: 1rem 2rem;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+  }
+
+  .actions button {
+    margin-right: 4px;
+  }
+
+  .empty {
+    text-align: center;
+    color: gray;
+    padding: 2rem;
+  }
+}

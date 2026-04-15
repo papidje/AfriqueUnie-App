@@ -1,0 +1,37 @@
+@import 'src/styles/auth-layout';
+
+.step-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+
+  .active {
+    color: #1d4ed8;
+    font-weight: 600;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-outline {
+  margin-top: 0.5rem;
+  padding: 0.7rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin: 0.25rem 0 0;
+  display: block;
+}

@@ -1,3 +1,147 @@
+<mat-sidenav-container class="app-container" *ngIf="showLayout">
+  <!-- SIDENAV -->
+  <mat-sidenav #sidenav mode="side" [(opened)]="opened" class="sidenav">
+    <mat-toolbar color="primary" class="sidenav-header">
+      <span>{{ headerTitle }}</span>
+    </mat-toolbar>
 
-<span>{{ title }} app is running!</span>
-<router-outlet></router-outlet>
+    <mat-nav-list>
+      <a
+        mat-list-item
+        *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
+        routerLink="/admin"
+        (click)="sidenav.close()"
+      >
+        <mat-icon>settings</mat-icon>
+        <span>Gestion du staff</span>
+      </a>
+      <a
+        mat-list-item
+        *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
+        routerLink="/mes-etablissements"
+        (click)="sidenav.close()"
+      >
+        <mat-icon>apartment</mat-icon>
+        <span>Mes établissements</span>
+      </a>
+      <a
+        mat-list-item
+        *ngIf="hasDashboardAccess()"
+        routerLink="/dashboard"
+        (click)="sidenav.close()"
+      >
+        <mat-icon>dashboard</mat-icon>
+        <span>Dashboard</span>
+      </a>
+      <a
+        mat-list-item
+        *ngIf="hasAnyRole(navStudentsRoles)"
+        routerLink="/students"
+        (click)="sidenav.close()"
+      >
+        <mat-icon>school</mat-icon>
+        <span>Élèves</span>
+      </a>
+      <a
+        mat-list-item
+        *ngIf="hasAnyRole(navClassesRoles)"
+        routerLink="/classes"
+        (click)="sidenav.close()"
+      >
+        <mat-icon>class</mat-icon>
+        <span>Classes</span>
+      </a>
+      <a
+        mat-list-item
+        *ngIf="hasAnyRole(navClassesRoles)"
+        routerLink="/referentiel/matieres"
+        (click)="sidenav.close()"
+      >
+        <mat-icon>menu_book</mat-icon>
+        <span>Matières (référentiel)</span>
+      </a>
+      <a
+        mat-list-item
+        *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
+        routerLink="/schools"
+        (click)="sidenav.close()"
+      >
+        <mat-icon>domain</mat-icon>
+        <span>Écoles</span>
+      </a>
+      <a
+        mat-list-item
+        *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
+        routerLink="/super-admin/dashboard"
+        (click)="sidenav.close()"
+      >
+        <mat-icon>apartment</mat-icon>
+        <span>Tenants / écoles</span>
+      </a>
+      <a
+        mat-list-item
+        *ngIf="hasAnyRole(navUsersRoles)"
+        routerLink="/users"
+        (click)="sidenav.close()"
+      >
+        <mat-icon>people</mat-icon>
+        <span>Utilisateurs</span>
+      </a>
+      <a mat-list-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Déconnexion</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- CONTENU PRINCIPAL -->
+  <mat-sidenav-content class="main-content">
+    <mat-toolbar color="primary" class="header">
+      <button mat-icon-button (click)="sidenav.toggle()" class="menu-btn">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="title">{{ headerTitle }}</span>
+      <span class="spacer"></span>
+      <ng-container *ngIf="activeSchool.headerVm$ | async as vm">
+        <mat-form-field
+          *ngIf="vm.showPicker"
+          appearance="outline"
+          class="header-school-picker"
+          subscriptSizing="dynamic"
+        >
+          <mat-label>École active</mat-label>
+          <mat-select
+            [value]="vm.selectedId"
+            (selectionChange)="activeSchool.setActiveSchoolId($event.value)"
+          >
+            <mat-option *ngFor="let s of vm.schools" [value]="s.id">{{ s.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </ng-container>
+      <button mat-icon-button routerLink="/profile"><mat-icon>account_circle</mat-icon></button>
+    </mat-toolbar>
+
+    <app-academic-context-banner></app-academic-context-banner>
+
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+
+    <mat-toolbar color="primary" class="footer">
+      <div class="footer-left">
+        <span class="company">© {{ currentYear }} Friasoft</span>
+      </div>
+
+      <span class="spacer"></span>
+
+      <div class="footer-links">
+        <a mat-button routerLink="/about">À propos</a>
+        <a mat-button routerLink="/contact">Contact</a>
+        <a mat-button routerLink="/privacy">Confidentialité</a>
+      </div>
+    </mat-toolbar>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<!-- Si page d'auth, on affiche juste le router-outlet -->
+<router-outlet *ngIf="!showLayout"></router-outlet>

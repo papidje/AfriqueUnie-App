@@ -1,0 +1,24 @@
+.school-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+mat-dialog-actions {
+  margin-top: 16px;
+}
+
+button {
+  min-width: 120px;
+}
+
+@media (max-width: 600px) {
+  .school-form {
+    gap: 12px;
+  }
+}

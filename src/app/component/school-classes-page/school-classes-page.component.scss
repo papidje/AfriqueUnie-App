@@ -1,0 +1,81 @@
+.page {
+  padding: 16px 24px 32px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+}
+
+.intro {
+  margin: 0 0 20px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+}
+
+.notice {
+  margin-bottom: 16px;
+}
+
+.form-card,
+.list-card {
+  margin-bottom: 20px;
+  overflow: visible;
+}
+
+mat-card-subtitle.warn {
+  color: #b71c1c;
+}
+
+.open-class-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.field-level {
+  min-width: 260px;
+  flex: 1 1 260px;
+}
+
+.field-name {
+  min-width: 220px;
+  flex: 1 1 220px;
+}
+
+.loading,
+.empty {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 14px;
+}
+
+/* Panneau du select : hauteur suffisante (évite une « petite fenêtre » dans le layout scrollable). */
+:host ::ng-deep .school-class-level-select-panel.mat-mdc-select-panel {
+  max-height: min(75vh, 560px) !important;
+}
+
+.classes-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th,
+  td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  th {
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.65);
+  }
+
+  .col-mat {
+    width: 140px;
+    white-space: nowrap;
+  }
+}

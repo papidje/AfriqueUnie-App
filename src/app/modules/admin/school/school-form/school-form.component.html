@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>{{ isEditMode ? 'Modifier une école' : 'Nouvelle école' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="school-form" mat-dialog-content>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Nom de l’école</mat-label>
+    <input matInput formControlName="name" />
+    <mat-error *ngIf="form.get('name')?.invalid">Nom requis</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Adresse</mat-label>
+    <input matInput formControlName="address" />
+    <mat-error *ngIf="form.get('address')?.invalid">Adresse requise</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Email</mat-label>
+    <input matInput formControlName="email" />
+    <mat-error *ngIf="form.get('email')?.invalid">Email invalide</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Téléphone</mat-label>
+    <input matInput formControlName="phone" />
+    <mat-error *ngIf="form.get('phone')?.invalid">Téléphone requis</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Description</mat-label>
+    <textarea matInput rows="3" formControlName="description"></textarea>
+  </mat-form-field>
+</form>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cancel()">Annuler</button>
+  <button mat-flat-button color="primary" [disabled]="loading || form.invalid" type="submit">
+    {{ isEditMode ? 'Mettre à jour' : 'Créer' }}
+  </button>
+</mat-dialog-actions>

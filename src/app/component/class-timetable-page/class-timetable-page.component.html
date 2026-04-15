@@ -1,0 +1,95 @@
+<div class="page">
+  <div class="toolbar">
+    <a mat-stroked-button routerLink="/classes">Retour aux classes</a>
+    <a mat-stroked-button *ngIf="classId != null" [routerLink]="['/classes', classId, 'planning']">
+      Planning & professeurs
+    </a>
+  </div>
+
+  <h1>Emploi du temps</h1>
+
+  <app-class-workspace-context-bar workspaceSegment="emploi-du-temps"></app-class-workspace-context-bar>
+
+  <p class="intro" *ngIf="classId != null">
+    Semaine type (lundi–vendredi), créneaux d’une heure de 8h à 16h.
+    <span *ngIf="canEdit"> Glissez une matière depuis la liste vers un créneau, ou déplacez les créneaux entre eux. </span>
+    <span *ngIf="!canEdit"> Affichage seul. </span>
+  </p>
+
+  <div *ngIf="loading" class="loading">Chargement…</div>
+  <div *ngIf="syncing" class="syncing">Enregistrement…</div>
+
+  <div class="layout" *ngIf="!loading && classId != null">
+    <aside class="sidebar" *ngIf="canEdit">
+      <h2>Matières de la classe</h2>
+      <p class="hint">Glisser vers la grille ou vers « Retirer » pour vider un créneau.</p>
+      <div
+        cdkDropList
+        id="palette"
+        class="palette"
+        [cdkDropListData]="paletteItems"
+        [cdkDropListConnectedTo]="dropListIds"
+        [cdkDropListSortingDisabled]="true"
+        [cdkDropListEnterPredicate]="blockExternalDropIntoPalette"
+        (cdkDropListDropped)="onDrop($event)"
+      >
+        <div *ngFor="let item of paletteItems" cdkDrag [cdkDragDisabled]="!canEdit" class="drag-chip palette-chip">
+          <span class="code">{{ item.subjectCode }}</span>
+          {{ item.subjectName }}
+        </div>
+      </div>
+
+      <div
+        cdkDropList
+        id="trash"
+        class="trash"
+        [cdkDropListData]="trashBin"
+        [cdkDropListConnectedTo]="dropListIds"
+        [cdkDropListSortingDisabled]="true"
+        [cdkDropListDisabled]="!canEdit"
+        (cdkDropListDropped)="onDrop($event)"
+      >
+        <mat-icon>delete_outline</mat-icon>
+        <span>Retirer du créneau</span>
+      </div>
+    </aside>
+
+    <div class="grid-wrap">
+      <table class="timetable">
+        <thead>
+          <tr>
+            <th class="corner"></th>
+            <th *ngFor="let d of days">{{ d.label }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let slot of slotDefs">
+            <th class="time">{{ slot.label }}</th>
+            <td *ngFor="let d of days" class="slot-cell">
+              <div
+                cdkDropList
+                [id]="cellId(d.dow, slot.index)"
+                class="cell"
+                [cdkDropListData]="cellData(d.dow, slot.index)"
+                [cdkDropListConnectedTo]="dropListIds"
+                [cdkDropListSortingDisabled]="true"
+                [cdkDropListDisabled]="!canEdit"
+                (cdkDropListDropped)="onDrop($event)"
+              >
+                <div
+                  *ngFor="let item of cellData(d.dow, slot.index)"
+                  cdkDrag
+                  [cdkDragDisabled]="!canEdit"
+                  class="drag-chip cell-chip"
+                >
+                  <span class="code">{{ item.subjectCode }}</span>
+                  {{ item.subjectName }}
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

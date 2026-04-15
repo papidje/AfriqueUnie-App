@@ -1,0 +1,67 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h2 class="title">Inscription d'une ecole</h2>
+
+    <div class="step-indicator">
+      <span [class.active]="step === 1">1. Ecole</span>
+      <span [class.active]="step === 2">2. Compte Admin</span>
+    </div>
+
+    <form *ngIf="step === 1" [formGroup]="schoolForm" class="auth-form">
+      <div class="form-group">
+        <label for="schoolName">Nom de l'établissement</label>
+        <input id="schoolName" type="text" formControlName="schoolName" placeholder="Ex. : Collège moderne" />
+        <small class="error" *ngIf="schoolForm.get('schoolName')?.invalid && schoolForm.get('schoolName')?.touched">
+          Ce champ est obligatoire.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="tenantName">Nom du tenant / organisation</label>
+        <input id="tenantName" type="text" formControlName="tenantName" placeholder="Optionnel — par défaut : même nom que l'établissement" />
+      </div>
+
+      <div class="form-group">
+        <label for="tenantAddress">Adresse</label>
+        <input id="tenantAddress" type="text" formControlName="tenantAddress" placeholder="Commune, quartier…" />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Téléphone</label>
+        <input id="phone" type="text" formControlName="phone" placeholder="+224…" />
+      </div>
+
+      <button type="button" class="btn-submit" (click)="goToStep2()">Continuer</button>
+    </form>
+
+    <form *ngIf="step === 2" [formGroup]="adminForm" class="auth-form" (ngSubmit)="submit()">
+      <div class="form-group">
+        <label>Nom de l'admin</label>
+        <input type="text" formControlName="fullname" placeholder="Nom complet" />
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="admin@ecole.com" />
+      </div>
+
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" formControlName="password" placeholder="********" />
+      </div>
+
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <div class="actions">
+        <button type="button" class="btn-outline" (click)="goBack()">Retour</button>
+        <button type="submit" class="btn-submit" [disabled]="loading">
+          {{ loading ? 'Creation...' : 'Creer le compte' }}
+        </button>
+      </div>
+    </form>
+
+    <div class="back-login">
+      <a routerLink="/login">Retour a la connexion</a>
+    </div>
+  </div>
+</div>

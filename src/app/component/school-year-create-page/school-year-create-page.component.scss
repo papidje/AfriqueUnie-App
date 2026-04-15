@@ -1,0 +1,64 @@
+.page {
+  padding: 16px 24px 32px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+}
+
+.intro {
+  margin: 0 0 20px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.notice {
+  margin-bottom: 16px;
+}
+
+.year-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.full {
+  width: 100%;
+}
+
+.dates-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  mat-form-field {
+    flex: 1 1 200px;
+    min-width: 180px;
+  }
+}
+
+.form-error {
+  color: #b71c1c;
+  font-size: 13px;
+  margin: 0;
+}
+
+.hint-btn {
+  align-self: flex-start;
+  margin-bottom: 8px;
+}
+
+.active-row {
+  margin: 8px 0 16px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}

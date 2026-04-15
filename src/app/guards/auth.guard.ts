@@ -1,29 +1,31 @@
-import { Injectable } from '@angular/core';
-import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree} from '@angular/router';
-import { Observable } from 'rxjs';
-import {jwtDecode} from "jwt-decode";
+import {Injectable} from '@angular/core';
+import {CanActivate, CanActivateChild, Router,} from '@angular/router';
+import {AuthUtilsService} from "../service/auth-utils.service";
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthGuard implements CanActivate {
+export class AuthGuard implements CanActivate, CanActivateChild {
 
   constructor(
-    private router: Router
+    private router: Router, private authUtils: AuthUtilsService
   ) {
   }
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    const token = localStorage.getItem('jwt');
-    if (token) {
-      // Optionnel : tu peux vérifier la validité du token ici
-      console.log(jwtDecode(token))
+  canActivate() {
+    return this.checkToken();
+  }
+
+  canActivateChild() {
+    return this.checkToken();
+  }
+
+
+  private checkToken(): boolean {
+    if (this.authUtils.isAuthenticated()) {
       return true;
     } else {
-      // Non connecté, redirige vers login
-      this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+      this.router.navigate(['/login']);
       return false;
     }
   }

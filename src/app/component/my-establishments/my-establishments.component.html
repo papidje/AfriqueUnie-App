@@ -1,0 +1,28 @@
+<div class="page">
+  <h1>Mes établissements</h1>
+  <p class="subtitle">Écoles rattachées à votre organisation (même tenant).</p>
+
+  <div *ngIf="loading" class="state">Chargement…</div>
+  <p *ngIf="error && !loading" class="state err">Impossible de charger la liste.</p>
+
+  <div class="grid" *ngIf="!loading && !error">
+    <mat-card class="card" *ngFor="let school of schools">
+      <mat-card-header>
+        <mat-card-title>{{ school.name }}</mat-card-title>
+        <mat-card-subtitle *ngIf="school.adress">{{ school.adress }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="meta" *ngIf="school.contact">Contact : {{ school.contact }}</p>
+        <span class="badge" [class.active]="school.active" [class.inactive]="!school.active">
+          {{ school.active ? 'Actif' : 'Inactif' }}
+        </span>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <a mat-raised-button color="primary" [routerLink]="['/admin', 'schools', school.id]">
+          Gérer cette école
+        </a>
+      </mat-card-actions>
+    </mat-card>
+    <p *ngIf="!schools.length" class="empty">Aucun établissement pour le moment.</p>
+  </div>
+</div>

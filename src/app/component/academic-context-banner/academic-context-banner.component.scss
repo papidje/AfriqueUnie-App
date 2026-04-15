@@ -1,0 +1,52 @@
+.academic-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 16px;
+  background: #e3f2fd;
+  color: #0d47a1;
+  border-bottom: 1px solid #bbdefb;
+  font-size: 14px;
+}
+
+.banner-icon {
+  flex-shrink: 0;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.banner-text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.banner-label {
+  font-weight: 500;
+}
+
+.banner-sep {
+  opacity: 0.5;
+}
+
+.banner-value {
+  font-weight: 600;
+}
+
+.banner-dates.muted {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.banner-warn {
+  color: #b71c1c;
+  font-weight: 500;
+}
+
+.banner-action {
+  margin-left: 4px;
+  line-height: 32px;
+}

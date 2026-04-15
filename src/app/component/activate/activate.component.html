@@ -1,12 +1,33 @@
-<h2>Activate</h2>
-<form [formGroup]="activateForm" (ngSubmit)="onSubmit()">
-  <div>
-    <label>Email</label>
-    <input type="email" formControlName="userMail">
+<div class="auth-container">
+  <div class="auth-card">
+    <h2 class="title">Activation du compte</h2>
+
+    <form [formGroup]="activateForm" (ngSubmit)="onSubmit()" class="activate-form">
+      <div class="form-group">
+        <label for="userMail">Email</label>
+        <input
+          id="userMail"
+          type="email"
+          formControlName="userMail"
+          placeholder="Entrez votre adresse e-mail"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="code">Code d’activation</label>
+        <input
+          id="code"
+          type="text"
+          formControlName="code"
+          placeholder="Entrez votre code"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn-submit" [disabled]="activateForm.invalid">
+        Activer
+      </button>
+    </form>
   </div>
-  <div>
-    <label>Code</label>
-    <input type="text" formControlName="code">
-  </div>
-  <button type="submit">Login</button>
-</form>
+</div>

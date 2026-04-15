@@ -1,0 +1,61 @@
+<div class="page">
+  <h1>Nouvelle année scolaire</h1>
+  <p class="intro">
+    Les champs ci-dessous alimentent l’établissement sélectionné : libellé, dates, statut actif. Si vous cochez
+    <strong>année active</strong>, les autres années de la même école seront désactivées automatiquement.
+  </p>
+
+  <mat-card *ngIf="schoolId == null" class="notice">
+    <mat-card-content>
+      <p>Impossible de déterminer l’établissement. Sélectionnez une école dans l’en-tête ou ouvrez cette page depuis le bandeau / la page Classes.</p>
+      <button mat-stroked-button type="button" (click)="cancel()">Retour</button>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="schoolId != null">
+    <mat-card-title>Paramètres</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="year-form">
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Libellé (ex. 2025-2026)</mat-label>
+          <input matInput formControlName="label" maxlength="20" autocomplete="off" />
+          <mat-hint align="end">{{ labelCharCount }}/20</mat-hint>
+          <mat-error *ngIf="form.controls.label.hasError('required')">Libellé requis.</mat-error>
+          <mat-error *ngIf="form.controls.label.hasError('maxlength')">20 caractères maximum.</mat-error>
+        </mat-form-field>
+
+        <div class="dates-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Date de début</mat-label>
+            <input matInput type="date" formControlName="startDate" />
+            <mat-error *ngIf="form.controls.startDate.hasError('required')">Requis.</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Date de fin</mat-label>
+            <input matInput type="date" formControlName="endDate" />
+            <mat-error *ngIf="form.controls.endDate.hasError('required')">Requis.</mat-error>
+          </mat-form-field>
+        </div>
+
+        <p class="form-error" *ngIf="form.hasError('dateOrder') && form.touched">
+          La date de fin doit être postérieure à la date de début.
+        </p>
+
+        <button mat-button type="button" (click)="suggestLabelFromDates()" class="hint-btn">
+          Mettre à jour le libellé selon les dates
+        </button>
+
+        <div class="active-row">
+          <mat-checkbox formControlName="active">Définir comme année scolaire active</mat-checkbox>
+        </div>
+
+        <div class="actions">
+          <button mat-stroked-button type="button" (click)="cancel()" [disabled]="submitting">Annuler</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="submitting || form.invalid">
+            {{ submitting ? 'Enregistrement…' : 'Enregistrer' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

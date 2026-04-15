@@ -1,0 +1,27 @@
+<ng-container *ngIf="vm$ | async as vm">
+  <div class="academic-banner" *ngIf="vm.visible" role="status">
+    <mat-icon class="banner-icon" aria-hidden="true">event</mat-icon>
+    <span class="banner-text">
+      <span class="banner-label">Année scolaire active</span>
+      <ng-container *ngIf="vm.year as y">
+        <span class="banner-sep">·</span>
+        <strong class="banner-value">{{ y.label }}</strong>
+        <span class="banner-dates muted">({{ y.startDate }} → {{ y.endDate }})</span>
+      </ng-container>
+      <ng-container *ngIf="!vm.year">
+        <span class="banner-sep">·</span>
+        <span class="banner-warn">Aucune année active.</span>
+        <button
+          mat-stroked-button
+          type="button"
+          color="primary"
+          class="banner-action"
+          [routerLink]="['/annee-scolaire/nouvelle']"
+          [queryParams]="{ schoolId: vm.schoolId, returnUrl: router.url }"
+        >
+          Créer une année scolaire
+        </button>
+      </ng-container>
+    </span>
+  </div>
+</ng-container>
