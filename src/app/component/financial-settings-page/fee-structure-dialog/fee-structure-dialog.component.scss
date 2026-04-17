@@ -1,0 +1,17 @@
+.dialog-content {
+  min-width: 420px;
+}
+
+.subtitle {
+  margin: 0 0 12px;
+  color: #607d8b;
+}
+
+.fee-form {
+  display: grid;
+  gap: 10px;
+}
+
+mat-form-field {
+  width: 100%;
+}

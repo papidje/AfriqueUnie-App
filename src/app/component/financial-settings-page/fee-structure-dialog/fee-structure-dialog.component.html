@@ -1,0 +1,49 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Modifier les frais' : 'Configurer les frais' }}</h2>
+
+<mat-dialog-content class="dialog-content">
+  <p class="subtitle">
+    {{ data.classLevelName }} ({{ data.classLevelCode }}) - {{ data.schoolYearLabel }}
+  </p>
+
+  <form [formGroup]="form" class="fee-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Frais d'inscription</mat-label>
+      <input matInput formControlName="registrationFee" inputmode="numeric" (input)="onAmountInput('registrationFee')" />
+      <span matTextSuffix>GNF</span>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Frais de réinscription</mat-label>
+      <input matInput formControlName="reRegistrationFee" inputmode="numeric" (input)="onAmountInput('reRegistrationFee')" />
+      <span matTextSuffix>GNF</span>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Scolarité mensuelle</mat-label>
+      <input matInput formControlName="monthlyTuitionFee" inputmode="numeric" (input)="onAmountInput('monthlyTuitionFee')" />
+      <span matTextSuffix>GNF</span>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Frais fournitures</mat-label>
+      <input matInput formControlName="suppliesFee" inputmode="numeric" (input)="onAmountInput('suppliesFee')" />
+      <span matTextSuffix>GNF</span>
+    </mat-form-field>
+
+    <mat-checkbox formControlName="suppliesColumnEnabled">
+      Afficher la colonne Fournitures dans le suivi financier
+    </mat-checkbox>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Devise</mat-label>
+      <input matInput formControlName="currency" maxlength="10" />
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Annuler</button>
+  <button mat-raised-button color="primary" type="button" (click)="submit()">
+    {{ isEdit ? 'Mettre à jour' : 'Enregistrer' }}
+  </button>
+</mat-dialog-actions>

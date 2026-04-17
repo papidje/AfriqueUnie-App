@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { DashboardPageComponent } from './dashboard-page.component';
 import { DashboardService } from '../../service/dashboard.service';
+import { ActiveSchoolService } from '../../service/active-school.service';
 
 describe('DashboardPageComponent', () => {
   let component: DashboardPageComponent;
@@ -16,11 +17,21 @@ describe('DashboardPageComponent', () => {
         {
           provide: DashboardService,
           useValue: {
-            getSummary: () => of({
-              studentsCount: 100,
-              monthlyTuitionCollected: 500000,
-              recentEnrollments: []
-            })
+            getSummary: () =>
+              of({
+                studentsCount: 100,
+                monthlyTuitionCollected: 500000,
+                recentEnrollments: []
+              })
+          }
+        },
+        {
+          provide: ActiveSchoolService,
+          useValue: {
+            refreshSchools$: () => of([]),
+            activeSchoolId$: new BehaviorSubject<number | null>(null).asObservable(),
+            headerVm$: of({ showPicker: false, schools: [], selectedId: null }),
+            getActiveSchoolId: () => null
           }
         }
       ],

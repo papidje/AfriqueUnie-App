@@ -11,6 +11,7 @@ import { SchoolYearService } from '../../service/school-year.service';
 import { ClassLevel, SchoolClassDto, SchoolYearDto } from '../../models/academic.models';
 
 export interface ClassLevelGroupOption {
+  groupCode: string;
   groupLabel: string;
   levels: ClassLevel[];
 }
@@ -103,7 +104,7 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
       .subscribe((ctx) => {
         this.schoolId = ctx.schoolId;
         this.activeYear = ctx.year;
-        this.classes = ctx.classes;
+        this.classes = this.sortClasses(ctx.classes);
         this.loadingClasses = false;
         if (ctx.schoolId != null && ctx.year == null && !this.redirectedForMissingYear) {
           this.redirectedForMissingYear = true;
@@ -129,7 +130,27 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
       }
       byCode.get(code)!.levels.push(level);
     }
-    return Array.from(byCode.values()).sort((a, b) => a.groupLabel.localeCompare(b.groupLabel, 'fr'));
+
+    // Ordre métier attendu : Maternelle → Primaire → Collège → Lycée
+    const orderByGroupCode: Record<string, number> = {
+      MAT: 1,
+      PRI: 2,
+      COL: 3,
+      LYC: 4
+    };
+
+    return Array.from(byCode.entries())
+      .map(([groupCode, value]) => ({
+        groupCode,
+        groupLabel: value.groupLabel,
+        levels: value.levels.slice().sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
+      }))
+      .sort((a, b) => {
+        const ao = orderByGroupCode[a.groupCode] ?? Number.MAX_SAFE_INTEGER;
+        const bo = orderByGroupCode[b.groupCode] ?? Number.MAX_SAFE_INTEGER;
+        if (ao !== bo) return ao - bo;
+        return a.groupLabel.localeCompare(b.groupLabel, 'fr');
+      });
   }
 
   /** Recharge la liste après création (même établissement). */
@@ -157,7 +178,7 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe((list) => {
-        this.classes = list;
+        this.classes = this.sortClasses(list);
         this.loadingClasses = false;
       });
   }
@@ -216,5 +237,21 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
 
   canUseForm(): boolean {
     return this.schoolId != null && this.activeYear != null && !this.loadingLevels;
+  }
+
+  private sortClasses(list: SchoolClassDto[]): SchoolClassDto[] {
+    return (list ?? [])
+      .slice()
+      .sort((a, b) => {
+        const ag = a.level?.group?.id ?? Number.MAX_SAFE_INTEGER;
+        const bg = b.level?.group?.id ?? Number.MAX_SAFE_INTEGER;
+        if (ag !== bg) return ag - bg;
+
+        const al = a.level?.id ?? Number.MAX_SAFE_INTEGER;
+        const bl = b.level?.id ?? Number.MAX_SAFE_INTEGER;
+        if (al !== bl) return al - bl;
+
+        return (a.id ?? 0) - (b.id ?? 0);
+      });
   }
 }

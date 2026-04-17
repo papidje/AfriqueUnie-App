@@ -1,0 +1,88 @@
+<section class="student-payment-page">
+  <mat-card class="shell" *ngIf="!loading; else loadingTpl">
+    <div class="head">
+      <h1>Encaissement</h1>
+      <p class="sub">{{ info?.studentName }} · {{ info?.matricule }}</p>
+    </div>
+
+    <ng-container *ngIf="maxRemaining > 0; else settledTpl">
+      <div class="debts-wrap">
+        <div class="debts-row">
+          <div
+            class="debt-tile"
+            *ngFor="let debt of debts; trackBy: trackDebtById"
+            [class.debt-tile--on]="debt.checked"
+            (click)="toggleDebt(debt, !debt.checked)"
+          >
+            <mat-checkbox
+              class="debt-cb"
+              [checked]="debt.checked"
+              (click)="$event.stopPropagation()"
+              (change)="toggleDebt(debt, $event.checked)"
+            ></mat-checkbox>
+            <span class="debt-text">
+              <span class="debt-title">{{ debt.title }}</span>
+              <span class="debt-amt">{{ asMoney(debt.amount) }} GNF</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <form class="payment-form" [formGroup]="form">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ff-mode">
+          <mat-label>Mode de paiement</mat-label>
+          <mat-select formControlName="paymentMode">
+            <mat-option value="ESPECES">Espèces</mat-option>
+            <mat-option value="ORANGE_MONEY">Orange Money</mat-option>
+            <mat-option value="MOOV_MONEY">Moov Money</mat-option>
+            <mat-option value="VIREMENT">Virement</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ff-amt">
+          <mat-label>Montant à encaisser</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="amountToCollect"
+            min="0.01"
+            step="1"
+            [attr.max]="maxRemaining"
+          />
+          <span matTextSuffix>GNF</span>
+          <mat-hint>Plafond : {{ asMoney(maxRemaining) }} GNF (reliquat dû)</mat-hint>
+          <mat-error *ngIf="form.get('amountToCollect')?.hasError('max')">
+            Le montant ne peut pas dépasser le reliquat dû ({{ asMoney(maxRemaining) }} GNF).
+          </mat-error>
+          <mat-error *ngIf="form.get('amountToCollect')?.hasError('min')">
+            Saisissez un montant d’au moins 1 GNF.
+          </mat-error>
+        </mat-form-field>
+      </form>
+
+      <div class="actions">
+        <button mat-stroked-button type="button" routerLink="/finance">Annuler</button>
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          [disabled]="submitting || maxRemaining <= 0 || form.invalid"
+          (click)="submitPayment()"
+        >
+          Enregistrer le paiement
+        </button>
+      </div>
+    </ng-container>
+  </mat-card>
+</section>
+
+<ng-template #loadingTpl>
+  <mat-card class="shell">Chargement…</mat-card>
+</ng-template>
+
+<ng-template #settledTpl>
+  <p class="empty">Aucune dette ouverte pour cet élève.</p>
+  <div class="actions">
+    <button mat-stroked-button type="button" routerLink="/finance">Retour à la liste</button>
+  </div>
+</ng-template>

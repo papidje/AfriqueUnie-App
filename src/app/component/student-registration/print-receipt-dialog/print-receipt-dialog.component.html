@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>Recevoir et imprimer le reçu</h2>
+
+<mat-dialog-content>
+  <div #receipt class="receipt">
+    <h3>Reçu d'inscription</h3>
+
+    <div class="row">
+      <div class="label">Nom de l'école</div>
+      <div class="value">{{ data.schoolName }}</div>
+    </div>
+
+    <div class="row">
+      <div class="label">Nom de l'élève</div>
+      <div class="value">{{ data.studentName }}</div>
+    </div>
+
+    <div class="row">
+      <div class="label">Classe</div>
+      <div class="value">{{ data.classLabel }}</div>
+    </div>
+
+    <div class="row">
+      <div class="label">Date</div>
+      <div class="value">{{ data.dateLabel }}</div>
+    </div>
+
+    <div class="row">
+      <div class="label">Montant payé</div>
+      <div class="value">{{ money(data.amountPaid) }}</div>
+    </div>
+
+    <div class="row" *ngIf="data.remainingToPay > 0">
+      <div class="label">Reste à payer</div>
+      <div class="value">{{ money(data.remainingToPay) }}</div>
+    </div>
+
+    <div class="foot">
+      Ceci est un reçu de démonstration (impression depuis la boîte de dialogue).
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="print()">Imprimer</button>
+  <button mat-stroked-button type="button" (click)="close()">Fermer</button>
+</mat-dialog-actions>
+

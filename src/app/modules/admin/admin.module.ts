@@ -19,7 +19,9 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import {MatInputModule} from "@angular/material/input";
 import {MatButtonModule} from "@angular/material/button";
 import { AdminShellComponent } from './admin-shell/admin-shell.component';
-import { StaffManagementComponent } from './staff-management/staff-management.component';
+import {MatSelectModule} from "@angular/material/select";
+import { UserManagementComponent } from './user-management/user-management.component';
+import { InviteMemberDialogComponent } from './user-management/invite-member-dialog/invite-member-dialog.component';
 
 
 @NgModule({
@@ -30,7 +32,8 @@ import { StaffManagementComponent } from './staff-management/staff-management.co
     SchoolDetailsComponent,
     AssignAdminDialogComponent,
     SchoolDialogComponent,
-    StaffManagementComponent
+    UserManagementComponent,
+    InviteMemberDialogComponent
   ],
   imports: [
     CommonModule,
@@ -42,6 +45,7 @@ import { StaffManagementComponent } from './staff-management/staff-management.co
     MatTableModule,
     MatIconModule,
     MatInputModule,
+    MatSelectModule,
     MatButtonModule,
     MatProgressSpinnerModule,
     MatListModule,

@@ -1,0 +1,129 @@
+<section class="finance-page">
+  <mat-card>
+    <div class="head">
+      <div>
+        <h1>Finance</h1>
+        <p>Tableau de suivi des paiements par classe.</p>
+      </div>
+      <button mat-stroked-button color="primary" type="button" (click)="goToSettings()">
+        Paramètres financiers
+      </button>
+    </div>
+
+    <div class="loading" *ngIf="loadingClasses">Chargement des classes…</div>
+
+    <div *ngIf="!loadingClasses && sortedClasses.length" class="class-tabs">
+      <button
+        type="button"
+        mat-stroked-button
+        *ngFor="let cl of sortedClasses; let i = index"
+        [class.active]="selectedIndex === i"
+        (click)="onTabChange(i)"
+      >
+        {{ cl.name }}
+      </button>
+    </div>
+
+    <div class="tab-content" *ngIf="!loadingClasses && sortedClasses.length">
+      <ng-container *ngIf="sortedClasses[selectedIndex] as activeClass">
+        <div class="loading" *ngIf="isLoading(activeClass.id)">Chargement…</div>
+        <div class="empty" *ngIf="!isLoading(activeClass.id) && rows(activeClass.id).length === 0">Aucune donnée pour cette classe.</div>
+
+        <div class="table-wrap" *ngIf="!isLoading(activeClass.id) && rows(activeClass.id).length > 0">
+          <table mat-table class="mat-elevation-z1 finance-table" [dataSource]="rows(activeClass.id)">
+            <ng-container matColumnDef="index">
+              <th mat-header-cell *matHeaderCellDef>N°</th>
+              <td mat-cell *matCellDef="let row; let i = index">{{ rowIndex(i) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="fullName">
+              <th mat-header-cell *matHeaderCellDef>Nom &amp; Prénom</th>
+              <td mat-cell *matCellDef="let row">{{ fullName(row) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="matricule">
+              <th mat-header-cell *matHeaderCellDef>Matricule</th>
+              <td mat-cell *matCellDef="let row">{{ row.matricule }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="phone">
+              <th mat-header-cell *matHeaderCellDef>Tel</th>
+              <td mat-cell *matCellDef="let row">{{ row.phone || '—' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="insReins">
+              <th mat-header-cell *matHeaderCellDef>INS/REINS</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="ins-reins-cell" [matTooltip]="insReinsTooltip(row)">
+                  <svg class="ins-reins-pie" viewBox="0 0 36 36" aria-hidden="true">
+                    <circle class="pie-bg" cx="18" cy="18" r="14"></circle>
+                    <circle
+                      class="pie-paid"
+                      cx="18"
+                      cy="18"
+                      r="14"
+                      [attr.stroke-dasharray]="insReinsStrokeDasharray(row)"
+                    ></circle>
+                  </svg>
+                  <div class="pie-center">{{ insReinsPercent(row) }}%</div>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="supplies">
+              <th mat-header-cell *matHeaderCellDef>Fournitures</th>
+              <td mat-cell *matCellDef="let row">
+                <mat-icon class="rame-ok" *ngIf="row.hasPaidSupplies">check_circle</mat-icon>
+                <mat-icon class="rame-ko" *ngIf="!row.hasPaidSupplies">cancel</mat-icon>
+              </td>
+            </ng-container>
+
+            <ng-container *ngFor="let month of months; let idx = index" [matColumnDef]="month">
+              <th mat-header-cell *matHeaderCellDef>{{ month }}</th>
+              <td
+                mat-cell
+                *matCellDef="let row"
+                class="month-cell"
+                [class.first-month]="idx === 0"
+              >
+                <div
+                  *ngIf="idx === 0"
+                  class="months-progress-host"
+                  [matTooltip]="monthsProgressTooltip(row)"
+                >
+                  <div class="months-progress-track">
+                    <div
+                      class="months-progress-fill"
+                      [ngClass]="progressClass(row)"
+                      [style.width.%]="monthsProgressFillPercent(row)"
+                    ></div>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let row" class="actions-cell">
+                <button
+                  *ngIf="!isFullySettled(row)"
+                  mat-icon-button
+                  color="primary"
+                  type="button"
+                  (click)="encaisser(row)"
+                  matTooltip="Encaisser"
+                >
+                  <mat-icon>point_of_sale</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsForClass(activeClass.id)"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsForClass(activeClass.id);"></tr>
+          </table>
+        </div>
+      </ng-container>
+    </div>
+  </mat-card>
+</section>
+

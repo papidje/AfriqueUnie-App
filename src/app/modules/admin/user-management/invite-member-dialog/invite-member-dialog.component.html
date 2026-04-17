@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Inviter un membre</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="invite-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Nom Prénom</mat-label>
+      <input matInput formControlName="fullname" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Rôle</mat-label>
+      <mat-select formControlName="role">
+        <mat-option *ngFor="let role of roles" [value]="role">{{ role }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Annuler</button>
+  <button mat-raised-button color="primary" type="button" [disabled]="form.invalid" (click)="submit()">
+    Envoyer l’invitation
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,69 @@
+<section class="financial-settings-page">
+  <mat-card>
+    <div class="head">
+      <div>
+        <h1>Paramètres financiers</h1>
+        <p>
+          Configuration des frais par niveau pour l'année active
+          <strong *ngIf="activeYearLabel">{{ activeYearLabel }}</strong>.
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="!schoolId" class="empty-state">
+      Sélectionnez d'abord un établissement actif.
+    </div>
+
+    <div *ngIf="schoolId && !activeYearId && !loading" class="empty-state">
+      Aucune année scolaire active trouvée pour cet établissement.
+    </div>
+
+    <div *ngIf="loading" class="loading">Chargement...</div>
+
+    <div class="table-wrap" *ngIf="!loading && activeYearId">
+      <table mat-table [dataSource]="rows" class="mat-elevation-z1">
+        <ng-container matColumnDef="level">
+          <th mat-header-cell *matHeaderCellDef>Niveau</th>
+          <td mat-cell *matCellDef="let row">{{ row.level.code }} - {{ row.level.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="registrationFee">
+          <th mat-header-cell *matHeaderCellDef>Inscription</th>
+          <td mat-cell *matCellDef="let row">{{ asMoney(row.feeStructure?.registrationFee, row.feeStructure?.currency || 'GNF') }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="reRegistrationFee">
+          <th mat-header-cell *matHeaderCellDef>Réinscription</th>
+          <td mat-cell *matCellDef="let row">{{ asMoney(row.feeStructure?.reRegistrationFee, row.feeStructure?.currency || 'GNF') }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="monthlyTuitionFee">
+          <th mat-header-cell *matHeaderCellDef>Scolarité mensuelle</th>
+          <td mat-cell *matCellDef="let row">{{ asMoney(row.feeStructure?.monthlyTuitionFee, row.feeStructure?.currency || 'GNF') }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="suppliesFee">
+          <th mat-header-cell *matHeaderCellDef>Fournitures</th>
+          <td mat-cell *matCellDef="let row">{{ asMoney(row.feeStructure?.suppliesFee, row.feeStructure?.currency || 'GNF') }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="suppliesColumnEnabled">
+          <th mat-header-cell *matHeaderCellDef>Colonne Fournitures</th>
+          <td mat-cell *matCellDef="let row">{{ row.feeStructure?.suppliesColumnEnabled ? 'Activée' : 'Désactivée' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-stroked-button color="primary" type="button" (click)="configure(row)">
+              Configurer les frais
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+  </mat-card>
+</section>

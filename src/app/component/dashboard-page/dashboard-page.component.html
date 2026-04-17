@@ -1,9 +1,25 @@
 <section class="dashboard-wrapper">
   <header class="dashboard-header">
-    <div>
+    <div class="dashboard-title-block">
       <h1>Dashboard</h1>
-      <p>Vue d'ensemble de votre etablissement</p>
+      <p>Indicateurs filtrés par établissement (pas sur l’ensemble du tenant).</p>
     </div>
+    <ng-container *ngIf="activeSchool.headerVm$ | async as vm">
+      <mat-form-field
+        *ngIf="vm.showPicker"
+        appearance="outline"
+        class="dashboard-school-picker"
+        subscriptSizing="dynamic"
+      >
+        <mat-label>Établissement</mat-label>
+        <mat-select
+          [value]="vm.selectedId"
+          (selectionChange)="activeSchool.setActiveSchoolId($event.value)"
+        >
+          <mat-option *ngFor="let s of vm.schools" [value]="s.id">{{ s.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
   </header>
 
   <div *ngIf="loading" class="loading-state">
@@ -46,15 +62,25 @@
         <h3>Derniers inscrits</h3>
       </div>
 
-      <mat-list>
-        <mat-list-item *ngFor="let student of data.recentEnrollments">
-          <mat-icon matListIcon>person_add</mat-icon>
-          <div matLine class="student-name">{{ student.fullName }}</div>
-          <div matLine class="student-meta">
-            {{ student.className }} - {{ student.enrolledAt | date:'mediumDate' }}
+      <div class="recent-list" *ngIf="data.recentEnrollments.length; else emptyRecent">
+        <div class="recent-item" *ngFor="let student of data.recentEnrollments">
+          <div class="recent-icon">
+            <mat-icon>person_add</mat-icon>
           </div>
-        </mat-list-item>
-      </mat-list>
+          <div class="recent-body">
+            <div class="student-name">{{ student.fullName }}</div>
+            <div class="student-meta">
+              <span class="class-name">{{ student.className }}</span>
+              <span class="dot">•</span>
+              <span>{{ student.enrolledAt | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #emptyRecent>
+        <p class="empty-recent">Aucune inscription récente.</p>
+      </ng-template>
     </mat-card>
   </ng-container>
 </section>

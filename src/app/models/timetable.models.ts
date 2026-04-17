@@ -3,6 +3,7 @@ export interface TimetableDragItem {
   classSubjectId: number;
   subjectCode: string;
   subjectName: string;
+  teacherFullname?: string | null;
 }
 
 export interface TimetableSlotDto {
@@ -12,6 +13,7 @@ export interface TimetableSlotDto {
   classSubjectId: number;
   subjectCode: string;
   subjectName: string;
+  teacherFullname: string | null;
 }
 
 export interface TimetableViewDto {

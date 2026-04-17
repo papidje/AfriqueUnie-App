@@ -4,26 +4,55 @@
 
     <form [formGroup]="activateForm" (ngSubmit)="onSubmit()" class="activate-form">
       <div class="form-group">
-        <label for="userMail">Email</label>
+        <label for="email">Email</label>
         <input
-          id="userMail"
+          id="email"
           type="email"
-          formControlName="userMail"
+          formControlName="email"
           placeholder="Entrez votre adresse e-mail"
           required
         />
       </div>
 
       <div class="form-group">
-        <label for="code">Code d’activation</label>
+        <label for="activationCode">Code d’activation</label>
         <input
-          id="code"
+          id="activationCode"
           type="text"
-          formControlName="code"
+          formControlName="activationCode"
           placeholder="Entrez votre code"
           required
         />
       </div>
+
+      <div class="form-group">
+        <label for="newPassword">Nouveau mot de passe</label>
+        <input
+          id="newPassword"
+          type="password"
+          formControlName="newPassword"
+          placeholder="Entrez le nouveau mot de passe"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmer le mot de passe</label>
+        <input
+          id="confirmPassword"
+          type="password"
+          formControlName="confirmPassword"
+          placeholder="Confirmez le mot de passe"
+          required
+        />
+      </div>
+
+      <p *ngIf="activateForm.hasError('passwordMismatch') && activateForm.touched" style="color:#b00020; margin: 0;">
+        Les deux mots de passe ne correspondent pas.
+      </p>
+      <p *ngIf="submitError" style="color:#b00020; margin: 0;">
+        {{ submitError }}
+      </p>
 
       <button type="submit" class="btn-submit" [disabled]="activateForm.invalid">
         Activer

@@ -1,0 +1,33 @@
+.financial-settings-page {
+  padding: 16px;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.head h1 {
+  margin: 0;
+}
+
+.head p {
+  margin: 6px 0 0;
+  color: #607d8b;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+.empty-state,
+.loading {
+  padding: 18px 0;
+  color: #607d8b;
+}

@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from "./component/login/login.component";
-import { RegisterComponent } from "./component/register/register.component";
 import { ActivateComponent } from "./component/activate/activate.component";
 import { AuthGuard } from "./guards/auth.guard";
 import { ResetPasswordComponent } from "./component/reset-password/reset-password.component";
@@ -13,7 +12,7 @@ import { UnautorizedComponent } from "./component/unautorized/unautorized.compon
 import { DashboardPageComponent } from "./component/dashboard-page/dashboard-page.component";
 import { RoleGuard } from "./guards/role.guard";
 import { RegisterSchoolComponent } from "./component/register-school/register-school.component";
-import { ALL_APP_ROLES, AppRoles, ROLES_CLASSES_NAV, ROLES_SCHOOL_YEAR_NAV } from "./core/app-roles";
+import { ALL_APP_ROLES, AppRoles, ROLES_CLASSES_NAV, ROLES_SCHOOL_YEAR_NAV, ROLES_STUDENTS_NAV } from "./core/app-roles";
 import { SuperAdminDashboardComponent } from "./component/super-admin-dashboard/super-admin-dashboard.component";
 import { MyEstablishmentsComponent } from "./component/my-establishments/my-establishments.component";
 import { SchoolClassesPageComponent } from "./component/school-classes-page/school-classes-page.component";
@@ -22,6 +21,8 @@ import { SubjectsCatalogPageComponent } from "./component/subjects-catalog-page/
 import { ClassSubjectsPageComponent } from "./component/class-subjects-page/class-subjects-page.component";
 import { ClassPlanningPageComponent } from "./component/class-planning-page/class-planning-page.component";
 import { ClassTimetablePageComponent } from "./component/class-timetable-page/class-timetable-page.component";
+import { StudentRegistrationComponent } from "./component/student-registration/student-registration.component";
+import { StudentListComponent } from "./component/student-list/student-list.component";
 
 const routes: Routes = [
   // 🔒 Layout d’authentification
@@ -31,7 +32,6 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: '/login', pathMatch: 'full' },
       { path: 'login', component: LoginComponent },
-      { path: 'register', component: RegisterComponent },
       { path: 'register-school', component: RegisterSchoolComponent },
       { path: 'activate', component: ActivateComponent },
       { path: 'resetPwd', component: ResetPasswordComponent },
@@ -103,6 +103,23 @@ const routes: Routes = [
         component: SchoolYearCreatePageComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: { roles: [...ROLES_SCHOOL_YEAR_NAV] }
+      },
+      {
+        path: 'finance',
+        loadChildren: () => import('./modules/finance/finance.module').then(m => m.FinanceModule)
+      },
+      { path: 'parametres-financiers', redirectTo: 'finance/settings', pathMatch: 'full' },
+      {
+        path: 'students',
+        component: StudentListComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [...ROLES_STUDENTS_NAV] }
+      },
+      {
+        path: 'students/inscription',
+        component: StudentRegistrationComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [...ROLES_STUDENTS_NAV] }
       },
       {
         path: 'admin',

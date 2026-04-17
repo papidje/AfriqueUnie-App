@@ -1,0 +1,38 @@
+.receipt {
+  max-width: 680px;
+  margin: 0 auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+h3 {
+  margin-top: 0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  color: #607d8b;
+}
+
+.value {
+  font-weight: 600;
+}
+
+.foot {
+  margin-top: 12px;
+  color: #777;
+  font-size: 12px;
+}
+

@@ -1,0 +1,85 @@
+.student-registration-page {
+  padding: 16px;
+}
+
+.head h1 {
+  margin: 0;
+}
+
+.muted {
+  color: #607d8b;
+}
+
+.loading {
+  padding: 16px 0;
+  color: #607d8b;
+}
+
+.stepper {
+  margin-top: 8px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.grid .full {
+  grid-column: 1 / -1;
+}
+
+.parents-wrap {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.parent-card {
+  padding: 8px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.notice {
+  margin-top: 12px;
+  background: #fff8e1;
+}
+
+.payment-row {
+  display: grid;
+  grid-template-columns: 1fr minmax(240px, 320px);
+  gap: 16px;
+  align-items: end;
+  margin-top: 14px;
+}
+
+.expected .label {
+  color: #607d8b;
+  font-size: 13px;
+}
+
+.expected .value {
+  font-weight: 600;
+  font-size: 20px;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .parents-wrap {
+    grid-template-columns: 1fr;
+  }
+  .payment-row {
+    grid-template-columns: 1fr;
+  }
+}
+

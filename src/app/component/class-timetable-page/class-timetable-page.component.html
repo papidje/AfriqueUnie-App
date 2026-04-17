@@ -36,6 +36,7 @@
         <div *ngFor="let item of paletteItems" cdkDrag [cdkDragDisabled]="!canEdit" class="drag-chip palette-chip">
           <span class="code">{{ item.subjectCode }}</span>
           {{ item.subjectName }}
+          <div class="teacher" *ngIf="item.teacherFullname">Prof: {{ item.teacherFullname }}</div>
         </div>
       </div>
 
@@ -84,6 +85,7 @@
                 >
                   <span class="code">{{ item.subjectCode }}</span>
                   {{ item.subjectName }}
+                  <div class="teacher" *ngIf="item.teacherFullname">Prof: {{ item.teacherFullname }}</div>
                 </div>
               </div>
             </td>

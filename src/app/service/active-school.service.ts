@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { catchError, distinctUntilChanged, map, tap } from 'rxjs/operators';
 import { SchoolService } from '../modules/admin/school/school.service';
 import { School } from '../modules/admin/school/school-list/school-list.component';
 import { AuthUtilsService } from './auth-utils.service';
@@ -23,7 +23,7 @@ export class ActiveSchoolService {
     this.selectedId$
   ]).pipe(
     map(([schools, selectedId]) => ({
-      showPicker: schools.length > 1,
+      showPicker: schools.length > 1 && this.getLinkedUserSchoolId(schools) == null,
       schools,
       selectedId
     }))
@@ -39,26 +39,16 @@ export class ActiveSchoolService {
     private readonly authUtils: AuthUtilsService
   ) {}
 
-  /** Admin d’école : chargement des établissements du tenant pour le sélecteur. */
+  /** Le listing /schools est réservé aux rôles admin/super-admin. */
   shouldLoadSchoolsForPicker(): boolean {
     return (
       this.authUtils.isAuthenticated() &&
-      !this.authUtils.isSuperAdmin() &&
-      this.authUtils.hasRole(AppRoles.ADMIN_ECOLE)
+      (this.authUtils.hasRole(AppRoles.ADMIN_ECOLE) || this.authUtils.isSuperAdmin())
     );
   }
 
   refreshSchools(): void {
-    if (!this.shouldLoadSchoolsForPicker()) {
-      this.schools$.next([]);
-      this.selectedId$.next(null);
-      return;
-    }
-    this.schoolService.getAll().subscribe({
-      next: (schools) => {
-        this.schools$.next(schools);
-        this.applySelectionForList(schools);
-      },
+    this.refreshSchools$().subscribe({
       error: () => {
         this.schools$.next([]);
         this.selectedId$.next(null);
@@ -66,9 +56,35 @@ export class ActiveSchoolService {
     });
   }
 
+  /** Charge les établissements accessibles et met à jour la sélection (Observable pour enchaîner après chargement). */
+  refreshSchools$(): Observable<School[]> {
+    if (!this.shouldLoadSchoolsForPicker()) {
+      this.schools$.next([]);
+      const linked = this.authUtils.getUserSchoolId();
+      this.persistAndEmit(linked);
+      return of([]);
+    }
+    return this.schoolService.getAll().pipe(
+      tap((schools) => {
+        this.schools$.next(schools);
+        this.applySelectionForList(schools);
+      }),
+      catchError(() => {
+        this.schools$.next([]);
+        this.selectedId$.next(null);
+        return of([]);
+      })
+    );
+  }
+
   private applySelectionForList(schools: School[]): void {
     if (!schools.length) {
       this.persistAndEmit(null);
+      return;
+    }
+    const linkedSchoolId = this.getLinkedUserSchoolId(schools);
+    if (linkedSchoolId != null) {
+      this.persistAndEmit(linkedSchoolId);
       return;
     }
     const stored = this.readStoredId();
@@ -82,7 +98,19 @@ export class ActiveSchoolService {
     if (!schools.some((s) => s.id === id)) {
       return;
     }
+    const linkedSchoolId = this.getLinkedUserSchoolId(schools);
+    if (linkedSchoolId != null && linkedSchoolId !== id) {
+      return;
+    }
     this.persistAndEmit(id);
+  }
+
+  private getLinkedUserSchoolId(schools: School[]): number | null {
+    const userSchoolId = this.authUtils.getUserSchoolId();
+    if (userSchoolId == null) {
+      return null;
+    }
+    return schools.some((s) => s.id === userSchoolId) ? userSchoolId : null;
   }
 
   private persistAndEmit(id: number | null): void {

@@ -1,6 +1,9 @@
 <div class="auth-container">
   <div class="auth-card">
     <h2 class="title">Connexion</h2>
+    <p *ngIf="activationSuccessMessage" style="color:#2e7d32; margin-bottom: 12px;">
+      {{ activationSuccessMessage }}
+    </p>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
       <div class="form-group">
@@ -30,7 +33,7 @@
       </button>
 
       <div class="links">
-        <a routerLink="/register">Créer un compte</a>
+        <a routerLink="/register-school">Inscrire une école</a>
         <span>/</span>
         <a routerLink="/activate">Activer un compte</a>
       </div>

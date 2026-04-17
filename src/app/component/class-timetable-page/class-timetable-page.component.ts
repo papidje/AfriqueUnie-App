@@ -217,7 +217,8 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
           this.paletteItems = subjects.map((s) => ({
             classSubjectId: s.id,
             subjectCode: s.subjectCode,
-            subjectName: s.subjectName
+            subjectName: s.subjectName,
+            teacherFullname: s.teacherFullname
           }));
           this.applyServerView(timetable);
           this.rebuildDropListIds();
@@ -249,14 +250,15 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
     this.dropListIds = ids;
   }
 
-  private applyServerView(view: { slots: { dayOfWeek: number; slotIndex: number; classSubjectId: number; subjectCode: string; subjectName: string }[] }): void {
+  private applyServerView(view: { slots: { dayOfWeek: number; slotIndex: number; classSubjectId: number; subjectCode: string; subjectName: string; teacherFullname?: string | null }[] }): void {
     this.initGridKeys();
     for (const sl of view.slots) {
       const arr = this.cellData(sl.dayOfWeek, sl.slotIndex);
       arr.push({
         classSubjectId: sl.classSubjectId,
         subjectCode: sl.subjectCode,
-        subjectName: sl.subjectName
+        subjectName: sl.subjectName,
+        teacherFullname: sl.teacherFullname ?? null
       });
     }
   }

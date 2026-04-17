@@ -29,8 +29,7 @@ export class RegisterSchoolComponent {
 
     this.adminForm = this.fb.group({
       fullname: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      email: ['', [Validators.required, Validators.email]]
     });
   }
 
@@ -69,7 +68,6 @@ export class RegisterSchoolComponent {
       username: adminValues.email,
       fullname: adminValues.fullname,
       email: adminValues.email,
-      password: adminValues.password,
       tenantName: tenantLabel,
       schoolName: establishmentName,
       tenantAddress: `${schoolValues.tenantAddress} | Tel: ${schoolValues.phone}`,

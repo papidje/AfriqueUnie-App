@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../service/auth.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AppRoles } from '../../core/app-roles';
 
 @Component({
@@ -11,15 +11,22 @@ import { AppRoles } from '../../core/app-roles';
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  activationSuccessMessage: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.loginForm = this.fb.group({
       userName: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
+    });
+    this.route.queryParamMap.subscribe((params) => {
+      this.activationSuccessMessage = params.get('activated') === 'success'
+        ? 'Compte activé avec succès. Vous pouvez maintenant vous connecter.'
+        : null;
     });
   }
 

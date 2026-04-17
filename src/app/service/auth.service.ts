@@ -62,7 +62,7 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/auth/login`, credentials);
   }
 
-  activate(data: {userMail: string, code: string}): Observable<any> {
+  activate(data: {email: string, activationCode: string, newPassword: string}): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/activate`, data);
   }
 
@@ -82,7 +82,6 @@ export class AuthService {
     username: string;
     fullname: string;
     email: string;
-    password: string;
     tenantName: string;
     schoolName: string;
     tenantAddress: string;
@@ -100,6 +99,9 @@ export class AuthService {
 
     if (this.isTokenValid(token)) {
       this.saveClaims(token);
+      if (!this.tokenHasRequiredSchoolClaim(token)) {
+        await this.tryRefreshTokenSilently();
+      }
       return;
     }
 
@@ -109,6 +111,10 @@ export class AuthService {
       return;
     }
 
+    await this.tryRefreshTokenSilently();
+  }
+
+  private async tryRefreshTokenSilently(): Promise<void> {
     await new Promise<void>((resolve) => {
       this.refreshToken().pipe(
         catchError(() => {
@@ -120,6 +126,29 @@ export class AuthService {
         error: () => resolve()
       });
     });
+  }
+
+  /**
+   * STAFF/TEACHER doivent embarquer `school_id` pour initialiser l’école active
+   * dans les pages métiers (classes, élèves, finance, ...).
+   */
+  private tokenHasRequiredSchoolClaim(token: string): boolean {
+    try {
+      const decoded = jwtDecode<any>(token);
+      const rolesRaw = decoded?.roles;
+      const roles: string[] = Array.isArray(rolesRaw)
+        ? rolesRaw
+            .map((r: any) => (typeof r === 'string' ? r : r?.authority))
+            .filter((r: string | undefined): r is string => !!r)
+        : [];
+      const isStaffOrTeacher = roles.includes(AppRoles.STAFF) || roles.includes(AppRoles.TEACHER);
+      if (!isStaffOrTeacher) {
+        return true;
+      }
+      return decoded?.school_id !== undefined && decoded?.school_id !== null;
+    } catch {
+      return false;
+    }
   }
 
   private isTokenValid(token: string): boolean {

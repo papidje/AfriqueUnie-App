@@ -98,6 +98,17 @@ export class AuthUtilsService {
     return stored ? Number(stored) : null;
   }
 
+  /** École explicitement rattachée au compte (si présente dans le JWT). */
+  getUserSchoolId(): number | null {
+    if (!this.decodedToken) this.loadToken();
+    const fromToken = this.decodedToken?.school_id ?? this.decodedToken?.schoolId;
+    if (fromToken !== undefined && fromToken !== null) {
+      const n = Number(fromToken);
+      return Number.isFinite(n) ? n : null;
+    }
+    return null;
+  }
+
   /** Vérifie si l’utilisateur est super admin */
   isSuperAdmin(): boolean {
     return this.hasRole(AppRoles.SUPER_ADMIN);

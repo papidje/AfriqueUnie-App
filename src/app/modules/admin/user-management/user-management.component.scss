@@ -1,0 +1,85 @@
+.user-mgmt-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  h2 {
+    margin: 0 0 4px 0;
+  }
+
+  p {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.quick-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  .active {
+    background: rgba(63, 81, 181, 0.12);
+  }
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+.role-badge {
+  display: inline-block;
+  border-radius: 999px;
+  font-size: 12px;
+  padding: 4px 10px;
+  font-weight: 600;
+}
+
+.role-admin {
+  background: #e8eaf6;
+  color: #283593;
+}
+
+.role-staff {
+  background: #e0f2f1;
+  color: #00695c;
+}
+
+.role-teacher {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.status-chip {
+  display: inline-block;
+  border-radius: 999px;
+  font-size: 12px;
+  padding: 4px 10px;
+  font-weight: 600;
+}
+
+.status-active {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-pending {
+  background: #fff8e1;
+  color: #f57f17;
+}
+
+.loading,
+.empty {
+  color: rgba(0, 0, 0, 0.65);
+}

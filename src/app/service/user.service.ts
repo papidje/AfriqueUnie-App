@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {Observable, tap} from "rxjs";
-import { UserRoleName } from '../core/app-roles';
+import {Observable} from "rxjs";
+import { UserRoleNameType } from '../core/app-roles';
 
 @Injectable({
   providedIn: 'root'
@@ -11,20 +11,13 @@ export class UserService {
 
   constructor(private http: HttpClient) { }
 
-  register(data: {fullname: string, username: string, email: string, password: string}): Observable<any> {
-    return this.http.post(`${this.apiUrl}/registery`, data);
-  }
-
-  createStaff(data: {
-    fullname: string;
-    username: string;
+  inviteMember(data: {
+    nom: string;
     email: string;
-    password: string;
-    schoolId: number | null;
+    role: UserRoleNameType;
   }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/registery`, {
+    return this.http.post(`${this.apiUrl}/invite`, {
       ...data,
-      role: UserRoleName.STAFF
     });
   }
 

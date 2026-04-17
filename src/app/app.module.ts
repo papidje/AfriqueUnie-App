@@ -5,7 +5,6 @@ import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {LoginComponent} from './component/login/login.component';
-import {RegisterComponent} from './component/register/register.component';
 import {ReactiveFormsModule} from "@angular/forms";
 import {ActivateComponent} from './component/activate/activate.component';
 import {AuthInterceptor} from "./interceptors/auth.interceptor";
@@ -36,6 +35,9 @@ import {MatInputModule} from "@angular/material/input";
 import {MatSnackBarModule} from "@angular/material/snack-bar";
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiUnavailableComponent } from './component/api-unavailable/api-unavailable.component';
 import { RegisterSchoolComponent } from './component/register-school/register-school.component';
 import { SuperAdminDashboardComponent } from './component/super-admin-dashboard/super-admin-dashboard.component';
@@ -47,6 +49,9 @@ import { SubjectsCatalogPageComponent } from './component/subjects-catalog-page/
 import { ClassSubjectsPageComponent } from './component/class-subjects-page/class-subjects-page.component';
 import { ClassPlanningPageComponent } from './component/class-planning-page/class-planning-page.component';
 import { ClassTimetablePageComponent } from './component/class-timetable-page/class-timetable-page.component';
+import { StudentRegistrationComponent } from './component/student-registration/student-registration.component';
+import { PrintReceiptDialogComponent } from './component/student-registration/print-receipt-dialog/print-receipt-dialog.component';
+import { StudentListComponent } from './component/student-list/student-list.component';
 import { AuthService } from './service/auth.service';
 
 export function initializeAuthFactory(authService: AuthService) {
@@ -57,7 +62,6 @@ export function initializeAuthFactory(authService: AuthService) {
   declarations: [
     AppComponent,
     LoginComponent,
-    RegisterComponent,
     ActivateComponent,
     HeaderComponent,
     FooterComponent,
@@ -80,7 +84,12 @@ export function initializeAuthFactory(authService: AuthService) {
     SubjectsCatalogPageComponent,
     ClassSubjectsPageComponent,
     ClassPlanningPageComponent,
-    ClassTimetablePageComponent
+    ClassTimetablePageComponent,
+    StudentRegistrationComponent
+    ,
+    PrintReceiptDialogComponent
+    ,
+    StudentListComponent
   ],
   imports: [
     BrowserModule,
@@ -102,7 +111,11 @@ export function initializeAuthFactory(authService: AuthService) {
     MatInputModule,
     MatSnackBarModule,
     MatCheckboxModule,
-    DragDropModule
+    DragDropModule,
+    MatStepperModule
+    ,
+    MatTabsModule,
+    MatTooltipModule
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from "@angular/forms";
 import {AuthService} from "../../service/auth.service";
 import {Router} from "@angular/router";
 
@@ -10,6 +10,7 @@ import {Router} from "@angular/router";
 })
 export class ActivateComponent {
   activateForm: FormGroup;
+  submitError: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -17,21 +18,40 @@ export class ActivateComponent {
     private router: Router
   ) {
     this.activateForm = this.fb.group({
-      userMail: ['', [Validators.required, Validators.email]],
-      code: ['', Validators.required]
+      email: ['', [Validators.required, Validators.email]],
+      activationCode: ['', Validators.required],
+      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]]
+    }, {
+      validators: [this.passwordsMatchValidator]
     });
   }
 
-  onSubmit() {
-    if (this.activateForm.valid) {
-      this.authService.activate(this.activateForm.value).subscribe({
-        next: (res) => {
-          console.log('Activate successful', res);
-          // Stocker token, rediriger vers dashboard...
-          this.router.navigate(['/login']);
-        },
-        error: (err) => console.error('Login failed', err)
-      });
+  private readonly passwordsMatchValidator = (group: AbstractControl): ValidationErrors | null => {
+    const password = group.get('newPassword')?.value;
+    const confirmPassword = group.get('confirmPassword')?.value;
+    if (!password || !confirmPassword) {
+      return null;
     }
+    return password === confirmPassword ? null : { passwordMismatch: true };
+  };
+
+  onSubmit() {
+    this.submitError = null;
+    if (this.activateForm.invalid) {
+      this.activateForm.markAllAsTouched();
+      return;
+    }
+    const { email, activationCode, newPassword } = this.activateForm.getRawValue();
+    this.authService.activate({ email, activationCode, newPassword }).subscribe({
+      next: () => {
+        this.router.navigate(['/login'], {
+          queryParams: { activated: 'success' }
+        });
+      },
+      error: () => {
+        this.submitError = "Activation impossible. Vérifiez l'email, le code et le mot de passe.";
+      }
+    });
   }
 }

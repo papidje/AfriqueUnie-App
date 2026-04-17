@@ -15,6 +15,36 @@ html, body {
   width: 230px;
   background-color: #fafafa;
   border-right: 1px solid #ddd;
+  transition: width 0.2s ease;
+}
+
+.sidenav.sidenav-collapsed {
+  width: 72px;
+}
+
+.sidenav.sidenav-collapsed .mat-mdc-list-item {
+  padding-left: 0;
+  padding-right: 0;
+  justify-content: center;
+}
+
+.sidenav.sidenav-collapsed .mat-icon {
+  margin: 0 auto;
+}
+
+.nav-item-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.nav-item-stack span {
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .sidenav-header {
@@ -24,12 +54,21 @@ html, body {
   justify-content: center;
   font-weight: 500;
   color: white;
+  padding: 0 8px;
+}
+
+.tenant-title {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .main-content {
   display: flex;
   flex-direction: column;
   flex: 1; /* ✅ remplace height:100vh */
+  min-width: 0;
   overflow: auto;
 }
 
@@ -52,16 +91,6 @@ html, body {
 
 .spacer {
   flex: 1 1 auto;
-}
-
-.header-school-picker {
-  flex-shrink: 0;
-  margin-right: 8px;
-  width: min(280px, 42vw);
-}
-
-.header .header-school-picker ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-  display: none;
 }
 
 .content {

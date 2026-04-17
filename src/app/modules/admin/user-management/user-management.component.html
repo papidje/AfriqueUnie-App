@@ -1,0 +1,53 @@
+<section class="user-mgmt-page">
+  <mat-card>
+    <div class="head">
+      <div>
+        <h2>Gestion des utilisateurs</h2>
+        <p>Administrez les membres de votre école.</p>
+      </div>
+      <button mat-raised-button color="primary" (click)="openInviteDialog()">
+        Inviter un membre
+      </button>
+    </div>
+
+    <div class="quick-filters">
+      <button mat-stroked-button [class.active]="quickFilter === 'ALL'" (click)="setQuickFilter('ALL')">Tous</button>
+      <button mat-stroked-button [class.active]="quickFilter === 'TEACHER'" (click)="setQuickFilter('TEACHER')">Enseignants</button>
+      <button mat-stroked-button [class.active]="quickFilter === 'STAFF'" (click)="setQuickFilter('STAFF')">Staff + Admin</button>
+    </div>
+
+    <div *ngIf="loading" class="loading">Chargement...</div>
+
+    <div class="table-wrap" *ngIf="!loading">
+      <table mat-table [dataSource]="filteredUsers" class="mat-elevation-z1">
+        <ng-container matColumnDef="fullname">
+          <th mat-header-cell *matHeaderCellDef>Nom</th>
+          <td mat-cell *matCellDef="let user">{{ user.fullname }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let user">{{ user.email }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Rôle</th>
+          <td mat-cell *matCellDef="let user">
+            <span class="role-badge" [ngClass]="roleBadgeClass(user)">{{ roleLabel(user) }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Statut</th>
+          <td mat-cell *matCellDef="let user">
+            <span class="status-chip" [ngClass]="statusClass(user)">{{ statusLabel(user) }}</span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+      <p class="empty" *ngIf="!filteredUsers.length">Aucun utilisateur pour ce filtre.</p>
+    </div>
+  </mat-card>
+</section>

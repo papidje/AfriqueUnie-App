@@ -50,3 +50,10 @@ export const ROLES_USERS_NAV: AppRoleAuthority[] = [
   AppRoles.SUPER_ADMIN,
   AppRoles.ADMIN_ECOLE,
 ];
+
+/** Navigation / routes : paramètres financiers */
+export const ROLES_FINANCIAL_NAV: AppRoleAuthority[] = [
+  AppRoles.SUPER_ADMIN,
+  AppRoles.ADMIN_ECOLE,
+  AppRoles.STAFF,
+];

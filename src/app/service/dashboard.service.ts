@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../core/api-base';
 
 export interface DashboardStudent {
   id: number;
@@ -19,11 +20,16 @@ export interface DashboardSummary {
   providedIn: 'root'
 })
 export class DashboardService {
-  private apiUrl = 'http://localhost:8080/api/rest/dashboard/summary?mock=true';
+  private readonly apiUrl = `${API_BASE_URL}/dashboard/summary`;
 
   constructor(private readonly http: HttpClient) {}
 
-  getSummary(): Observable<DashboardSummary> {
-    return this.http.get<DashboardSummary>(this.apiUrl);
+  /** @param schoolId établissement ciblé (obligatoire pour admin multi-écoles et super admin ; optionnel si un seul établissement ou compte rattaché à une école). */
+  getSummary(schoolId?: number | null): Observable<DashboardSummary> {
+    let params = new HttpParams();
+    if (schoolId != null && Number.isFinite(schoolId) && schoolId > 0) {
+      params = params.set('schoolId', String(schoolId));
+    }
+    return this.http.get<DashboardSummary>(this.apiUrl, { params });
   }
 }

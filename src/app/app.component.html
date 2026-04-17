@@ -1,8 +1,10 @@
-<mat-sidenav-container class="app-container" *ngIf="showLayout">
+<mat-sidenav-container class="app-container" *ngIf="showLayout" autosize>
   <!-- SIDENAV -->
-  <mat-sidenav #sidenav mode="side" [(opened)]="opened" class="sidenav">
+  <mat-sidenav mode="side" [opened]="true" class="sidenav" [class.sidenav-collapsed]="!sidebarExpanded">
     <mat-toolbar color="primary" class="sidenav-header">
-      <span>{{ headerTitle }}</span>
+      <span class="tenant-title" [title]="tenantTitle">
+        {{ sidebarExpanded ? tenantTitle : tenantShortTitle }}
+      </span>
     </mat-toolbar>
 
     <mat-nav-list>
@@ -10,86 +12,143 @@
         mat-list-item
         *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
         routerLink="/admin"
-        (click)="sidenav.close()"
+        matTooltip="Gestion du staff"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
       >
-        <mat-icon>settings</mat-icon>
-        <span>Gestion du staff</span>
+        <div class="nav-item-stack">
+          <mat-icon>settings</mat-icon>
+          <span *ngIf="sidebarExpanded">Gestion du staff</span>
+        </div>
       </a>
       <a
         mat-list-item
         *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
         routerLink="/mes-etablissements"
-        (click)="sidenav.close()"
+        matTooltip="Mes établissements"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
       >
-        <mat-icon>apartment</mat-icon>
-        <span>Mes établissements</span>
+        <div class="nav-item-stack">
+          <mat-icon>apartment</mat-icon>
+          <span *ngIf="sidebarExpanded">Mes établissements</span>
+        </div>
       </a>
       <a
         mat-list-item
         *ngIf="hasDashboardAccess()"
         routerLink="/dashboard"
-        (click)="sidenav.close()"
+        matTooltip="Dashboard"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
       >
-        <mat-icon>dashboard</mat-icon>
-        <span>Dashboard</span>
+        <div class="nav-item-stack">
+          <mat-icon>dashboard</mat-icon>
+          <span *ngIf="sidebarExpanded">Dashboard</span>
+        </div>
       </a>
       <a
         mat-list-item
         *ngIf="hasAnyRole(navStudentsRoles)"
         routerLink="/students"
-        (click)="sidenav.close()"
+        matTooltip="Élèves"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
       >
-        <mat-icon>school</mat-icon>
-        <span>Élèves</span>
+        <div class="nav-item-stack">
+          <mat-icon>school</mat-icon>
+          <span *ngIf="sidebarExpanded">Élèves</span>
+        </div>
       </a>
       <a
         mat-list-item
         *ngIf="hasAnyRole(navClassesRoles)"
         routerLink="/classes"
-        (click)="sidenav.close()"
+        matTooltip="Classes"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
       >
-        <mat-icon>class</mat-icon>
-        <span>Classes</span>
+        <div class="nav-item-stack">
+          <mat-icon>class</mat-icon>
+          <span *ngIf="sidebarExpanded">Classes</span>
+        </div>
       </a>
       <a
         mat-list-item
         *ngIf="hasAnyRole(navClassesRoles)"
         routerLink="/referentiel/matieres"
-        (click)="sidenav.close()"
+        matTooltip="Matières (référentiel)"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
       >
-        <mat-icon>menu_book</mat-icon>
-        <span>Matières (référentiel)</span>
+        <div class="nav-item-stack">
+          <mat-icon>menu_book</mat-icon>
+          <span *ngIf="sidebarExpanded">Matières (référentiel)</span>
+        </div>
+      </a>
+      <a
+        mat-list-item
+        *ngIf="hasAnyRole(navFinancialRoles)"
+        routerLink="/finance"
+        matTooltip="Finance"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
+      >
+        <div class="nav-item-stack">
+          <mat-icon>account_balance_wallet</mat-icon>
+          <span *ngIf="sidebarExpanded">Finance</span>
+        </div>
       </a>
       <a
         mat-list-item
         *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
         routerLink="/schools"
-        (click)="sidenav.close()"
+        matTooltip="Écoles"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
       >
-        <mat-icon>domain</mat-icon>
-        <span>Écoles</span>
+        <div class="nav-item-stack">
+          <mat-icon>domain</mat-icon>
+          <span *ngIf="sidebarExpanded">Écoles</span>
+        </div>
       </a>
       <a
         mat-list-item
         *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
         routerLink="/super-admin/dashboard"
-        (click)="sidenav.close()"
+        matTooltip="Tenants / écoles"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
       >
-        <mat-icon>apartment</mat-icon>
-        <span>Tenants / écoles</span>
+        <div class="nav-item-stack">
+          <mat-icon>apartment</mat-icon>
+          <span *ngIf="sidebarExpanded">Tenants / écoles</span>
+        </div>
       </a>
       <a
         mat-list-item
         *ngIf="hasAnyRole(navUsersRoles)"
         routerLink="/users"
-        (click)="sidenav.close()"
+        matTooltip="Utilisateurs"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
       >
-        <mat-icon>people</mat-icon>
-        <span>Utilisateurs</span>
+        <div class="nav-item-stack">
+          <mat-icon>people</mat-icon>
+          <span *ngIf="sidebarExpanded">Utilisateurs</span>
+        </div>
       </a>
-      <a mat-list-item (click)="logout()">
-        <mat-icon>logout</mat-icon>
-        <span>Déconnexion</span>
+      <a
+        mat-list-item
+        (click)="logout()"
+        matTooltip="Déconnexion"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
+      >
+        <div class="nav-item-stack">
+          <mat-icon>logout</mat-icon>
+          <span *ngIf="sidebarExpanded">Déconnexion</span>
+        </div>
       </a>
     </mat-nav-list>
   </mat-sidenav>
@@ -97,27 +156,16 @@
   <!-- CONTENU PRINCIPAL -->
   <mat-sidenav-content class="main-content">
     <mat-toolbar color="primary" class="header">
-      <button mat-icon-button (click)="sidenav.toggle()" class="menu-btn">
+      <button mat-icon-button (click)="toggleSidebar()" class="menu-btn">
         <mat-icon>menu</mat-icon>
       </button>
-      <span class="title">{{ headerTitle }}</span>
-      <span class="spacer"></span>
-      <ng-container *ngIf="activeSchool.headerVm$ | async as vm">
-        <mat-form-field
-          *ngIf="vm.showPicker"
-          appearance="outline"
-          class="header-school-picker"
-          subscriptSizing="dynamic"
-        >
-          <mat-label>École active</mat-label>
-          <mat-select
-            [value]="vm.selectedId"
-            (selectionChange)="activeSchool.setActiveSchoolId($event.value)"
-          >
-            <mat-option *ngFor="let s of vm.schools" [value]="s.id">{{ s.name }}</mat-option>
-          </mat-select>
-        </mat-form-field>
+      <ng-container *ngIf="activeSchool.headerVm$ | async as vm; else defaultTitle">
+        <span class="title">{{ selectedSchoolName(vm) || headerTitle }}</span>
       </ng-container>
+      <ng-template #defaultTitle>
+        <span class="title">{{ headerTitle }}</span>
+      </ng-template>
+      <span class="spacer"></span>
       <button mat-icon-button routerLink="/profile"><mat-icon>account_circle</mat-icon></button>
     </mat-toolbar>
 
