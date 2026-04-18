@@ -15,10 +15,17 @@ export class UserService {
     nom: string;
     email: string;
     role: UserRoleNameType;
+    schoolId?: number | null;
   }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/invite`, {
-      ...data,
-    });
+    const body: Record<string, unknown> = {
+      nom: data.nom,
+      email: data.email,
+      role: data.role
+    };
+    if (data.schoolId != null && Number.isFinite(data.schoolId)) {
+      body['schoolId'] = data.schoolId;
+    }
+    return this.http.post(`${this.apiUrl}/invite`, body);
   }
 
   getUsers(): Observable<any[]> {

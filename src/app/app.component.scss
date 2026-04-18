@@ -84,6 +84,25 @@ html, body {
   margin-right: 8px;
 }
 
+.header-title-group {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.header-title-group .title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.school-switch-btn {
+  flex-shrink: 0;
+  margin-left: 2px;
+}
+
 .title {
   font-weight: 500;
   font-size: 18px;

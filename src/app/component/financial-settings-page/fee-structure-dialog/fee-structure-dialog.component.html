@@ -24,15 +24,15 @@
       <span matTextSuffix>GNF</span>
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
+    <mat-checkbox formControlName="suppliesColumnEnabled" class="supplies-enable-row">
+      Afficher la colonne Fournitures dans le suivi financier
+    </mat-checkbox>
+
+    <mat-form-field *ngIf="form.get('suppliesColumnEnabled')?.value" appearance="outline">
       <mat-label>Frais fournitures</mat-label>
       <input matInput formControlName="suppliesFee" inputmode="numeric" (input)="onAmountInput('suppliesFee')" />
       <span matTextSuffix>GNF</span>
     </mat-form-field>
-
-    <mat-checkbox formControlName="suppliesColumnEnabled">
-      Afficher la colonne Fournitures dans le suivi financier
-    </mat-checkbox>
 
     <mat-form-field appearance="outline">
       <mat-label>Devise</mat-label>

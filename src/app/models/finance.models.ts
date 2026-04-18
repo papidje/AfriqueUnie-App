@@ -38,6 +38,8 @@ export interface StudentPaymentInfoDto {
   insReinsRemaining: number;
   suppliesPaid: boolean;
   suppliesExpected: number;
+  /** Aligné sur la structure de frais : si false, pas de ligne fournitures à l’encaissement. Absent (API ancienne) = activé. */
+  suppliesColumnEnabled?: boolean;
   monthlyTuition: MonthlyTuitionStatusDto[];
 }
 

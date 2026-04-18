@@ -25,7 +25,7 @@ import {MatCardModule} from "@angular/material/card";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import { UnautorizedComponent } from './component/unautorized/unautorized.component';
 import { DashboardPageComponent } from './component/dashboard-page/dashboard-page.component';
-import { ConfirmDialogComponent } from './shared/component/confirm-dialog/confirm-dialog.component';
+import { SharedModule } from './shared/shared.module';
 import { ClassWorkspaceContextBarComponent } from './shared/component/class-workspace-context-bar/class-workspace-context-bar.component';
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatTableModule} from "@angular/material/table";
@@ -38,10 +38,12 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 import { ApiUnavailableComponent } from './component/api-unavailable/api-unavailable.component';
 import { RegisterSchoolComponent } from './component/register-school/register-school.component';
 import { SuperAdminDashboardComponent } from './component/super-admin-dashboard/super-admin-dashboard.component';
 import { MyEstablishmentsComponent } from './component/my-establishments/my-establishments.component';
+import { CreateSchoolDialogComponent } from './component/my-establishments/create-school-dialog/create-school-dialog.component';
 import { AcademicContextBannerComponent } from './component/academic-context-banner/academic-context-banner.component';
 import { SchoolClassesPageComponent } from './component/school-classes-page/school-classes-page.component';
 import { SchoolYearCreatePageComponent } from './component/school-year-create-page/school-year-create-page.component';
@@ -72,12 +74,12 @@ export function initializeAuthFactory(authService: AuthService) {
     ProfileComponent,
     UnautorizedComponent,
     DashboardPageComponent,
-    ConfirmDialogComponent,
     ClassWorkspaceContextBarComponent,
     ApiUnavailableComponent,
     RegisterSchoolComponent,
     SuperAdminDashboardComponent,
     MyEstablishmentsComponent,
+    CreateSchoolDialogComponent,
     AcademicContextBannerComponent,
     SchoolClassesPageComponent,
     SchoolYearCreatePageComponent,
@@ -115,7 +117,9 @@ export function initializeAuthFactory(authService: AuthService) {
     MatStepperModule
     ,
     MatTabsModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatMenuModule,
+    SharedModule
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

@@ -25,7 +25,13 @@ export class AcademicContextBannerComponent {
     switchMap((schoolId) => {
       const visible =
         !this.authUtils.isSuperAdmin() &&
-        this.authUtils.hasAnyRole([AppRoles.ADMIN_ECOLE, AppRoles.STAFF]) &&
+        this.authUtils.hasAnyRole([
+          AppRoles.ADMIN_ECOLE,
+          AppRoles.STAFF,
+          AppRoles.DIRECTOR,
+          AppRoles.TEACHER,
+          AppRoles.ACCOUNTANT
+        ]) &&
         schoolId != null;
 
       if (!visible || schoolId == null) {

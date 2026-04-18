@@ -29,7 +29,27 @@
   color: #607d8b;
 }
 
+.class-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.class-tabs button.active {
+  background: #1976d2;
+  color: #fff;
+}
+
 .tab-content {
-  padding-top: 10px;
+  padding: 12px 4px 4px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.table-wrap table {
+  width: 100%;
 }
 

@@ -16,6 +16,19 @@ function dateOrderValidator(group: AbstractControl): ValidationErrors | null {
   return new Date(start) < new Date(end) ? null : { dateOrder: true };
 }
 
+function normalizeDateToInput(value: unknown): string {
+  if (typeof value === 'string') {
+    return value.length >= 10 ? value.slice(0, 10) : value;
+  }
+  if (Array.isArray(value) && value.length >= 3) {
+    const y = value[0];
+    const m = value[1];
+    const d = value[2];
+    return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
+  return '';
+}
+
 @Component({
   selector: 'app-school-year-create-page',
   templateUrl: './school-year-create-page.component.html',
@@ -26,6 +39,7 @@ export class SchoolYearCreatePageComponent implements OnInit, OnDestroy {
   private lastResolvedSchoolId: number | null = null;
 
   schoolId: number | null = null;
+  editYearId: number | null = null;
   returnUrl = '/dashboard';
   submitting = false;
 
@@ -50,14 +64,41 @@ export class SchoolYearCreatePageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      const rawSchool = params.get('schoolId');
-      const parsed = rawSchool != null ? Number(rawSchool) : NaN;
-      const fromQuery = Number.isFinite(parsed) ? parsed : null;
       this.returnUrl = params.get('returnUrl')?.trim() || '/dashboard';
       if (this.returnUrl.startsWith('http')) {
         this.returnUrl = '/dashboard';
       }
-      const nextId = fromQuery ?? this.activeSchool.getActiveSchoolId();
+
+      const rawYear = params.get('yearId');
+      const yearParsed = rawYear != null ? Number(rawYear) : NaN;
+      const yearId = Number.isFinite(yearParsed) ? yearParsed : null;
+
+      const rawSchool = params.get('schoolId');
+      const parsedSchool = rawSchool != null ? Number(rawSchool) : NaN;
+      const schoolFromQuery = Number.isFinite(parsedSchool) ? parsedSchool : null;
+
+      if (yearId != null) {
+        this.editYearId = yearId;
+        this.schoolYearService.getById(yearId).subscribe({
+          next: (y) => {
+            const sid = y.school?.id ?? schoolFromQuery ?? this.activeSchool.getActiveSchoolId();
+            this.schoolId = sid ?? null;
+            this.form.patchValue({
+              label: y.label,
+              startDate: normalizeDateToInput(y.startDate as unknown),
+              endDate: normalizeDateToInput(y.endDate as unknown),
+              active: y.active
+            });
+          },
+          error: () => {
+            this.snackBar.open('Année scolaire introuvable.', 'Fermer', { duration: 5000 });
+          }
+        });
+        return;
+      }
+
+      this.editYearId = null;
+      const nextId = schoolFromQuery ?? this.activeSchool.getActiveSchoolId();
       const changed = nextId !== this.lastResolvedSchoolId;
       this.schoolId = nextId;
       this.lastResolvedSchoolId = nextId;
@@ -70,6 +111,10 @@ export class SchoolYearCreatePageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  get isEditMode(): boolean {
+    return this.editYearId != null;
   }
 
   /** Propose libellé + dates type septembre → juin (France / Afrique francophone). */
@@ -107,7 +152,7 @@ export class SchoolYearCreatePageComponent implements OnInit, OnDestroy {
 
   submit(): void {
     if (this.schoolId == null) {
-      this.snackBar.open('Établissement inconnu : sélectionnez une école dans l’en-tête.', 'Fermer', {
+      this.snackBar.open('Établissement inconnu : indiquez schoolId ou ouvrez depuis la fiche école.', 'Fermer', {
         duration: 5000
       });
       return;
@@ -117,29 +162,34 @@ export class SchoolYearCreatePageComponent implements OnInit, OnDestroy {
       return;
     }
     const v = this.form.getRawValue();
+    const payload = {
+      school: { id: this.schoolId },
+      label: (v.label ?? '').trim(),
+      startDate: v.startDate!,
+      endDate: v.endDate!,
+      active: !!v.active
+    };
     this.submitting = true;
-    this.schoolYearService
-      .create({
-        school: { id: this.schoolId },
-        label: (v.label ?? '').trim(),
-        startDate: v.startDate!,
-        endDate: v.endDate!,
-        active: !!v.active
-      })
-      .subscribe({
-        next: () => {
-          this.submitting = false;
-          this.snackBar.open('Année scolaire enregistrée.', 'Fermer', { duration: 3500 });
-          void this.router.navigateByUrl(this.returnUrl);
-        },
-        error: (err) => {
-          this.submitting = false;
-          const msg =
-            err?.error?.message ||
-            (typeof err?.error === 'string' ? err.error : null) ||
-            'Enregistrement impossible.';
-          this.snackBar.open(msg, 'Fermer', { duration: 6000 });
-        }
-      });
+    const req =
+      this.editYearId != null
+        ? this.schoolYearService.update(this.editYearId, payload)
+        : this.schoolYearService.create(payload);
+    req.subscribe({
+      next: () => {
+        this.submitting = false;
+        this.snackBar.open(this.isEditMode ? 'Année scolaire mise à jour.' : 'Année scolaire enregistrée.', 'Fermer', {
+          duration: 3500
+        });
+        void this.router.navigateByUrl(this.returnUrl);
+      },
+      error: (err) => {
+        this.submitting = false;
+        const msg =
+          err?.error?.message ||
+          (typeof err?.error === 'string' ? err.error : null) ||
+          'Enregistrement impossible.';
+        this.snackBar.open(msg, 'Fermer', { duration: 6000 });
+      }
+    });
   }
 }

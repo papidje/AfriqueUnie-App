@@ -1,5 +1,5 @@
 <div class="page">
-  <h1>Nouvelle année scolaire</h1>
+  <h1>{{ isEditMode ? 'Modifier l’année scolaire' : 'Nouvelle année scolaire' }}</h1>
   <p class="intro">
     Les champs ci-dessous alimentent l’établissement sélectionné : libellé, dates, statut actif. Si vous cochez
     <strong>année active</strong>, les autres années de la même école seront désactivées automatiquement.
@@ -52,7 +52,7 @@
         <div class="actions">
           <button mat-stroked-button type="button" (click)="cancel()" [disabled]="submitting">Annuler</button>
           <button mat-raised-button color="primary" type="submit" [disabled]="submitting || form.invalid">
-            {{ submitting ? 'Enregistrement…' : 'Enregistrer' }}
+            {{ submitting ? 'Enregistrement…' : (isEditMode ? 'Mettre à jour' : 'Enregistrer') }}
           </button>
         </div>
       </form>

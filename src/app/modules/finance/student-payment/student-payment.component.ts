@@ -259,7 +259,10 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
         kind: 'insReins'
       });
     }
-    if (!info.suppliesPaid) {
+    const suppliesColumnOn = info.suppliesColumnEnabled !== false;
+    const suppliesDue =
+      suppliesColumnOn && !info.suppliesPaid && Number(info.suppliesExpected || 0) > 0;
+    if (suppliesDue) {
       rows.push({
         id: 'supplies',
         title: 'Fournitures',
@@ -290,7 +293,7 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
 
   private computeTotalRemaining(info: StudentPaymentInfoDto): number {
     let s = Math.max(0, Number(info.insReinsRemaining || 0));
-    if (!info.suppliesPaid) {
+    if (info.suppliesColumnEnabled !== false && !info.suppliesPaid) {
       s += Number(info.suppliesExpected || 0);
     }
     for (const m of info.monthlyTuition) {

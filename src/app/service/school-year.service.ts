@@ -27,7 +27,19 @@ export class SchoolYearService {
     return this.http.get<SchoolYearDto[]>(`${this.base}/school/${schoolId}`);
   }
 
+  getById(id: number): Observable<SchoolYearDto & { school?: { id: number } }> {
+    return this.http.get<SchoolYearDto & { school?: { id: number } }>(`${this.base}/${id}`);
+  }
+
   create(payload: CreateSchoolYearPayload): Observable<SchoolYearDto> {
     return this.http.post<SchoolYearDto>(this.base, payload);
+  }
+
+  update(id: number, payload: CreateSchoolYearPayload): Observable<SchoolYearDto> {
+    return this.http.put<SchoolYearDto>(`${this.base}/${id}`, payload);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
   }
 }

@@ -1,6 +1,14 @@
 <div class="page">
-  <h1>Mes établissements</h1>
-  <p class="subtitle">Écoles rattachées à votre organisation (même tenant).</p>
+  <div class="page-head">
+    <div>
+      <h1>Mes établissements</h1>
+      <p class="subtitle">Écoles rattachées à votre organisation (même tenant).</p>
+    </div>
+    <button mat-raised-button color="primary" type="button" (click)="openCreateSchool()">
+      <mat-icon>add</mat-icon>
+      Nouvelle école
+    </button>
+  </div>
 
   <div *ngIf="loading" class="state">Chargement…</div>
   <p *ngIf="error && !loading" class="state err">Impossible de charger la liste.</p>

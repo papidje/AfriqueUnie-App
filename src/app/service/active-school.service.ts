@@ -39,7 +39,11 @@ export class ActiveSchoolService {
     private readonly authUtils: AuthUtilsService
   ) {}
 
-  /** Le listing /schools est réservé aux rôles admin/super-admin. */
+  /**
+   * Charge la liste complète des écoles pour le sélecteur d’en-tête uniquement pour les comptes
+   * « multi-établissements » : admin d’organisation (tenant) et super admin. Les autres rôles
+   * sont liés à une seule école (JWT / session figée sur cet établissement).
+   */
   shouldLoadSchoolsForPicker(): boolean {
     return (
       this.authUtils.isAuthenticated() &&

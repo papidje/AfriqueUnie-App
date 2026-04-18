@@ -129,7 +129,7 @@ export class AuthService {
   }
 
   /**
-   * STAFF/TEACHER doivent embarquer `school_id` pour initialiser l’école active
+   * STAFF / TEACHER / DIRECTOR / ACCOUNTANT doivent embarquer `school_id` pour initialiser l’école active
    * dans les pages métiers (classes, élèves, finance, ...).
    */
   private tokenHasRequiredSchoolClaim(token: string): boolean {
@@ -141,8 +141,12 @@ export class AuthService {
             .map((r: any) => (typeof r === 'string' ? r : r?.authority))
             .filter((r: string | undefined): r is string => !!r)
         : [];
-      const isStaffOrTeacher = roles.includes(AppRoles.STAFF) || roles.includes(AppRoles.TEACHER);
-      if (!isStaffOrTeacher) {
+      const needsSchoolClaim =
+        roles.includes(AppRoles.STAFF) ||
+        roles.includes(AppRoles.TEACHER) ||
+        roles.includes(AppRoles.DIRECTOR) ||
+        roles.includes(AppRoles.ACCOUNTANT);
+      if (!needsSchoolClaim) {
         return true;
       }
       return decoded?.school_id !== undefined && decoded?.school_id !== null;

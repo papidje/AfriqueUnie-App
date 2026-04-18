@@ -22,7 +22,9 @@ import { AdminShellComponent } from './admin-shell/admin-shell.component';
 import {MatSelectModule} from "@angular/material/select";
 import { UserManagementComponent } from './user-management/user-management.component';
 import { InviteMemberDialogComponent } from './user-management/invite-member-dialog/invite-member-dialog.component';
-
+import { RouterModule } from '@angular/router';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { SharedModule } from '../../shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -37,7 +39,10 @@ import { InviteMemberDialogComponent } from './user-management/invite-member-dia
   ],
   imports: [
     CommonModule,
+    RouterModule,
     AdminRoutingModule,
+    SharedModule,
+    MatSlideToggleModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatDialogModule,

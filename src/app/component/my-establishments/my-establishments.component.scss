@@ -4,6 +4,20 @@
   margin: 0 auto;
 }
 
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 1rem;
+
+  button mat-icon {
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+}
+
 h1 {
   font-size: 1.35rem;
   margin: 0 0 0.35rem;

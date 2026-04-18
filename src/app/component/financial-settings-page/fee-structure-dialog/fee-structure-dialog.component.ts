@@ -1,6 +1,8 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { FeeStructureDto } from '../../../models/fee-structure.models';
 
 export interface FeeStructureDialogData {
@@ -29,8 +31,10 @@ export interface FeeStructureDialogResult {
   templateUrl: './fee-structure-dialog.component.html',
   styleUrls: ['./fee-structure-dialog.component.scss']
 })
-export class FeeStructureDialogComponent {
+export class FeeStructureDialogComponent implements OnInit, OnDestroy {
   readonly isEdit = !!this.data.existing;
+
+  private readonly destroy$ = new Subject<void>();
 
   readonly form = this.fb.group({
     registrationFee: [this.toDisplay(this.data.existing?.registrationFee ?? 0), Validators.required],
@@ -47,6 +51,29 @@ export class FeeStructureDialogComponent {
     private readonly dialogRef: MatDialogRef<FeeStructureDialogComponent>
   ) {}
 
+  ngOnInit(): void {
+    const col = this.form.get('suppliesColumnEnabled');
+    const fee = this.form.get('suppliesFee');
+    const syncSuppliesFeeState = (enabled: boolean | null | undefined): void => {
+      if (!fee) {
+        return;
+      }
+      if (!enabled) {
+        fee.setValue(this.toDisplay(0), { emitEvent: false });
+        fee.disable({ emitEvent: false });
+      } else {
+        fee.enable({ emitEvent: false });
+      }
+    };
+    syncSuppliesFeeState(!!col?.value);
+    col?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((on) => syncSuppliesFeeState(!!on));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   onAmountInput(controlName: 'registrationFee' | 'reRegistrationFee' | 'monthlyTuitionFee' | 'suppliesFee'): void {
     const ctrl = this.form.get(controlName);
     const formatted = this.toDisplay(this.toNumber(ctrl?.value));
@@ -59,6 +86,7 @@ export class FeeStructureDialogComponent {
       return;
     }
     const v = this.form.getRawValue();
+    const suppliesOn = !!v.suppliesColumnEnabled;
     const payload: FeeStructureDialogResult = {
       id: this.data.existing?.id,
       classLevelId: this.data.classLevelId,
@@ -66,8 +94,8 @@ export class FeeStructureDialogComponent {
       registrationFee: this.toNumber(v.registrationFee),
       reRegistrationFee: this.toNumber(v.reRegistrationFee),
       monthlyTuitionFee: this.toNumber(v.monthlyTuitionFee),
-      suppliesFee: this.toNumber(v.suppliesFee),
-      suppliesColumnEnabled: !!v.suppliesColumnEnabled,
+      suppliesFee: suppliesOn ? this.toNumber(v.suppliesFee) : 0,
+      suppliesColumnEnabled: suppliesOn,
       currency: (v.currency || 'GNF').trim().toUpperCase()
     };
     this.dialogRef.close(payload);

@@ -11,7 +11,15 @@ const routes: Routes = [
   {
     path: '',
     canActivate: [AuthGuard, RoleGuard],
-    data: { roles: [AppRoles.SUPER_ADMIN, AppRoles.ADMIN_ECOLE, AppRoles.STAFF] },
+    data: {
+      roles: [
+        AppRoles.SUPER_ADMIN,
+        AppRoles.ADMIN_ECOLE,
+        AppRoles.STAFF,
+        AppRoles.DIRECTOR,
+        AppRoles.ACCOUNTANT
+      ]
+    },
     children: [
       { path: '', component: FinancePageComponent },
       { path: 'settings', component: FinancialSettingsPageComponent },

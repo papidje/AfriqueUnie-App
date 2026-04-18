@@ -1,38 +1,69 @@
-.school-card,
-.admin-card {
+.school-manage {
+  padding: 8px 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+}
+
+.block {
   margin-bottom: 20px;
-  padding: 16px;
 }
 
-.spacer {
-  flex: 1 1 auto;
+.grid-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
 }
 
-mat-card-title {
+.full-row {
+  grid-column: 1 / -1;
+}
+
+.actions-row {
+  margin-top: 4px;
+}
+
+.active-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-mat-list-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.danger-zone {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.secondary {
-  font-size: 13px;
-  color: gray;
+.years-head {
+  margin-bottom: 12px;
 }
 
-.empty {
-  color: #666;
-  font-style: italic;
-  padding: 8px;
+.years-table,
+.admin-table {
+  width: 100%;
+  margin-top: 12px;
 }
 
-.loader {
-  display: flex;
-  justify-content: center;
-  margin-top: 50px;
+.muted {
+  color: rgba(0, 0, 0, 0.55);
+  margin-top: 8px;
 }

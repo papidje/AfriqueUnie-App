@@ -99,10 +99,12 @@ export class StudentListComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  onTabIndexChange(index: number): void {
+  onTabChange(index: number): void {
     this.selectedIndex = index;
     const cl = this.sortedClasses[index];
-    if (!cl) return;
+    if (!cl) {
+      return;
+    }
     this.loadStudentsForClass(cl.id);
   }
 
@@ -138,10 +140,6 @@ export class StudentListComponent implements OnInit, OnDestroy {
     if (civility === 'MONSIEUR') return 'Garçon';
     if (civility === 'MADAME') return 'Fille';
     return civility ?? '';
-  }
-
-  tabClassesLabel(cl: SchoolClassDto): string {
-    return cl.name;
   }
 
   private sortClasses(list: SchoolClassDto[]): SchoolClassDto[] {

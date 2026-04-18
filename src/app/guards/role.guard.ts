@@ -17,7 +17,10 @@ export class RoleGuard implements CanActivate, CanActivateChild {
     }
 
     try {
-      const allowedRoles = route.data['roles'] as string[];
+      const allowedRoles = route.data['roles'] as string[] | undefined;
+      if (!allowedRoles?.length) {
+        return true;
+      }
       const userRoles = this.authUtils.getRoles();
       const hasAccess = allowedRoles.some(role => userRoles.includes(role));
       if (!hasAccess) {

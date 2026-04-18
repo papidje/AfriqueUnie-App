@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Inviter un membre</h2>
+<h2 mat-dialog-title>{{ directorMode ? 'Inviter un membre du staff' : 'Inviter un membre' }}</h2>
 
 <mat-dialog-content>
   <form [formGroup]="form" class="invite-form">
@@ -15,8 +15,17 @@
     <mat-form-field appearance="outline">
       <mat-label>Rôle</mat-label>
       <mat-select formControlName="role">
-        <mat-option *ngFor="let role of roles" [value]="role">{{ role }}</mat-option>
+        <mat-option *ngFor="let role of roleOptions" [value]="role">{{ role }}</mat-option>
       </mat-select>
+    </mat-form-field>
+
+    <mat-form-field *ngIf="showSchoolField" appearance="outline">
+      <mat-label>Établissement</mat-label>
+      <mat-select formControlName="schoolId">
+        <mat-option *ngFor="let s of schools" [value]="s.id">{{ s.name }}</mat-option>
+      </mat-select>
+      <mat-hint *ngIf="loadingSchools">Chargement des écoles…</mat-hint>
+      <mat-error *ngIf="form.get('schoolId')?.hasError('required')">Choisissez un établissement.</mat-error>
     </mat-form-field>
   </form>
 </mat-dialog-content>

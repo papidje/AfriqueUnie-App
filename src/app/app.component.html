@@ -23,6 +23,19 @@
       </a>
       <a
         mat-list-item
+        *ngIf="hasRole(AppRoles.DIRECTOR)"
+        routerLink="/admin/staff"
+        matTooltip="Mon Staff"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
+      >
+        <div class="nav-item-stack">
+          <mat-icon>groups</mat-icon>
+          <span *ngIf="sidebarExpanded">Mon Staff</span>
+        </div>
+      </a>
+      <a
+        mat-list-item
         *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
         routerLink="/mes-etablissements"
         matTooltip="Mes établissements"
@@ -160,7 +173,31 @@
         <mat-icon>menu</mat-icon>
       </button>
       <ng-container *ngIf="activeSchool.headerVm$ | async as vm; else defaultTitle">
-        <span class="title">{{ selectedSchoolName(vm) || headerTitle }}</span>
+        <span class="header-title-group">
+          <span class="title">{{ selectedSchoolName(vm) || headerTitle }}</span>
+          <button
+            *ngIf="vm.showPicker"
+            type="button"
+            mat-icon-button
+            class="school-switch-btn"
+            [matMenuTriggerFor]="schoolSwitchMenu"
+            matTooltip="Changer d'établissement"
+            aria-label="Changer d'établissement actif"
+          >
+            <mat-icon>swap_horiz</mat-icon>
+          </button>
+        </span>
+        <mat-menu #schoolSwitchMenu="matMenu">
+          <button
+            mat-menu-item
+            *ngFor="let s of vm.schools"
+            type="button"
+            (click)="activeSchool.setActiveSchoolId(s.id)"
+          >
+            <mat-icon [style.opacity]="s.id === vm.selectedId ? 1 : 0">check</mat-icon>
+            <span>{{ s.name }}</span>
+          </button>
+        </mat-menu>
       </ng-container>
       <ng-template #defaultTitle>
         <span class="title">{{ headerTitle }}</span>

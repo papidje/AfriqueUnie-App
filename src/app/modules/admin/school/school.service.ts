@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import {School} from "./school-list/school-list.component";
+import { API_BASE_URL } from '../../../core/api-base';
+import { School } from './school-list/school-list.component';
 
 @Injectable({ providedIn: 'root' })
 export class SchoolService {
-  private apiUrl = 'http://localhost:8080/api/rest/schools';
+  private readonly apiUrl = `${API_BASE_URL}/schools`;
 
   constructor(private http: HttpClient) {}
 
@@ -29,15 +30,15 @@ export class SchoolService {
     return this.http.patch<void>(`${this.apiUrl}/${id}/active/${active}`, {});
   }
 
-  getById(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}`);
+  getById(id: number): Observable<School> {
+    return this.http.get<School>(`${this.apiUrl}/${id}`);
   }
 
-  assignAdministrator(schoolId: number, adminId: number): Observable<any> {
+  assignAdministrator(schoolId: number, adminId: number): Observable<unknown> {
     return this.http.post(`${this.apiUrl}/${schoolId}/assign/${adminId}`, {});
   }
 
-  removeAdministrator(schoolId: number, adminId: number): Observable<any> {
+  removeAdministrator(schoolId: number, adminId: number): Observable<unknown> {
     return this.http.delete(`${this.apiUrl}/${schoolId}/admins/${adminId}`);
   }
 }

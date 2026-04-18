@@ -11,13 +11,24 @@ const routes: Routes = [
   {
     path: '',
     component: AdminShellComponent,
-    canActivate: [AuthGuard, RoleGuard],
+    canActivate: [AuthGuard],
     canActivateChild: [RoleGuard],
-    data: { roles: [AppRoles.ADMIN_ECOLE] },
     children: [
-      { path: '', component: UserManagementComponent },
-      { path: 'staff', component: UserManagementComponent },
-      { path: 'schools/:id', component: SchoolDetailsComponent }
+      {
+        path: '',
+        component: UserManagementComponent,
+        data: { roles: [AppRoles.ADMIN_ECOLE] }
+      },
+      {
+        path: 'staff',
+        component: UserManagementComponent,
+        data: { roles: [AppRoles.DIRECTOR], directorStaff: true }
+      },
+      {
+        path: 'schools/:id',
+        component: SchoolDetailsComponent,
+        data: { roles: [AppRoles.ADMIN_ECOLE] }
+      }
     ]
   }
 ];

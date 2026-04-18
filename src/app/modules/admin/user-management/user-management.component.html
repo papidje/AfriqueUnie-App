@@ -2,18 +2,26 @@
   <mat-card>
     <div class="head">
       <div>
-        <h2>Gestion des utilisateurs</h2>
-        <p>Administrez les membres de votre école.</p>
+        <h2 *ngIf="!isDirectorStaff">Gestion des utilisateurs</h2>
+        <h2 *ngIf="isDirectorStaff">Mon Staff</h2>
+        <p *ngIf="!isDirectorStaff">Administrez les membres de votre établissement.</p>
+        <p *ngIf="isDirectorStaff">Invitez des enseignants ou des comptables rattachés à votre établissement.</p>
       </div>
       <button mat-raised-button color="primary" (click)="openInviteDialog()">
         Inviter un membre
       </button>
     </div>
 
-    <div class="quick-filters">
+    <div class="quick-filters" *ngIf="!isDirectorStaff">
       <button mat-stroked-button [class.active]="quickFilter === 'ALL'" (click)="setQuickFilter('ALL')">Tous</button>
       <button mat-stroked-button [class.active]="quickFilter === 'TEACHER'" (click)="setQuickFilter('TEACHER')">Enseignants</button>
       <button mat-stroked-button [class.active]="quickFilter === 'STAFF'" (click)="setQuickFilter('STAFF')">Staff + Admin</button>
+      <button mat-stroked-button [class.active]="quickFilter === 'ACCOUNTANT'" (click)="setQuickFilter('ACCOUNTANT')">Comptables</button>
+    </div>
+    <div class="quick-filters" *ngIf="isDirectorStaff">
+      <button mat-stroked-button [class.active]="quickFilter === 'ALL'" (click)="setQuickFilter('ALL')">Tous</button>
+      <button mat-stroked-button [class.active]="quickFilter === 'TEACHER'" (click)="setQuickFilter('TEACHER')">Enseignants</button>
+      <button mat-stroked-button [class.active]="quickFilter === 'ACCOUNTANT'" (click)="setQuickFilter('ACCOUNTANT')">Comptables</button>
     </div>
 
     <div *ngIf="loading" class="loading">Chargement...</div>
