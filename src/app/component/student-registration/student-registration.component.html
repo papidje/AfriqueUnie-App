@@ -11,7 +11,22 @@
 
     <div *ngIf="loading" class="loading">Chargement...</div>
 
-    <mat-stepper *ngIf="!loading && schoolId && activeYear" [linear]="true" class="stepper">
+    <div *ngIf="registrationComplete" class="success-panel">
+      <mat-icon class="success-icon" color="primary">check_circle</mat-icon>
+      <h2>Inscription validée</h2>
+      <p class="success-lead">
+        L’inscription de <strong>{{ registeredStudentSummary }}</strong> est enregistrée. L’encaissement des frais se fait
+        depuis la page dédiée (comptabilité).
+      </p>
+      <div class="success-actions">
+        <button mat-raised-button color="primary" type="button" (click)="goToEncaissement()">
+          Aller à l’encaissement
+        </button>
+        <button mat-stroked-button type="button" (click)="startAnotherRegistration()">Nouvelle inscription</button>
+      </div>
+    </div>
+
+    <mat-stepper *ngIf="!registrationComplete && !loading && schoolId && activeYear" [linear]="true" class="stepper">
       <mat-step [stepControl]="stepStudent">
         <form [formGroup]="stepStudent">
           <ng-template matStepLabel>Informations élève</ng-template>
@@ -139,6 +154,11 @@
         <form [formGroup]="stepEmergency">
           <ng-template matStepLabel>Urgence</ng-template>
 
+          <p class="step-final-hint">
+            Après validation, l’élève sera créé sans encaissement ici. Utilisez la page <strong>Encaissement</strong> pour
+            enregistrer les paiements.
+          </p>
+
           <div class="grid">
             <mat-form-field appearance="outline" class="full">
               <mat-label>Contact d'urgence</mat-label>
@@ -154,38 +174,13 @@
 
           <div class="actions">
             <button mat-stroked-button matStepperPrevious type="button">Retour</button>
-            <button mat-raised-button color="primary" matStepperNext [disabled]="stepEmergency.invalid">Suivant</button>
-          </div>
-        </form>
-      </mat-step>
-
-      <mat-step [stepControl]="stepPayment">
-        <form [formGroup]="stepPayment">
-          <ng-template matStepLabel>Paiement initial</ng-template>
-
-          <mat-card class="notice" *ngIf="expectedRegistrationFee == null">
-            <mat-card-content>
-              <p>Aucun frais d'inscription trouvé pour ce niveau. Configurez-les dans <strong>Paramètres financiers</strong>.</p>
-            </mat-card-content>
-          </mat-card>
-
-          <div class="payment-row">
-            <div class="expected">
-              <div class="label">Frais d'inscription attendus</div>
-              <div class="value">{{ money(expectedRegistrationFee ?? 0) }}</div>
-            </div>
-            <mat-form-field appearance="outline" class="amount">
-              <mat-label>Montant reçu</mat-label>
-              <input matInput type="number" formControlName="amountPaid" min="0" />
-              <span matTextSuffix>{{ expectedCurrency }}</span>
-              <mat-error *ngIf="stepPayment.controls.amountPaid.hasError('required')">Requis</mat-error>
-              <mat-error *ngIf="stepPayment.controls.amountPaid.hasError('min')">Doit être ≥ 0</mat-error>
-            </mat-form-field>
-          </div>
-
-          <div class="actions">
-            <button mat-stroked-button matStepperPrevious type="button">Retour</button>
-            <button mat-raised-button color="primary" type="button" (click)="submit()" [disabled]="submitting || stepPayment.invalid">
+            <button
+              mat-raised-button
+              color="primary"
+              type="button"
+              (click)="submit()"
+              [disabled]="submitting || stepEmergency.invalid"
+            >
               {{ submitting ? 'Enregistrement…' : 'Valider l’inscription' }}
             </button>
           </div>
@@ -194,4 +189,3 @@
     </mat-stepper>
   </mat-card>
 </section>
-

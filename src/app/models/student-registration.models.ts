@@ -16,13 +16,28 @@ export interface StudentRegistrationDto {
   emergencyContactPhone: string;
 }
 
+/** Valeurs `PaymentMode` côté API (inscription / encaissement). */
+export type RegistrationPaymentMode = 'ESPECES' | 'ORANGE_MONEY' | 'MOOV_MONEY' | 'VIREMENT';
+
 export interface RegistrationDto {
   student: StudentRegistrationDto;
   father: ParentRegistrationDto;
   mother: ParentRegistrationDto;
   classId: number;
-  amountPaid: number;
+  /** 0 ou omis : pas de paiement à l’inscription (encaissement séparé). */
+  amountPaid?: number | null;
   currency?: string | null;
+  paymentMode?: RegistrationPaymentMode | null;
+}
+
+/** Réponse POST `/api/student-registrations` (élève créé). */
+export interface StudentRegistrationResponse {
+  id: number;
+  civility?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  birthDate?: string | null;
+  matricule?: string | null;
 }
 
 export interface ParentDto {

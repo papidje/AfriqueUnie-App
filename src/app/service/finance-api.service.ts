@@ -6,7 +6,9 @@ import { API_BASE_URL } from '../core/api-base';
 import {
   CreateStudentPaymentPayload,
   CreateStudentPaymentResponse,
+  PaymentReceiptViewDto,
   StudentPaymentInfoDto,
+  StudentPaymentLedgerRow,
   StudentPaymentStatusDto
 } from '../models/finance.models';
 
@@ -28,8 +30,21 @@ export class FinanceApiService {
     );
   }
 
+  listPaymentsForStudent(studentId: number): Observable<StudentPaymentLedgerRow[]> {
+    return this.http.get<StudentPaymentLedgerRow[]>(`${this.base}/payments/student/${studentId}`).pipe(
+      catchError((err: HttpErrorResponse) => throwError(() => err))
+    );
+  }
+
   createPayment(studentId: number, payload: CreateStudentPaymentPayload): Observable<CreateStudentPaymentResponse> {
     return this.http.post<CreateStudentPaymentResponse>(`${this.base}/payments/${studentId}`, payload).pipe(
+      catchError((err: HttpErrorResponse) => throwError(() => err))
+    );
+  }
+
+  getReceiptDuplicata(studentId: number, reference: string): Observable<PaymentReceiptViewDto> {
+    const params = { reference };
+    return this.http.get<PaymentReceiptViewDto>(`${this.base}/receipt/${studentId}`, { params }).pipe(
       catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }

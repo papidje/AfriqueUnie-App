@@ -21,8 +21,10 @@ import {UpdatePasswordComponent} from './component/update-password/update-passwo
 import {AuthLayoutComponent} from './component/auth-layout/auth-layout.component';
 import {MainLayoutComponent} from './component/main-layout/main-layout.component';
 import { ProfileComponent } from './component/profile/profile.component';
+import { ChangePasswordDialogComponent } from './component/profile/change-password-dialog/change-password-dialog.component';
 import {MatCardModule} from "@angular/material/card";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { UnautorizedComponent } from './component/unautorized/unautorized.component';
 import { DashboardPageComponent } from './component/dashboard-page/dashboard-page.component';
 import { SharedModule } from './shared/shared.module';
@@ -49,11 +51,15 @@ import { SchoolClassesPageComponent } from './component/school-classes-page/scho
 import { SchoolYearCreatePageComponent } from './component/school-year-create-page/school-year-create-page.component';
 import { SubjectsCatalogPageComponent } from './component/subjects-catalog-page/subjects-catalog-page.component';
 import { ClassSubjectsPageComponent } from './component/class-subjects-page/class-subjects-page.component';
+import { ClassSubjectFormDialogComponent } from './component/class-subject-form-dialog/class-subject-form-dialog.component';
 import { ClassPlanningPageComponent } from './component/class-planning-page/class-planning-page.component';
 import { ClassTimetablePageComponent } from './component/class-timetable-page/class-timetable-page.component';
+import { ClassWorkspacePageComponent } from './component/class-workspace-page/class-workspace-page.component';
 import { StudentRegistrationComponent } from './component/student-registration/student-registration.component';
-import { PrintReceiptDialogComponent } from './component/student-registration/print-receipt-dialog/print-receipt-dialog.component';
 import { StudentListComponent } from './component/student-list/student-list.component';
+import { StudentDetailPageComponent } from './component/student-detail-page/student-detail-page.component';
+import { ParentDetailPageComponent } from './component/parent-detail-page/parent-detail-page.component';
+import { ParentListPageComponent } from './component/parent-list-page/parent-list-page.component';
 import { AuthService } from './service/auth.service';
 
 export function initializeAuthFactory(authService: AuthService) {
@@ -72,6 +78,7 @@ export function initializeAuthFactory(authService: AuthService) {
     AuthLayoutComponent,
     MainLayoutComponent,
     ProfileComponent,
+    ChangePasswordDialogComponent,
     UnautorizedComponent,
     DashboardPageComponent,
     ClassWorkspaceContextBarComponent,
@@ -85,13 +92,15 @@ export function initializeAuthFactory(authService: AuthService) {
     SchoolYearCreatePageComponent,
     SubjectsCatalogPageComponent,
     ClassSubjectsPageComponent,
+    ClassSubjectFormDialogComponent,
     ClassPlanningPageComponent,
     ClassTimetablePageComponent,
-    StudentRegistrationComponent
-    ,
-    PrintReceiptDialogComponent
-    ,
-    StudentListComponent
+    ClassWorkspacePageComponent,
+    StudentRegistrationComponent,
+    StudentListComponent,
+    StudentDetailPageComponent,
+    ParentDetailPageComponent,
+    ParentListPageComponent
   ],
   imports: [
     BrowserModule,
@@ -106,6 +115,7 @@ export function initializeAuthFactory(authService: AuthService) {
     MatButtonModule,
     MatCardModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
     MatDialogModule,
     MatTableModule,
     MatFormFieldModule,

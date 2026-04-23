@@ -31,6 +31,10 @@ export interface CreateSchoolYearPayload {
 export interface SchoolClassDto {
   id: number;
   name: string;
+  /** Présent sur l’endpoint overview et sur l’entité classe. */
+  capacity?: number;
+  enrolledStudentCount?: number;
+  subjectCount?: number;
   year?: { id: number; label?: string };
   level?: ClassLevel;
 }

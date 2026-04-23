@@ -1,9 +1,19 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { API_BASE_URL } from '../core/api-base';
-import { ParentDto, ParentRegistrationDto } from '../models/student-registration.models';
+import { ParentListRowDto } from '../models/parent-list.models';
+import { ParentDetailDto } from '../models/student-list.models';
+
+export interface ParentWritePayload {
+  lastName: string;
+  firstName: string;
+  phone: string;
+  email: string | null;
+  profession: string | null;
+  address: string | null;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ParentApiService {
@@ -11,12 +21,17 @@ export class ParentApiService {
 
   constructor(private readonly http: HttpClient) {}
 
-  findByPhone(phone: string): Observable<ParentDto | null> {
-    const p = (phone || '').trim();
-    if (!p) {
-      return of(null);
-    }
-    return this.http.get<ParentDto>(`${this.base}/by-phone?phone=${encodeURIComponent(p)}`).pipe(
+  /** Parents avec au moins un enfant inscrit dans l’année scolaire active de l’établissement. */
+  listForSchoolActiveYear(schoolId: number): Observable<ParentListRowDto[]> {
+    return this.http
+      .get<ParentListRowDto[]>(`${this.base}/by-school/${schoolId}/active-year-enrolled`)
+      .pipe(catchError((err: HttpErrorResponse) => throwError(() => err)));
+  }
+
+  /** Retourne le parent si trouvé, sinon `null` (404). */
+  findByPhone(phone: string): Observable<ParentDetailDto | null> {
+    const params = new HttpParams().set('phone', phone.trim());
+    return this.http.get<ParentDetailDto>(`${this.base}/by-phone`, { params }).pipe(
       catchError((err: HttpErrorResponse) => {
         if (err.status === 404) {
           return of(null);
@@ -26,8 +41,15 @@ export class ParentApiService {
     );
   }
 
-  create(payload: ParentRegistrationDto): Observable<ParentDto> {
-    return this.http.post<ParentDto>(this.base, payload);
+  getById(parentId: number): Observable<ParentDetailDto> {
+    return this.http.get<ParentDetailDto>(`${this.base}/${parentId}`).pipe(
+      catchError((err: HttpErrorResponse) => throwError(() => err))
+    );
+  }
+
+  update(parentId: number, body: ParentWritePayload): Observable<ParentDetailDto> {
+    return this.http.put<ParentDetailDto>(`${this.base}/${parentId}`, body).pipe(
+      catchError((err: HttpErrorResponse) => throwError(() => err))
+    );
   }
 }
-

@@ -8,8 +8,7 @@ import {
   AppRoles,
   ROLES_CLASSES_NAV,
   ROLES_FINANCIAL_NAV,
-  ROLES_STUDENTS_NAV,
-  ROLES_USERS_NAV
+  ROLES_STUDENTS_NAV
 } from "./core/app-roles";
 
 @Component({
@@ -26,7 +25,7 @@ export class AppComponent {
   readonly AppRoles = AppRoles;
   readonly navStudentsRoles = ROLES_STUDENTS_NAV;
   readonly navClassesRoles = ROLES_CLASSES_NAV;
-  readonly navUsersRoles = ROLES_USERS_NAV;
+  readonly navParentsRoles = ROLES_STUDENTS_NAV;
   readonly navFinancialRoles = ROLES_FINANCIAL_NAV;
 
   constructor(

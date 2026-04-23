@@ -1,40 +1,87 @@
-.profile-card {
-  max-width: 500px;
-  margin: 40px auto;
-  padding: 16px;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  border-radius: 12px;
+.profile-page {
+  padding: 24px;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
-.profile-item {
+h1 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0 0 20px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.loading-wrap {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  font-size: 15px;
-  color: #333;
+  align-items: center;
+  gap: 16px;
+  color: #4b5563;
+  padding: 24px 0;
+}
+
+.profile-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(17, 24, 39, 0.08);
+}
+
+.profile-dl {
+  margin: 0;
+}
+
+.profile-dl .row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 12px 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eef2f7;
+  font-size: 14px;
+}
+
+.profile-dl .row:last-child {
+  border-bottom: none;
+}
+
+.profile-dl dt {
+  margin: 0;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.profile-dl dd {
+  margin: 0;
+  color: #111827;
+  word-break: break-word;
 }
 
 .active {
   color: #2e7d32;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .inactive {
   color: #c62828;
-  font-weight: 500;
-}
-
-mat-card-title {
-  font-size: 20px;
   font-weight: 600;
 }
 
-mat-card-subtitle {
-  font-size: 14px;
-  color: #666;
+mat-card-title {
+  font-size: 1.15rem;
 }
 
-button {
-  margin-top: 10px;
+mat-card-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+mat-card-actions {
+  padding: 8px 16px 16px;
+}
+
+mat-card-actions button mat-icon {
+  margin-right: 6px;
+  vertical-align: middle;
 }

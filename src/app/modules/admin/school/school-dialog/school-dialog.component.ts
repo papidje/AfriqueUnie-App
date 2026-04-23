@@ -27,8 +27,7 @@ export class SchoolDialogComponent {
       name: [data?.name || '', Validators.required],
       adress: [data?.adress || '', Validators.required],
       contact: [data?.contact || '', Validators.required],
-      openDate: [data?.openDate || '', Validators.required],
-      logo: [data?.logo || '']
+      openDate: [data?.openDate || '', Validators.required]
     });
   }
 

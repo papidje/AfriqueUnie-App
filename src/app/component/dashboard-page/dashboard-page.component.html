@@ -2,7 +2,7 @@
   <header class="dashboard-header">
     <div class="dashboard-title-block">
       <h1>Dashboard</h1>
-      <p>Indicateurs filtrés par établissement (pas sur l’ensemble du tenant).</p>
+      <p>Indicateurs pour l’année scolaire <strong>active</strong> de l’établissement sélectionné.</p>
     </div>
     <ng-container *ngIf="activeSchool.headerVm$ | async as vm">
       <mat-form-field
@@ -41,8 +41,30 @@
           <mat-icon>groups</mat-icon>
         </div>
         <div>
-          <p class="kpi-label">Nombre d'eleves</p>
-          <h2>{{ data.studentsCount }}</h2>
+          <p class="kpi-label">Élèves inscrits / capacité totale</p>
+          <h2>{{ data.studentsEnrolled }} <span class="kpi-sep">/</span> {{ data.totalCapacity }}</h2>
+          <p class="kpi-hint">Année active — somme des places renseignées sur les classes.</p>
+        </div>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <div class="kpi-icon classes">
+          <mat-icon>class</mat-icon>
+        </div>
+        <div>
+          <p class="kpi-label">Nombre de classes</p>
+          <h2>{{ data.classesCount }}</h2>
+        </div>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <div class="kpi-icon subjects">
+          <mat-icon>menu_book</mat-icon>
+        </div>
+        <div>
+          <p class="kpi-label">Matières enseignées</p>
+          <h2>{{ data.taughtSubjectsCount }}</h2>
+          <p class="kpi-hint">Affectations matière–classe (année active).</p>
         </div>
       </mat-card>
 
@@ -51,8 +73,19 @@
           <mat-icon>payments</mat-icon>
         </div>
         <div>
-          <p class="kpi-label">Frais percus ce mois</p>
-          <h2>{{ data.monthlyTuitionCollected | currency:'GNF':'symbol':'1.0-0' }}</h2>
+          <p class="kpi-label">Frais perçus — mois en cours</p>
+          <h2>{{ formatGnf(data.monthlyTuitionCollected) }}</h2>
+        </div>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <div class="kpi-icon revenue-year">
+          <mat-icon>account_balance_wallet</mat-icon>
+        </div>
+        <div>
+          <p class="kpi-label">Frais perçus — année scolaire</p>
+          <h2>{{ formatGnf(data.schoolYearTuitionCollected) }}</h2>
+          <p class="kpi-hint">Paiements liés aux comptes de l’année active.</p>
         </div>
       </mat-card>
     </div>
@@ -60,6 +93,7 @@
     <mat-card class="recent-card">
       <div class="recent-header">
         <h3>Derniers inscrits</h3>
+        <p class="recent-sub">Jusqu’à 10 élèves, par date d’inscription (année active).</p>
       </div>
 
       <div class="recent-list" *ngIf="data.recentEnrollments.length; else emptyRecent">
@@ -79,7 +113,7 @@
       </div>
 
       <ng-template #emptyRecent>
-        <p class="empty-recent">Aucune inscription récente.</p>
+        <p class="empty-recent">Aucune inscription récente pour cette année.</p>
       </ng-template>
     </mat-card>
   </ng-container>

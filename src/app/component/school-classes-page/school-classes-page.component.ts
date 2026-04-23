@@ -41,8 +41,11 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
 
   readonly form = this.fb.group({
     levelId: [null as number | null, Validators.required],
-    name: ['', [Validators.required, Validators.maxLength(50)]]
+    name: ['', [Validators.required, Validators.maxLength(50)]],
+    capacity: [40, [Validators.required, Validators.min(1), Validators.max(200)]]
   });
+
+  readonly overviewColumns = ['name', 'level', 'enrollment', 'subjectCount', 'actions'];
 
   constructor(
     private readonly fb: FormBuilder,
@@ -89,7 +92,7 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
               if (!year) {
                 return of<SchoolClassesContext>({ schoolId: id, year: null, classes: [] });
               }
-              return this.schoolClassService.listForActiveSchoolYear(id).pipe(
+              return this.schoolClassService.listOverviewForActiveSchoolYear(id).pipe(
                 map((classes) => ({ schoolId: id, year, classes })),
                 catchError(() => {
                   this.snackBar.open('Impossible de charger les classes.', 'Fermer', { duration: 5000 });
@@ -168,7 +171,7 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
           if (!year) {
             return of<SchoolClassDto[]>([]);
           }
-          return this.schoolClassService.listForActiveSchoolYear(id).pipe(
+          return this.schoolClassService.listOverviewForActiveSchoolYear(id).pipe(
             catchError(() => {
               this.snackBar.open('Impossible de recharger les classes.', 'Fermer', { duration: 5000 });
               return of<SchoolClassDto[]>([]);
@@ -190,6 +193,7 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
     }
     const name = (this.form.value.name ?? '').trim();
     const levelId = this.form.value.levelId;
+    const capacity = Number(this.form.value.capacity);
     if (!name || levelId == null) {
       return;
     }
@@ -211,7 +215,8 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
           .create({
             name,
             year: { id: year.id },
-            level: { id: levelId }
+            level: { id: levelId },
+            capacity: Number.isFinite(capacity) && capacity > 0 ? capacity : 40
           })
           .subscribe({
             next: () => {
@@ -237,6 +242,41 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
 
   canUseForm(): boolean {
     return this.schoolId != null && this.activeYear != null && !this.loadingLevels;
+  }
+
+  private readonly enrollmentPieCircumference = 2 * Math.PI * 14;
+
+  /** Taux de remplissage (0–1) pour le graphique inscription / capacité. */
+  enrollmentRatio(row: SchoolClassDto): number {
+    const cap = row.capacity ?? 40;
+    if (cap <= 0) {
+      return 0;
+    }
+    return Math.min(1, Math.max(0, (row.enrolledStudentCount ?? 0) / cap));
+  }
+
+  enrollmentDash(row: SchoolClassDto): string {
+    const len = this.enrollmentRatio(row) * this.enrollmentPieCircumference;
+    return `${len} ${this.enrollmentPieCircumference}`;
+  }
+
+  /** Vert clair → vert foncé selon le taux de remplissage. */
+  enrollmentStrokeColor(row: SchoolClassDto): string {
+    return this.greenForFillRatio(this.enrollmentRatio(row));
+  }
+
+  enrollmentTooltip(row: SchoolClassDto): string {
+    const n = row.enrolledStudentCount ?? 0;
+    const cap = row.capacity ?? 40;
+    const pct = Math.round(this.enrollmentRatio(row) * 100);
+    return `${n} / ${cap} inscrits — ${pct} % de remplissage`;
+  }
+
+  private greenForFillRatio(t: number): string {
+    const from = { r: 200, g: 230, b: 200 };
+    const to = { r: 27, g: 94, b: 32 };
+    const l = (a: number, b: number) => Math.round(a + (b - a) * t);
+    return `rgb(${l(from.r, to.r)}, ${l(from.g, to.g)}, ${l(from.b, to.b)})`;
   }
 
   private sortClasses(list: SchoolClassDto[]): SchoolClassDto[] {

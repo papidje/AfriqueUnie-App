@@ -19,8 +19,12 @@ describe('DashboardPageComponent', () => {
           useValue: {
             getSummary: () =>
               of({
-                studentsCount: 100,
+                studentsEnrolled: 80,
+                totalCapacity: 120,
+                classesCount: 4,
+                taughtSubjectsCount: 32,
                 monthlyTuitionCollected: 500000,
+                schoolYearTuitionCollected: 4_000_000,
                 recentEnrollments: []
               })
           }

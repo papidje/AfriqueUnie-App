@@ -1,19 +1,28 @@
-<div class="page">
-  <div class="toolbar">
-    <a mat-stroked-button routerLink="/classes">Retour aux classes</a>
-    <a mat-stroked-button [routerLink]="['/classes', classId, 'emploi-du-temps']" *ngIf="classId != null">
-      Emploi du temps
-    </a>
-    <a mat-stroked-button [routerLink]="['/classes', classId, 'matieres']" *ngIf="classId != null">
-      Gérer les matières
-    </a>
-  </div>
+<div class="page" [class.embedded]="workspaceChild">
+  <ng-container *ngIf="!workspaceChild">
+    <div class="toolbar">
+      <a mat-stroked-button routerLink="/classes">Retour aux classes</a>
+      <a mat-stroked-button [routerLink]="['/classes', classId, 'emploi-du-temps']" *ngIf="classId != null">
+        Emploi du temps
+      </a>
+      <a
+        mat-icon-button
+        [routerLink]="['/classes', classId, 'matieres']"
+        *ngIf="classId != null"
+        matTooltip="Gérer"
+        aria-label="Gérer les matières"
+      >
+        <mat-icon>settings</mat-icon>
+      </a>
+    </div>
 
-  <h1>{{ pageTitle }}</h1>
-  <app-class-workspace-context-bar
-    workspaceSegment="planning"
-    [classLabelHint]="view?.className ?? null"
-  ></app-class-workspace-context-bar>
+    <h1>{{ pageTitle }}</h1>
+    <app-class-workspace-context-bar
+      workspaceSegment="planning"
+      [classLabelHint]="view?.className ?? null"
+    ></app-class-workspace-context-bar>
+  </ng-container>
+
   <p class="intro" *ngIf="classId != null">{{ introLine }}</p>
 
   <div *ngIf="loading" class="loading">Chargement…</div>

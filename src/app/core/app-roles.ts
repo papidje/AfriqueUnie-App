@@ -34,8 +34,17 @@ export const ALL_APP_ROLES: AppRoleAuthority[] = [
   AppRoles.ACCOUNTANT,
 ];
 
-/** Navigation / routes : élèves */
+/** Navigation / routes : élèves (aligné sur les GET `/api/students` côté backend, y compris comptable). */
 export const ROLES_STUDENTS_NAV: AppRoleAuthority[] = [
+  AppRoles.SUPER_ADMIN,
+  AppRoles.ADMIN_ECOLE,
+  AppRoles.DIRECTOR,
+  AppRoles.STAFF,
+  AppRoles.ACCOUNTANT,
+];
+
+/** Édition fiche élève / parent (PUT/DELETE côté API, hors comptable). */
+export const ROLES_STUDENT_WRITE: AppRoleAuthority[] = [
   AppRoles.SUPER_ADMIN,
   AppRoles.ADMIN_ECOLE,
   AppRoles.DIRECTOR,

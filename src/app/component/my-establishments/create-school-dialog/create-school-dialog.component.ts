@@ -14,8 +14,7 @@ export class CreateSchoolDialogComponent {
     name: ['', Validators.required],
     adress: ['', Validators.required],
     contact: ['', Validators.required],
-    openDate: ['', Validators.required],
-    logo: ['']
+    openDate: ['', Validators.required]
   });
 
   saving = false;
@@ -43,8 +42,7 @@ export class CreateSchoolDialogComponent {
         name: (v.name || '').trim(),
         adress: (v.adress || '').trim(),
         contact: (v.contact || '').trim(),
-        openDate: v.openDate || '',
-        logo: (v.logo || '').trim() || undefined
+        openDate: v.openDate || ''
       })
       .subscribe({
         next: () => {

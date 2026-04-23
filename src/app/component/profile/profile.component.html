@@ -1,28 +1,66 @@
-<mat-card *ngIf="user" class="profile-card">
-  <mat-card-header>
-    <mat-card-title>Profil utilisateur</mat-card-title>
-    <mat-card-subtitle>Détails du compte</mat-card-subtitle>
-  </mat-card-header>
+<section class="profile-page">
+  <h1>Mon profil</h1>
+  <p class="subtitle">Informations de votre compte utilisateur.</p>
 
-  <mat-card-content>
-    <div class="profile-item"><strong>ID :</strong> {{ user.id }}</div>
-    <div class="profile-item"><strong>Nom complet :</strong> {{ user.fullname }}</div>
-    <div class="profile-item"><strong>Nom d'utilisateur :</strong> {{ user.username }}</div>
-    <div class="profile-item"><strong>Email :</strong> {{ user.email }}</div>
-    <div class="profile-item">
-      <strong>Statut :</strong>
-      <span [ngClass]="user.isActive ? 'active' : 'inactive'">
-        {{ user.isActive ? 'Actif' : 'Inactif' }}
-      </span>
-    </div>
-    <div class="profile-item">
-      <strong>Rôles :</strong>
-      <span *ngIf="user.roles?.length; else noRoles">
-        {{ user.roles.join(', ') }}
-      </span>
-      <ng-template #noRoles>Aucun rôle attribué</ng-template>
-    </div>
-  </mat-card-content>
-</mat-card>
+  <div *ngIf="loading" class="loading-wrap">
+    <mat-progress-spinner diameter="48"></mat-progress-spinner>
+    <span>Chargement…</span>
+  </div>
 
-<mat-progress-spinner *ngIf="!user" diameter="50" style="margin: 40px auto; display: block;"></mat-progress-spinner>
+  <app-api-unavailable
+    *ngIf="!loading && loadError"
+    title="Profil indisponible"
+    message="Le profil n’a pas pu être chargé."
+    (retry)="reload()"
+  ></app-api-unavailable>
+
+  <mat-card *ngIf="!loading && user" class="profile-card">
+    <mat-card-header>
+      <mat-card-title>Informations</mat-card-title>
+      <mat-card-subtitle>Compte et accès</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <dl class="profile-dl">
+        <div class="row">
+          <dt>Identifiant</dt>
+          <dd>{{ user.id }}</dd>
+        </div>
+        <div class="row">
+          <dt>Nom complet</dt>
+          <dd>{{ user.fullname }}</dd>
+        </div>
+        <div class="row">
+          <dt>Nom d’utilisateur</dt>
+          <dd>{{ user.username }}</dd>
+        </div>
+        <div class="row">
+          <dt>Email</dt>
+          <dd>{{ user.email || '—' }}</dd>
+        </div>
+        <div class="row">
+          <dt>Statut</dt>
+          <dd>
+            <span [ngClass]="user.isActive ? 'active' : 'inactive'">
+              {{ user.isActive ? 'Actif' : 'Inactif' }}
+            </span>
+          </dd>
+        </div>
+        <div class="row">
+          <dt>Rôles</dt>
+          <dd>
+            <span *ngIf="user.roles?.length; else noRoles">{{ user.roles.join(', ') }}</span>
+            <ng-template #noRoles>Aucun rôle attribué</ng-template>
+          </dd>
+        </div>
+      </dl>
+    </mat-card-content>
+
+    <mat-card-actions align="start">
+      <button mat-stroked-button color="primary" type="button" (click)="openChangePasswordDialog()">
+        <mat-icon>lock_reset</mat-icon>
+        Changer le mot de passe
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</section>

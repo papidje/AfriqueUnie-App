@@ -10,6 +10,22 @@
     <mat-card-title>Informations</mat-card-title>
     <mat-card-content>
       <form [formGroup]="form" (ngSubmit)="saveSchool()" class="grid-form">
+        <div class="logo-block full-row">
+          <div class="logo-preview-wrap">
+            <img *ngIf="logoDisplayUrl as lu" [src]="lu" alt="" class="logo-preview" />
+            <div *ngIf="!logoDisplayUrl" class="logo-placeholder">Aucun logo</div>
+          </div>
+          <input #logoFileInput type="file" accept="image/*" hidden (change)="onLogoFileSelected($event)" />
+          <button
+            mat-stroked-button
+            type="button"
+            color="primary"
+            (click)="logoFileInput.click()"
+            [disabled]="uploadingLogo || schoolId == null"
+          >
+            {{ uploadingLogo ? 'Envoi…' : 'Modifier le logo' }}
+          </button>
+        </div>
         <mat-form-field appearance="outline">
           <mat-label>Nom</mat-label>
           <input matInput formControlName="name" />
@@ -25,10 +41,6 @@
         <mat-form-field appearance="outline">
           <mat-label>Date d’ouverture</mat-label>
           <input matInput type="date" formControlName="openDate" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-row">
-          <mat-label>URL du logo</mat-label>
-          <input matInput formControlName="logo" />
         </mat-form-field>
         <div class="full-row actions-row">
           <button mat-raised-button color="primary" type="submit" [disabled]="saving || form.invalid">

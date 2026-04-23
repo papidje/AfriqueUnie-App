@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../core/api-base';
 
 export interface TenantSchoolSummary {
   id: number;
@@ -19,7 +20,7 @@ export interface SuperAdminTenantRow {
 
 @Injectable({ providedIn: 'root' })
 export class SuperAdminService {
-  private readonly apiUrl = 'http://localhost:8080/api/rest';
+  private readonly apiUrl = API_BASE_URL;
 
   constructor(private readonly http: HttpClient) {}
 

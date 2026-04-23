@@ -46,8 +46,24 @@ h1 {
 }
 
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
+}
+
+/* Réserve l’espace du logo 100px + marges quand un logo est présent */
+.card.card--has-logo {
+  padding-right: 124px;
+}
+
+.card-logo {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  box-sizing: border-box;
 }
 
 .meta {

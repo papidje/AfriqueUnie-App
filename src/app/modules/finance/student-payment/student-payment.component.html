@@ -39,6 +39,15 @@
           </mat-select>
         </mat-form-field>
 
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ff-author">
+          <mat-label>Auteur du paiement</mat-label>
+          <input matInput formControlName="recordedBy" autocomplete="name" />
+          <mat-hint>Personne ayant enregistré l’encaissement (figurera sur le reçu).</mat-hint>
+          <mat-error *ngIf="form.get('recordedBy')?.hasError('required') || form.get('recordedBy')?.hasError('blank')">
+            Champ obligatoire.
+          </mat-error>
+        </mat-form-field>
+
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ff-amt">
           <mat-label>Montant à encaisser</mat-label>
           <input

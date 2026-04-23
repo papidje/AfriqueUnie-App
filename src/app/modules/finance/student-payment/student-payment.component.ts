@@ -1,14 +1,19 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+
+function recordedByNotBlank(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const s = `${control.value ?? ''}`.trim();
+    return s.length ? null : { blank: true };
+  };
+}
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  PaymentReceiptPromptDialogComponent,
-  PaymentReceiptPromptData
-} from './payment-receipt-prompt-dialog.component';
+import { PaymentReceiptPrintDialogComponent } from '../../../shared/component/payment-receipt-print-dialog/payment-receipt-print-dialog.component';
+import { PaymentReceiptPrintData } from '../../../shared/component/payment-receipt-print-dialog/payment-receipt-print-dialog.models';
 import {
   CreateStudentPaymentPayload,
   MonthlyTuitionStatusDto,
@@ -49,6 +54,7 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
 
   readonly form = this.fb.group({
     paymentMode: ['ESPECES', Validators.required],
+    recordedBy: ['', [Validators.required, Validators.maxLength(200), recordedByNotBlank()]],
     amountToCollect: [0, [Validators.required, Validators.min(0.01)]]
   });
 
@@ -143,10 +149,18 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
     const mode = this.form.value.paymentMode as CreateStudentPaymentPayload['paymentMode'];
     let payload: CreateStudentPaymentPayload;
 
+    const author = String(this.form.value.recordedBy ?? '').trim();
+    if (!author) {
+      this.snackBar.open('Indiquez l’auteur du paiement.', 'Fermer', { duration: 3500 });
+      this.form.get('recordedBy')?.markAsTouched();
+      return;
+    }
+
     if (this.paymentInputSource === 'amount') {
       payload = {
         paymentMode: mode,
         currency: 'GNF',
+        recordedBy: author,
         totalDeclaredAmount: amountNum,
         payInsReins: false,
         insReinsAmount: 0,
@@ -164,6 +178,7 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
       payload = {
         paymentMode: mode,
         currency: 'GNF',
+        recordedBy: author,
         payInsReins: !!insReins,
         insReinsAmount: insReins?.amount ?? 0,
         paySupplies: selected.some((d) => d.kind === 'supplies'),
@@ -178,15 +193,27 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
         next: (res) => {
           this.submitting = false;
           const focusSchoolClassId = res.schoolClassId ?? this.info?.schoolClassId;
-          const data: PaymentReceiptPromptData = {
+          const printData: PaymentReceiptPrintData = {
             studentName: this.info?.studentName ?? '',
+            matricule: this.info?.matricule ?? '',
             reference: res.receiptReference,
-            totalCollected: res.totalCollected
+            recordedBy: res.recordedBy,
+            paymentMode: res.paymentMode,
+            currency: 'GNF',
+            paymentDate: new Date().toISOString(),
+            lines: (res.lines ?? []).map((l) => ({
+              paymentType: l.paymentType,
+              amount: Number(l.amount) || 0,
+              tuitionMonthLabel: l.tuitionMonthLabel ?? null
+            })),
+            totalCollected: res.totalCollected,
+            duplicate: false
           };
-          const ref = this.dialog.open(PaymentReceiptPromptDialogComponent, {
-            width: '380px',
+          const ref = this.dialog.open(PaymentReceiptPrintDialogComponent, {
+            width: '440px',
+            maxWidth: '95vw',
             disableClose: false,
-            data
+            data: printData
           });
           ref.afterClosed().subscribe(() => {
             const cid = Number(focusSchoolClassId);

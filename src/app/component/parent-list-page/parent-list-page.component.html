@@ -1,0 +1,63 @@
+<section class="parent-list-page">
+  <h1>Parents</h1>
+  <p class="intro">
+    Parents ayant au moins un enfant inscrit dans une classe de l’<strong>année scolaire active</strong> de
+    l’établissement sélectionné.
+  </p>
+
+  <mat-card *ngIf="schoolId == null" class="hint-card">
+    <p>Sélectionnez un établissement dans l’en-tête pour afficher la liste.</p>
+  </mat-card>
+
+  <ng-container *ngIf="schoolId != null">
+    <mat-card class="toolbar-card">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Rechercher (nom, prénom, email, téléphone)</mat-label>
+        <input matInput [value]="filterText" (input)="filterText = $any($event.target).value" />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </mat-card>
+
+    <mat-card *ngIf="loading" class="shell">Chargement…</mat-card>
+
+    <mat-card *ngIf="!loading" class="shell">
+      <p class="empty" *ngIf="!allRows.length">Aucun parent pour cette école et cette année active.</p>
+
+      <div class="table-wrap" *ngIf="allRows.length">
+        <table mat-table [dataSource]="filteredRows" class="parents-table mat-elevation-z0">
+          <ng-container matColumnDef="lastName">
+            <th mat-header-cell *matHeaderCellDef>Nom</th>
+            <td mat-cell *matCellDef="let row">{{ row.lastName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="firstName">
+            <th mat-header-cell *matHeaderCellDef>Prénom</th>
+            <td mat-cell *matCellDef="let row">{{ row.firstName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="phone">
+            <th mat-header-cell *matHeaderCellDef>Téléphone</th>
+            <td mat-cell *matCellDef="let row">{{ row.phone }}</td>
+          </ng-container>
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>Email</th>
+            <td mat-cell *matCellDef="let row">{{ row.email || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="enrolledChildrenCount">
+            <th mat-header-cell *matHeaderCellDef>Enfants inscrits</th>
+            <td mat-cell *matCellDef="let row">{{ row.enrolledChildrenCount }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let row">
+              <a *ngIf="canEditParent" mat-button color="primary" [routerLink]="['/parents', row.id]">
+                Fiche
+              </a>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+        <p class="filter-empty" *ngIf="allRows.length && !filteredRows.length">Aucun résultat pour ce filtre.</p>
+      </div>
+    </mat-card>
+  </ng-container>
+</section>

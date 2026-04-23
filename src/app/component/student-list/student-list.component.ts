@@ -25,7 +25,7 @@ export class StudentListComponent implements OnInit, OnDestroy {
 
   selectedIndex = 0;
 
-  readonly displayedColumns = ['lastName', 'firstName', 'matricule', 'sex', 'birthDate'];
+  readonly displayedColumns = ['lastName', 'firstName', 'matricule', 'sex', 'birthDate', 'actions'];
 
   readonly studentsByClassId = new Map<number, StudentListRow[]>();
   readonly loadingByClassId = new Set<number>();

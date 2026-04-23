@@ -3,6 +3,7 @@ import { Subject } from 'rxjs';
 import { distinctUntilChanged, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { DashboardService, DashboardSummary } from '../../service/dashboard.service';
 import { ActiveSchoolService } from '../../service/active-school.service';
+import { formatGnfAmount } from '../../util/money-format.util';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -11,6 +12,9 @@ import { ActiveSchoolService } from '../../service/active-school.service';
 })
 export class DashboardPageComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
+
+  /** Montants type « 1 235 000 GNF » pour le template. */
+  readonly formatGnf = formatGnfAmount;
 
   loading = true;
   hasError = false;

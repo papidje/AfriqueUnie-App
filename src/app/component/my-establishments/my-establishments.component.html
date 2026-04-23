@@ -14,7 +14,15 @@
   <p *ngIf="error && !loading" class="state err">Impossible de charger la liste.</p>
 
   <div class="grid" *ngIf="!loading && !error">
-    <mat-card class="card" *ngFor="let school of schools">
+    <mat-card class="card" *ngFor="let school of schools" [class.card--has-logo]="!!school.logo">
+      <img
+        *ngIf="logoDisplayUrl(school.logo) as logoUrl"
+        [src]="logoUrl"
+        alt=""
+        class="card-logo"
+        width="100"
+        height="100"
+      />
       <mat-card-header>
         <mat-card-title>{{ school.name }}</mat-card-title>
         <mat-card-subtitle *ngIf="school.adress">{{ school.adress }}</mat-card-subtitle>

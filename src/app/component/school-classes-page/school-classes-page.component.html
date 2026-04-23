@@ -59,6 +59,13 @@
             <mat-error *ngIf="form.controls.name.hasError('maxlength')">50 caractères maximum.</mat-error>
           </mat-form-field>
 
+          <mat-form-field appearance="outline" class="field-capacity">
+            <mat-label>Capacité (places)</mat-label>
+            <input matInput type="number" formControlName="capacity" min="1" max="200" />
+            <mat-hint>Effectif maximum pour l’affichage inscription / capacité.</mat-hint>
+            <mat-error>Entre 1 et 200.</mat-error>
+          </mat-form-field>
+
           <button
             mat-raised-button
             color="primary"
@@ -76,32 +83,60 @@
       <mat-card-content>
         <div *ngIf="loadingClasses" class="loading">Chargement…</div>
         <p *ngIf="!loadingClasses && !classes.length && activeYear" class="empty">Aucune classe pour cette année.</p>
-        <table *ngIf="classes.length" class="classes-table">
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Niveau</th>
-              <th class="col-mat">Planning</th>
-              <th class="col-mat">Emploi du temps</th>
-              <th class="col-mat">Matières</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of classes">
-              <td>{{ row.name }}</td>
-              <td>{{ row.level?.name ?? '—' }}</td>
-              <td class="col-mat">
-                <a mat-stroked-button [routerLink]="['/classes', row.id, 'planning']">Voir</a>
+        <div class="table-wrap" *ngIf="classes.length">
+          <table mat-table [dataSource]="classes" class="classes-mat-table mat-elevation-z0">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Nom</th>
+              <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+            </ng-container>
+            <ng-container matColumnDef="level">
+              <th mat-header-cell *matHeaderCellDef>Niveau</th>
+              <td mat-cell *matCellDef="let row">{{ row.level?.name ?? '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="enrollment">
+              <th mat-header-cell *matHeaderCellDef>Inscription</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="enrollment-cell" [matTooltip]="enrollmentTooltip(row)">
+                  <svg class="enrollment-pie" viewBox="0 0 40 40" aria-hidden="true">
+                    <circle class="enrollment-pie-bg" cx="20" cy="20" r="14" fill="none" stroke-width="6" />
+                    <circle
+                      class="enrollment-pie-fill"
+                      cx="20"
+                      cy="20"
+                      r="14"
+                      fill="none"
+                      stroke-width="6"
+                      stroke-linecap="round"
+                      transform="rotate(-90 20 20)"
+                      [attr.stroke]="enrollmentStrokeColor(row)"
+                      [attr.stroke-dasharray]="enrollmentDash(row)"
+                    />
+                  </svg>
+                </span>
               </td>
-              <td class="col-mat">
-                <a mat-stroked-button [routerLink]="['/classes', row.id, 'emploi-du-temps']">Éditer</a>
+            </ng-container>
+            <ng-container matColumnDef="subjectCount">
+              <th mat-header-cell *matHeaderCellDef>Nombre de matières</th>
+              <td mat-cell *matCellDef="let row">{{ row.subjectCount ?? 0 }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let row">
+                <a
+                  mat-icon-button
+                  color="primary"
+                  [routerLink]="['/classes', row.id, 'matieres']"
+                  matTooltip="Gérer"
+                  aria-label="Gérer la classe"
+                >
+                  <mat-icon>settings</mat-icon>
+                </a>
               </td>
-              <td class="col-mat">
-                <a mat-stroked-button [routerLink]="['/classes', row.id, 'matieres']">Gérer</a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="overviewColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: overviewColumns"></tr>
+          </table>
+        </div>
       </mat-card-content>
     </mat-card>
   </ng-container>

@@ -10,9 +10,14 @@ export interface DashboardStudent {
   enrolledAt: string;
 }
 
+/** Réponse `/dashboard/summary` — indicateurs pour l’année scolaire active de l’établissement. */
 export interface DashboardSummary {
-  studentsCount: number;
+  studentsEnrolled: number;
+  totalCapacity: number;
+  classesCount: number;
+  taughtSubjectsCount: number;
   monthlyTuitionCollected: number;
+  schoolYearTuitionCollected: number;
   recentEnrollments: DashboardStudent[];
 }
 

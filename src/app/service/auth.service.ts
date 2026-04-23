@@ -4,12 +4,13 @@ import {Observable, of, tap, catchError} from "rxjs";
 import {jwtDecode} from "jwt-decode";
 import {AppRoles} from "../core/app-roles";
 import {ACTIVE_SCHOOL_ID_SESSION_KEY} from "../core/storage-keys";
+import { API_BASE_URL } from '../core/api-base';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/rest'; // URL de ton backend
+  private readonly apiUrl = API_BASE_URL;
   private readonly ROLE_KEY = 'role';
   private readonly TENANT_KEY = 'tenantId';
   private readonly HEADER_TITLE_KEY = 'headerTitle';

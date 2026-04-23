@@ -1,0 +1,58 @@
+<section class="parent-detail-page">
+  <mat-card *ngIf="loading" class="shell">Chargement…</mat-card>
+
+  <ng-container *ngIf="!loading">
+    <div class="toolbar">
+      <button mat-stroked-button type="button" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Retour
+      </button>
+    </div>
+
+    <mat-card class="shell">
+      <h1>Fiche parent</h1>
+      <p class="sub">Modifier les coordonnées du parent (tous les élèves liés verront ces informations).</p>
+
+      <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Nom</mat-label>
+          <input matInput formControlName="lastName" autocomplete="family-name" />
+          <mat-error>Nom obligatoire</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Prénom</mat-label>
+          <input matInput formControlName="firstName" autocomplete="given-name" />
+          <mat-error>Prénom obligatoire</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Téléphone</mat-label>
+          <input matInput formControlName="phone" autocomplete="tel" />
+          <mat-error>Téléphone obligatoire</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Profession</mat-label>
+          <input matInput formControlName="profession" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Adresse</mat-label>
+          <textarea matInput formControlName="address" rows="2"></textarea>
+        </mat-form-field>
+
+        <div class="actions full">
+          <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving">
+            Enregistrer
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </ng-container>
+</section>

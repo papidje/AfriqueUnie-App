@@ -34,6 +34,12 @@ export class SchoolService {
     return this.http.get<School>(`${this.apiUrl}/${id}`);
   }
 
+  uploadLogo(id: number, file: File): Observable<School> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.patch<School>(`${this.apiUrl}/${id}/logo`, formData);
+  }
+
   assignAdministrator(schoolId: number, adminId: number): Observable<unknown> {
     return this.http.post(`${this.apiUrl}/${schoolId}/assign/${adminId}`, {});
   }

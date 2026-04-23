@@ -25,11 +25,6 @@
       <input matInput type="date" formControlName="openDate" />
       <mat-error *ngIf="form.controls.openDate.hasError('required')">Requis</mat-error>
     </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>URL du logo (optionnel)</mat-label>
-      <input matInput formControlName="logo" />
-    </mat-form-field>
   </form>
 </mat-dialog-content>
 

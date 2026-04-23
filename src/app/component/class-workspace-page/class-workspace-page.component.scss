@@ -1,0 +1,55 @@
+.class-workspace {
+  padding: 12px 16px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.top-bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.exit-btn {
+  justify-self: start;
+}
+
+.title-block {
+  text-align: center;
+  min-width: 0;
+}
+
+.title-block h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.top-spacer {
+  width: 40px;
+  justify-self: end;
+}
+
+.segment-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.segment-pills a {
+  text-decoration: none;
+}
+
+.segment-pills a.active {
+  background: #1976d2;
+  color: #fff;
+  border-color: #1976d2;
+}
+
+.tab-panel {
+  padding-top: 16px;
+}

@@ -38,7 +38,11 @@
 
             <ng-container matColumnDef="fullName">
               <th mat-header-cell *matHeaderCellDef>Nom &amp; Prénom</th>
-              <td mat-cell *matCellDef="let row">{{ fullName(row) }}</td>
+              <td mat-cell *matCellDef="let row">
+                <a class="student-name-link" [routerLink]="['/students', row.studentId]" matTooltip="Fiche et historique des paiements">
+                  {{ fullName(row) }}
+                </a>
+              </td>
             </ng-container>
 
             <ng-container matColumnDef="matricule">

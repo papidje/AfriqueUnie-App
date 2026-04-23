@@ -17,18 +17,18 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { StudentPaymentComponent } from './student-payment/student-payment.component';
-import { PaymentReceiptPromptDialogComponent } from './student-payment/payment-receipt-prompt-dialog.component';
+import { SharedModule } from '../../shared/shared.module';
 
 @NgModule({
   declarations: [
     FinancePageComponent,
     StudentPaymentComponent,
-    PaymentReceiptPromptDialogComponent,
     FinancialSettingsPageComponent,
     FeeStructureDialogComponent
   ],
   imports: [
     CommonModule,
+    SharedModule,
     FinanceRoutingModule,
     ReactiveFormsModule,
     MatCardModule,

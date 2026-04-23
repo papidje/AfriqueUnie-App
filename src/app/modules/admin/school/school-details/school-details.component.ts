@@ -12,6 +12,7 @@ import { UserService } from '../../../../service/user.service';
 import { SchoolYearService } from '../../../../service/school-year.service';
 import { SchoolYearDto } from '../../../../models/academic.models';
 import { ConfirmDialogComponent } from '../../../../shared/component/confirm-dialog/confirm-dialog.component';
+import { API_BASE_URL } from '../../../../core/api-base';
 
 @Component({
   selector: 'app-school-details',
@@ -28,13 +29,13 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
   loading = true;
   saving = false;
   togglingActive = false;
+  uploadingLogo = false;
 
   readonly form = this.fb.group({
     name: ['', Validators.required],
     adress: ['', Validators.required],
     contact: ['', Validators.required],
-    openDate: ['', Validators.required],
-    logo: ['']
+    openDate: ['', Validators.required]
   });
 
   constructor(
@@ -67,6 +68,21 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
 
   get isActive(): boolean {
     return !!this.school?.active;
+  }
+
+  /** URL absolue pour affichage (fichiers sous /uploads/… servis par l’API). */
+  get logoDisplayUrl(): string | null {
+    const logo = this.school?.logo;
+    if (!logo) {
+      return null;
+    }
+    if (logo.startsWith('http://') || logo.startsWith('https://')) {
+      return logo;
+    }
+    if (logo.startsWith('/')) {
+      return `${API_BASE_URL}${logo}`;
+    }
+    return logo;
   }
 
   private reloadAll(): void {
@@ -103,8 +119,7 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
       name: s.name ?? '',
       adress: s.adress ?? '',
       contact: s.contact ?? '',
-      openDate: od,
-      logo: s.logo ?? ''
+      openDate: od
     });
   }
 
@@ -140,8 +155,7 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
         name: (v.name || '').trim(),
         adress: (v.adress || '').trim(),
         contact: (v.contact || '').trim(),
-        openDate: v.openDate || '',
-        logo: (v.logo || '').trim()
+        openDate: v.openDate || ''
       })
       .pipe(finalize(() => (this.saving = false)))
       .subscribe({
@@ -150,6 +164,26 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
           this.snackBar.open('Établissement enregistré.', 'Fermer', { duration: 3000 });
         },
         error: () => this.snackBar.open('Enregistrement impossible.', 'Fermer', { duration: 5000 })
+      });
+  }
+
+  onLogoFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file || this.schoolId == null) {
+      return;
+    }
+    this.uploadingLogo = true;
+    this.schoolService
+      .uploadLogo(this.schoolId, file)
+      .pipe(finalize(() => (this.uploadingLogo = false)))
+      .subscribe({
+        next: (s) => {
+          this.school = s;
+          this.snackBar.open('Logo mis à jour.', 'Fermer', { duration: 3000 });
+        },
+        error: () => this.snackBar.open('Envoi du logo impossible.', 'Fermer', { duration: 5000 })
       });
   }
 

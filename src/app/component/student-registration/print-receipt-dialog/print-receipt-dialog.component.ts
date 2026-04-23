@@ -7,6 +7,7 @@ export interface PrintReceiptDialogData {
   classLabel: string;
   dateLabel: string;
   currency: string;
+  paymentModeLabel: string;
   amountPaid: number;
   remainingToPay: number;
 }

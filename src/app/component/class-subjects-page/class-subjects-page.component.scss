@@ -4,6 +4,12 @@
   margin: 0 auto;
 }
 
+.page.embedded {
+  padding: 0 0 16px;
+  max-width: none;
+  margin: 0;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -28,16 +34,16 @@ h1 {
   margin-bottom: 16px;
 }
 
-.add-form {
+.table-toolbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 16px;
+  justify-content: flex-end;
+  margin-bottom: 12px;
 }
 
-.subject-field {
-  min-width: 260px;
-  flex: 1 1 260px;
+.workspace-extra {
+  display: flex;
+  align-items: center;
+  margin: 0 0 12px;
 }
 
 .tbl {
@@ -61,8 +67,9 @@ h1 {
   }
 
   .actions {
-    width: 56px;
+    width: 104px;
     text-align: right;
+    white-space: nowrap;
   }
 }
 

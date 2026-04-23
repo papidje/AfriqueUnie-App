@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { SchoolService } from '../../modules/admin/school/school.service';
 import { School } from '../../modules/admin/school/school-list/school-list.component';
 import { CreateSchoolDialogComponent } from './create-school-dialog/create-school-dialog.component';
+import { API_BASE_URL } from '../../core/api-base';
 
 @Component({
   selector: 'app-my-establishments',
@@ -49,5 +50,18 @@ export class MyEstablishmentsComponent implements OnInit {
         this.load();
       }
     });
+  }
+
+  logoDisplayUrl(logo: string | null | undefined): string | null {
+    if (!logo) {
+      return null;
+    }
+    if (logo.startsWith('http://') || logo.startsWith('https://')) {
+      return logo;
+    }
+    if (logo.startsWith('/')) {
+      return `${API_BASE_URL}${logo}`;
+    }
+    return logo;
   }
 }

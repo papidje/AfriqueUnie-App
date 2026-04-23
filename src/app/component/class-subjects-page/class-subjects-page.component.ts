@@ -1,12 +1,17 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin, of, Subject as RxSubject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { ClassPlanningView, ClassSubjectRow, SchoolSubject } from '../../models/subject.models';
 import { ClassSubjectService } from '../../service/class-subject.service';
 import { SubjectService } from '../../service/subject.service';
+import { resolveSchoolClassId } from '../../util/class-route.util';
+import {
+  ClassSubjectFormDialogComponent,
+  ClassSubjectFormDialogData
+} from '../class-subject-form-dialog/class-subject-form-dialog.component';
 
 @Component({
   selector: 'app-class-subjects-page',
@@ -17,31 +22,32 @@ export class ClassSubjectsPageComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new RxSubject<void>();
 
   classId: number | null = null;
+  /** Affichage intégré dans l’espace classe (onglets) : masque en-tête dupliqué. */
+  workspaceChild = false;
   /** Libellé de la classe (API planning). */
   className: string | null = null;
+  /** École pour charger les enseignants (dialogues). */
+  schoolIdForTeachers: number | null = null;
   rows: ClassSubjectRow[] = [];
   catalog: SchoolSubject[] = [];
   loading = true;
-  saving = false;
-
-  readonly addForm = this.fb.group({
-    subjectId: [null as number | null, Validators.required],
-    coefficient: [1, [Validators.required, Validators.min(1), Validators.max(20)]]
-  });
 
   constructor(
-    private readonly fb: FormBuilder,
     private readonly route: ActivatedRoute,
+    private readonly dialog: MatDialog,
     private readonly classSubjectService: ClassSubjectService,
     private readonly subjectService: SubjectService,
     private readonly snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      const id = Number(params.get('classId'));
-      this.classId = Number.isFinite(id) ? id : null;
+    this.workspaceChild = !!this.route.snapshot.data['workspaceChild'];
+    const param$ =
+      this.workspaceChild && this.route.parent != null ? this.route.parent.paramMap : this.route.paramMap;
+    param$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.classId = resolveSchoolClassId(this.route);
       this.className = null;
+      this.schoolIdForTeachers = null;
       if (this.classId == null) {
         this.loading = false;
         return;
@@ -89,6 +95,8 @@ export class ClassSubjectsPageComponent implements OnInit, OnDestroy {
           this.className = name && name.length > 0 ? name : null;
           this.rows = rows;
           this.catalog = catalog;
+          const sid = planning.schoolId > 0 ? planning.schoolId : rows[0]?.schoolId ?? null;
+          this.schoolIdForTeachers = sid != null && sid > 0 ? sid : null;
           this.loading = false;
         },
         error: () => {
@@ -103,54 +111,43 @@ export class ClassSubjectsPageComponent implements OnInit, OnDestroy {
     return this.catalog.filter((s) => !used.has(s.id));
   }
 
-  submitAdd(): void {
-    if (this.classId == null || this.addForm.invalid) {
-      this.addForm.markAllAsTouched();
+  openAddDialog(): void {
+    if (this.classId == null || this.schoolIdForTeachers == null) {
       return;
     }
-    const v = this.addForm.getRawValue();
-    if (v.subjectId == null) {
-      return;
-    }
-    this.saving = true;
-    this.classSubjectService
-      .create(this.classId, { subjectId: v.subjectId, coefficient: Number(v.coefficient) })
-      .subscribe({
-        next: () => {
-          this.saving = false;
-          this.snackBar.open('Matière ajoutée à la classe.', 'Fermer', { duration: 3000 });
-          this.addForm.patchValue({ subjectId: null, coefficient: 1 });
-          this.reloadData();
-        },
-        error: () => {
-          this.saving = false;
-          this.snackBar.open('Ajout impossible (déjà affectée ?).', 'Fermer', { duration: 5000 });
-        }
-      });
+    const data: ClassSubjectFormDialogData = {
+      mode: 'add',
+      classId: this.classId,
+      schoolId: this.schoolIdForTeachers,
+      catalog: this.availableSubjects()
+    };
+    const ref = this.dialog.open(ClassSubjectFormDialogComponent, {
+      width: '420px',
+      data
+    });
+    ref.afterClosed().subscribe((saved) => {
+      if (saved) {
+        this.reloadData();
+      }
+    });
   }
 
-  onCoeffBlur(row: ClassSubjectRow, ev: Event): void {
-    const value = (ev.target as HTMLInputElement).value;
-    this.saveCoefficient(row, value);
-  }
-
-  saveCoefficient(row: ClassSubjectRow, value: string): void {
-    const n = Number(value);
-    if (!Number.isFinite(n) || n < 1 || n > 20) {
-      this.snackBar.open('Coefficient entre 1 et 20.', 'Fermer', { duration: 4000 });
-      this.reloadData();
+  openEditDialog(row: ClassSubjectRow): void {
+    if (this.classId == null || this.schoolIdForTeachers == null) {
       return;
     }
-    if (n === row.coefficient) {
-      return;
-    }
-    this.classSubjectService.updateCoefficient(row.id, n).subscribe({
-      next: (updated) => {
-        row.coefficient = updated.coefficient;
-        this.snackBar.open('Coefficient mis à jour.', 'Fermer', { duration: 2500 });
-      },
-      error: () => {
-        this.snackBar.open('Mise à jour impossible.', 'Fermer', { duration: 5000 });
+    const data: ClassSubjectFormDialogData = {
+      mode: 'edit',
+      classId: this.classId,
+      schoolId: this.schoolIdForTeachers,
+      row
+    };
+    const ref = this.dialog.open(ClassSubjectFormDialogComponent, {
+      width: '420px',
+      data
+    });
+    ref.afterClosed().subscribe((saved) => {
+      if (saved) {
         this.reloadData();
       }
     });

@@ -8,6 +8,7 @@ export interface CreateSchoolClassRequest {
   name: string;
   year: { id: number };
   level: { id: number };
+  capacity?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -18,6 +19,15 @@ export class SchoolClassService {
 
   listForActiveSchoolYear(schoolId: number): Observable<SchoolClassDto[]> {
     return this.http.get<SchoolClassDto[]>(`${this.base}/school/${schoolId}/active-year`);
+  }
+
+  /** Liste enrichie (effectifs, matières, capacité) pour la page Classes. */
+  listOverviewForActiveSchoolYear(schoolId: number): Observable<SchoolClassDto[]> {
+    return this.http.get<SchoolClassDto[]>(`${this.base}/school/${schoolId}/active-year/overview`);
+  }
+
+  getById(classId: number): Observable<SchoolClassDto> {
+    return this.http.get<SchoolClassDto>(`${this.base}/${classId}`);
   }
 
   create(body: CreateSchoolClassRequest): Observable<SchoolClassDto> {

@@ -1,15 +1,21 @@
-import {Injectable} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { UserRoleNameType } from '../core/app-roles';
+import { API_BASE_URL } from '../core/api-base';
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:8080/api/rest/users'; // URL de ton backend
+  private readonly apiUrl = `${API_BASE_URL}/users`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   inviteMember(data: {
     nom: string;
@@ -32,8 +38,17 @@ export class UserService {
     return this.http.get<any[]>(`${this.apiUrl}`);
   }
 
+  /** Nouveau code d’activation par e-mail (comptes encore inactifs). */
+  resendActivationEmail(userId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${userId}/resend-activation`, {});
+  }
+
   getUserInfo(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/userInfo`);
+  }
+
+  changePassword(body: ChangePasswordPayload): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/change-password`, body);
   }
 
   getAdmins(): Observable<any> {

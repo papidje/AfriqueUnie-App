@@ -12,7 +12,14 @@ import { UnautorizedComponent } from "./component/unautorized/unautorized.compon
 import { DashboardPageComponent } from "./component/dashboard-page/dashboard-page.component";
 import { RoleGuard } from "./guards/role.guard";
 import { RegisterSchoolComponent } from "./component/register-school/register-school.component";
-import { ALL_APP_ROLES, AppRoles, ROLES_CLASSES_NAV, ROLES_SCHOOL_YEAR_NAV, ROLES_STUDENTS_NAV } from "./core/app-roles";
+import {
+  ALL_APP_ROLES,
+  AppRoles,
+  ROLES_CLASSES_NAV,
+  ROLES_SCHOOL_YEAR_NAV,
+  ROLES_STUDENTS_NAV,
+  ROLES_STUDENT_WRITE,
+} from "./core/app-roles";
 import { SuperAdminDashboardComponent } from "./component/super-admin-dashboard/super-admin-dashboard.component";
 import { MyEstablishmentsComponent } from "./component/my-establishments/my-establishments.component";
 import { SchoolClassesPageComponent } from "./component/school-classes-page/school-classes-page.component";
@@ -21,8 +28,12 @@ import { SubjectsCatalogPageComponent } from "./component/subjects-catalog-page/
 import { ClassSubjectsPageComponent } from "./component/class-subjects-page/class-subjects-page.component";
 import { ClassPlanningPageComponent } from "./component/class-planning-page/class-planning-page.component";
 import { ClassTimetablePageComponent } from "./component/class-timetable-page/class-timetable-page.component";
+import { ClassWorkspacePageComponent } from "./component/class-workspace-page/class-workspace-page.component";
 import { StudentRegistrationComponent } from "./component/student-registration/student-registration.component";
 import { StudentListComponent } from "./component/student-list/student-list.component";
+import { StudentDetailPageComponent } from "./component/student-detail-page/student-detail-page.component";
+import { ParentDetailPageComponent } from "./component/parent-detail-page/parent-detail-page.component";
+import { ParentListPageComponent } from "./component/parent-list-page/parent-list-page.component";
 
 const routes: Routes = [
   // 🔒 Layout d’authentification
@@ -69,22 +80,31 @@ const routes: Routes = [
         data: { roles: [AppRoles.ADMIN_ECOLE] }
       },
       {
-        path: 'classes/:classId/matieres',
-        component: ClassSubjectsPageComponent,
+        path: 'classes/:classId',
+        component: ClassWorkspacePageComponent,
         canActivate: [AuthGuard, RoleGuard],
-        data: { roles: [...ROLES_CLASSES_NAV] }
-      },
-      {
-        path: 'classes/:classId/planning',
-        component: ClassPlanningPageComponent,
-        canActivate: [AuthGuard, RoleGuard],
-        data: { roles: [...ROLES_CLASSES_NAV] }
-      },
-      {
-        path: 'classes/:classId/emploi-du-temps',
-        component: ClassTimetablePageComponent,
-        canActivate: [AuthGuard, RoleGuard],
-        data: { roles: [...ROLES_CLASSES_NAV] }
+        data: { roles: [...ROLES_CLASSES_NAV] },
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'matieres' },
+          {
+            path: 'matieres',
+            component: ClassSubjectsPageComponent,
+            canActivate: [AuthGuard, RoleGuard],
+            data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
+          },
+          {
+            path: 'emploi-du-temps',
+            component: ClassTimetablePageComponent,
+            canActivate: [AuthGuard, RoleGuard],
+            data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
+          },
+          {
+            path: 'planning',
+            component: ClassPlanningPageComponent,
+            canActivate: [AuthGuard, RoleGuard],
+            data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
+          }
+        ]
       },
       {
         path: 'classes',
@@ -110,14 +130,32 @@ const routes: Routes = [
       },
       { path: 'parametres-financiers', redirectTo: 'finance/settings', pathMatch: 'full' },
       {
-        path: 'students',
-        component: StudentListComponent,
+        path: 'students/inscription',
+        component: StudentRegistrationComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: { roles: [...ROLES_STUDENTS_NAV] }
       },
       {
-        path: 'students/inscription',
-        component: StudentRegistrationComponent,
+        path: 'students/:studentId',
+        component: StudentDetailPageComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [...ROLES_STUDENTS_NAV] }
+      },
+      {
+        path: 'parents',
+        component: ParentListPageComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [...ROLES_STUDENTS_NAV] }
+      },
+      {
+        path: 'parents/:parentId',
+        component: ParentDetailPageComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [...ROLES_STUDENT_WRITE] }
+      },
+      {
+        path: 'students',
+        component: StudentListComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: { roles: [...ROLES_STUDENTS_NAV] }
       },

@@ -6,6 +6,7 @@ import {ConfirmDialogComponent} from "../../../../shared/component/confirm-dialo
 import {SchoolDialogComponent} from "../school-dialog/school-dialog.component";
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {Router} from "@angular/router";
+import { API_BASE_URL } from '../../../../core/api-base';
 
 export interface School {
   id: number;
@@ -13,7 +14,7 @@ export interface School {
   adress: string;
   contact: string;
   openDate: string;
-  logo: string;
+  logo?: string | null;
   created_at: string;
   updated_at?: string;
   active?: boolean;
@@ -105,5 +106,18 @@ export class SchoolListComponent implements OnInit {
 
   viewDetails(school: School) {
     this.router.navigate(['/admin', 'schools', school.id]);
+  }
+
+  logoDisplayUrl(logo: string | null | undefined): string | null {
+    if (!logo) {
+      return null;
+    }
+    if (logo.startsWith('http://') || logo.startsWith('https://')) {
+      return logo;
+    }
+    if (logo.startsWith('/')) {
+      return `${API_BASE_URL}${logo}`;
+    }
+    return logo;
   }
 }

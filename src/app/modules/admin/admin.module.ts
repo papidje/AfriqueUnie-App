@@ -16,6 +16,7 @@ import {AdminRoutingModule} from "./admin-routing.module";
 import { SchoolDialogComponent } from './school/school-dialog/school-dialog.component';
 import {MatProgressBarModule} from "@angular/material/progress-bar";
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import {MatInputModule} from "@angular/material/input";
 import {MatButtonModule} from "@angular/material/button";
 import { AdminShellComponent } from './admin-shell/admin-shell.component';
@@ -55,7 +56,8 @@ import { SharedModule } from '../../shared/shared.module';
     MatProgressSpinnerModule,
     MatListModule,
     MatProgressBarModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTooltipModule
   ]
 })
 export class AdminModule { }

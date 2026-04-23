@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { finalize, takeUntil } from 'rxjs/operators';
 import { UserRoleName, UserRoleNameType } from '../../../core/app-roles';
 import { UserService } from '../../../service/user.service';
 import { InviteMemberDialogComponent, InviteMemberDialogResult } from './invite-member-dialog/invite-member-dialog.component';
@@ -30,7 +30,8 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   users: ManagedUser[] = [];
   quickFilter: QuickFilter = 'ALL';
   isDirectorStaff = false;
-  readonly displayedColumns = ['fullname', 'email', 'role', 'status'];
+  readonly displayedColumns = ['fullname', 'email', 'role', 'status', 'actions'];
+  resendingUserId: number | null = null;
 
   constructor(
     private readonly userService: UserService,
@@ -129,6 +130,30 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
   statusClass(user: ManagedUser): string {
     return user.isActive ? 'status-active' : 'status-pending';
+  }
+
+  resendActivation(user: ManagedUser): void {
+    if (user.isActive || this.resendingUserId != null) {
+      return;
+    }
+    this.resendingUserId = user.id;
+    this.userService
+      .resendActivationEmail(user.id)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.resendingUserId = null;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.snackBar.open('Un nouveau code d’activation a été envoyé par e-mail.', 'Fermer', { duration: 4000 });
+        },
+        error: (err: { error?: { message?: string; detail?: string } }) => {
+          const msg = err?.error?.message || err?.error?.detail;
+          this.snackBar.open(msg || 'Impossible d’envoyer le code d’activation.', 'Fermer', { duration: 6000 });
+        }
+      });
   }
 
   private loadUsers(): void {

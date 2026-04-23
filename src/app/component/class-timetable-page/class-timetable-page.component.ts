@@ -9,6 +9,7 @@ import { TimetableDragItem } from '../../models/timetable.models';
 import { AuthUtilsService } from '../../service/auth-utils.service';
 import { ClassSubjectService } from '../../service/class-subject.service';
 import { ClassTimetableService } from '../../service/class-timetable.service';
+import { resolveSchoolClassId } from '../../util/class-route.util';
 
 @Component({
   selector: 'app-class-timetable-page',
@@ -32,6 +33,7 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
   }));
 
   classId: number | null = null;
+  workspaceChild = false;
   loading = true;
   syncing = false;
 
@@ -59,9 +61,11 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      const id = Number(params.get('classId'));
-      this.classId = Number.isFinite(id) ? id : null;
+    this.workspaceChild = !!this.route.snapshot.data['workspaceChild'];
+    const param$ =
+      this.workspaceChild && this.route.parent != null ? this.route.parent.paramMap : this.route.paramMap;
+    param$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.classId = resolveSchoolClassId(this.route);
       if (this.classId == null) {
         this.loading = false;
         return;

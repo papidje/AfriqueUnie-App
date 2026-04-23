@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Modifier la matière' : 'Ajouter une matière' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form" (ngSubmit)="submit()">
+    <mat-form-field *ngIf="!isEdit" appearance="outline" class="full">
+      <mat-label>Matière</mat-label>
+      <mat-select formControlName="subjectId" panelClass="school-class-level-select-panel">
+        <mat-option *ngFor="let s of data.catalog || []" [value]="s.id">{{ s.code }} — {{ s.name }}</mat-option>
+      </mat-select>
+      <mat-hint *ngIf="!(data.catalog?.length)">Aucune matière disponible.</mat-hint>
+      <mat-error>Choisissez une matière.</mat-error>
+    </mat-form-field>
+
+    <p *ngIf="isEdit && data.row" class="subject-readonly">
+      <strong>{{ data.row.subjectCode }}</strong> — {{ data.row.subjectName }}
+    </p>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Coefficient</mat-label>
+      <input matInput type="number" formControlName="coefficient" min="1" max="20" />
+      <mat-error>Entre 1 et 20.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field *ngIf="canEditTeachers" appearance="outline" class="full">
+      <mat-label>Enseignant</mat-label>
+      <mat-select formControlName="teacherId" [disabled]="loadingTeachers">
+        <mat-option [value]="null">— Non assigné —</mat-option>
+        <mat-option *ngFor="let t of teachers" [value]="t.id">{{ t.fullname }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="saving">Annuler</button>
+  <button
+    mat-raised-button
+    color="primary"
+    type="button"
+    (click)="submit()"
+    [disabled]="saving || form.invalid || (!isEdit && !(data.catalog?.length))"
+  >
+    {{ saving ? 'Enregistrement…' : isEdit ? 'Enregistrer' : 'Ajouter' }}
+  </button>
+</mat-dialog-actions>

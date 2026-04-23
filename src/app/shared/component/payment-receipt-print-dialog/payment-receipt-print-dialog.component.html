@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>{{ data.duplicate ? 'Duplicata de reçu' : 'Paiement enregistré' }}</h2>
+
+<mat-dialog-content class="dlg-body">
+  <p *ngIf="!data.duplicate">Le paiement a bien été enregistré.</p>
+  <p *ngIf="data.duplicate" class="dup-hint">Document non valable comme original. Même contenu que le reçu initial.</p>
+
+  <div class="meta-block">
+    <p><strong>{{ data.studentName }}</strong><span *ngIf="data.matricule"> · {{ data.matricule }}</span></p>
+    <p *ngIf="data.schoolYearLabel"><strong>Année :</strong> {{ data.schoolYearLabel }}</p>
+    <p>
+      Réf. <code>{{ data.reference }}</code>
+    </p>
+    <p><strong>Auteur :</strong> {{ data.recordedBy || '—' }}</p>
+    <p><strong>Mode :</strong> {{ modeLabel(data.paymentMode) }} · <strong>Total :</strong> {{ asMoney(data.totalCollected) }}</p>
+    <p><strong>Date :</strong> {{ formatDate(data.paymentDate) }}</p>
+  </div>
+
+  <table class="mini-lines" *ngIf="data.lines?.length">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th class="num">Montant</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let line of data.lines">
+        <td>{{ lineTypeLabel(line) }}</td>
+        <td class="num">{{ asMoney(line.amount) }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="hint" *ngIf="!data.duplicate">Souhaitez-vous imprimer le reçu ?</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Fermer</button>
+  <button mat-flat-button color="primary" type="button" (click)="printReceipt(); close()">Imprimer</button>
+</mat-dialog-actions>

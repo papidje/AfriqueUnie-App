@@ -7,6 +7,7 @@ import { AppRoles } from '../../core/app-roles';
 import { ClassPlanningView, ClassSubjectRow, TeacherSummary } from '../../models/subject.models';
 import { AuthUtilsService } from '../../service/auth-utils.service';
 import { ClassSubjectService } from '../../service/class-subject.service';
+import { resolveSchoolClassId } from '../../util/class-route.util';
 
 @Component({
   selector: 'app-class-planning-page',
@@ -17,6 +18,7 @@ export class ClassPlanningPageComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new RxSubject<void>();
 
   classId: number | null = null;
+  workspaceChild = false;
   view: ClassPlanningView | null = null;
   teachers: TeacherSummary[] = [];
   loading = true;
@@ -46,9 +48,11 @@ export class ClassPlanningPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      const id = Number(params.get('classId'));
-      this.classId = Number.isFinite(id) ? id : null;
+    this.workspaceChild = !!this.route.snapshot.data['workspaceChild'];
+    const param$ =
+      this.workspaceChild && this.route.parent != null ? this.route.parent.paramMap : this.route.paramMap;
+    param$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.classId = resolveSchoolClassId(this.route);
       if (this.classId == null) {
         this.loading = false;
         return;

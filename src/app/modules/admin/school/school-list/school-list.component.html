@@ -22,7 +22,7 @@
       <ng-container matColumnDef="logo">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let school">
-          <img [src]="school.logo" alt="logo" class="logo" *ngIf="school.logo">
+          <img *ngIf="logoDisplayUrl(school.logo) as logoUrl" [src]="logoUrl" alt="logo" class="logo" />
         </td>
       </ng-container>
 

@@ -4,6 +4,16 @@
   margin: 0 auto;
 }
 
+.page.embedded {
+  padding: 0 0 16px;
+  max-width: none;
+  margin: 0;
+}
+
+.workspace-extra {
+  margin: 0 0 12px;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;

@@ -140,15 +140,15 @@
       </a>
       <a
         mat-list-item
-        *ngIf="hasAnyRole(navUsersRoles)"
-        routerLink="/users"
-        matTooltip="Utilisateurs"
+        *ngIf="hasAnyRole(navParentsRoles)"
+        routerLink="/parents"
+        matTooltip="Parents"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"
       >
         <div class="nav-item-stack">
-          <mat-icon>people</mat-icon>
-          <span *ngIf="sidebarExpanded">Utilisateurs</span>
+          <mat-icon>family_restroom</mat-icon>
+          <span *ngIf="sidebarExpanded">Parents</span>
         </div>
       </a>
       <a

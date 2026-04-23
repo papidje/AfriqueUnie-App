@@ -46,12 +46,38 @@ export interface StudentPaymentInfoDto {
 export interface CreateStudentPaymentPayload {
   paymentMode: 'ESPECES' | 'ORANGE_MONEY' | 'MOOV_MONEY' | 'VIREMENT';
   currency: string;
+  /** Personne ayant enregistré l’encaissement (obligatoire côté API). */
+  recordedBy: string;
   /** Si défini (> 0), le serveur répartit ce montant (inscription → fournitures complètes → mois). */
   totalDeclaredAmount?: number | null;
   payInsReins: boolean;
   insReinsAmount: number;
   paySupplies: boolean;
   months: string[];
+}
+
+/** Ligne d’historique (fiche élève, tous comptes / années). */
+export interface StudentPaymentLedgerRow {
+  id: number;
+  paymentType: string;
+  amount: number;
+  currency: string;
+  paymentMode: string | null;
+  paymentDate: string;
+  schoolYearLabel: string;
+  /** Même valeur pour toutes les lignes d’un même encaissement ; absent pour d’anciennes données. */
+  receiptReference?: string | null;
+  recordedBy?: string | null;
+  /** Nom du compte ayant enregistré la ligne (historique fiche élève uniquement). */
+  validatedByUserName?: string | null;
+  /** Libellé du mois pour une ligne SCOLARITE (ex. « Octobre »). */
+  tuitionMonthLabel?: string | null;
+}
+
+export interface PaymentReceiptLineDto {
+  paymentType: string;
+  amount: number;
+  tuitionMonthLabel?: string | null;
 }
 
 export interface CreateStudentPaymentResponse {
@@ -61,5 +87,22 @@ export interface CreateStudentPaymentResponse {
   totalCollected: number;
   paymentMode: string;
   receiptReference: string;
+  recordedBy: string;
+  lines: PaymentReceiptLineDto[];
+}
+
+/** Réponse GET duplicata (alignée sur {@code PaymentReceiptView} backend). */
+export interface PaymentReceiptViewDto {
+  studentName: string;
+  matricule: string;
+  schoolYearLabel: string;
+  receiptReference: string;
+  recordedBy: string;
+  paymentMode: string;
+  currency: string;
+  paymentDate: string;
+  lines: PaymentReceiptLineDto[];
+  totalCollected: number;
+  duplicate: boolean;
 }
 

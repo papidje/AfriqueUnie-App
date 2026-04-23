@@ -1,0 +1,42 @@
+<div class="class-workspace">
+  <div class="top-bar">
+    <button
+      mat-icon-button
+      type="button"
+      routerLink="/classes"
+      matTooltip="Retour aux classes"
+      aria-label="Retour aux classes"
+      class="exit-btn"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+    <div class="title-block">
+      <h1>{{ heading || '…' }}</h1>
+    </div>
+    <span class="top-spacer"></span>
+  </div>
+
+  <app-class-workspace-context-bar [workspaceSegment]="workspaceSegment"></app-class-workspace-context-bar>
+
+  <div class="segment-pills" role="navigation" aria-label="Sections classe">
+    <a
+      mat-stroked-button
+      routerLink="matieres"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Matières
+    </a>
+    <a
+      mat-stroked-button
+      routerLink="emploi-du-temps"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Emploi du temps
+    </a>
+  </div>
+  <div class="tab-panel">
+    <router-outlet></router-outlet>
+  </div>
+</div>
