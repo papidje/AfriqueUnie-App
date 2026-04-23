@@ -1,5 +1,9 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { finalize } from 'rxjs';
+import { FinanceApiService } from '../../../service/finance-api.service';
 import { PaymentReceiptPrintData } from './payment-receipt-print-dialog.models';
 
 @Component({
@@ -8,9 +12,13 @@ import { PaymentReceiptPrintData } from './payment-receipt-print-dialog.models';
   styleUrls: ['./payment-receipt-print-dialog.component.scss']
 })
 export class PaymentReceiptPrintDialogComponent {
+  loadingPdf = false;
+
   constructor(
     public readonly dialogRef: MatDialogRef<PaymentReceiptPrintDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public readonly data: PaymentReceiptPrintData
+    @Inject(MAT_DIALOG_DATA) public readonly data: PaymentReceiptPrintData,
+    private readonly financeApi: FinanceApiService,
+    private readonly snackBar: MatSnackBar
   ) {}
 
   asMoney(value: number): string {
@@ -31,7 +39,6 @@ export class PaymentReceiptPrintDialogComponent {
     return labels[code] ?? code;
   }
 
-  /** Libellé type + mois pour les lignes de scolarité. */
   lineTypeLabel(line: { paymentType: string; tuitionMonthLabel?: string | null }): string {
     const base = this.typeLabel(line.paymentType);
     if (line.paymentType === 'SCOLARITE' && line.tuitionMonthLabel) {
@@ -61,53 +68,60 @@ export class PaymentReceiptPrintDialogComponent {
     return Number.isNaN(d.getTime()) ? raw : d.toLocaleString('fr-FR');
   }
 
-  printReceipt(): void {
-    const dup = this.data.duplicate ? '<div class="dup-banner">DUPLICATA</div>' : '';
-    const rows = (this.data.lines ?? [])
-      .map(
-        (l) =>
-          `<tr><td>${this.lineTypeLabel(l)}</td><td style="text-align:right">${this.asMoney(l.amount)}</td></tr>`
-      )
-      .join('');
-    const meta = `
-      <p><strong>Référence :</strong> ${this.data.reference}</p>
-      <p><strong>Élève :</strong> ${this.data.studentName}${this.data.matricule ? ` · ${this.data.matricule}` : ''}</p>
-      ${this.data.schoolYearLabel ? `<p><strong>Année scolaire :</strong> ${this.data.schoolYearLabel}</p>` : ''}
-      <p><strong>Auteur de l’enregistrement :</strong> ${this.data.recordedBy || '—'}</p>
-      <p><strong>Mode de paiement :</strong> ${this.modeLabel(this.data.paymentMode)}</p>
-      <p><strong>Date :</strong> ${this.formatDate(this.data.paymentDate)}</p>
-      <table class="lines" border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%;margin-top:12px">
-        <thead><tr><th align="left">Type</th><th align="right">Montant</th></tr></thead>
-        <tbody>${rows}</tbody>
-        <tfoot><tr><th align="left">Total encaissé</th><th align="right">${this.asMoney(this.data.totalCollected)}</th></tr></tfoot>
-      </table>`;
-    const content = `
-      <html>
-      <head>
-        <title>Reçu ${this.data.reference}</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 24px; }
-          .dup-banner { background:#fee; color:#b71c1c; font-weight:bold; text-align:center; padding:10px; margin-bottom:16px; border:2px solid #b71c1c; }
-        </style>
-      </head>
-      <body>
-        <h2>Reçu de paiement</h2>
-        ${dup}
-        ${meta}
-      </body>
-      </html>`;
-    const win = window.open('', '_blank', 'width=800,height=700');
-    if (!win) {
+  /**
+   * Même principe que l’attestation d’inscription (fiche élève) : ouverture du PDF dans un nouvel onglet.
+   */
+  previewReceiptPdf(): void {
+    if (!this.data.studentId) {
+      this.snackBar.open('Aperçu du reçu indisponible (élève).', 'Fermer', { duration: 4000 });
       return;
     }
-    win.document.open();
-    win.document.write(content);
-    win.document.close();
-    win.focus();
-    win.print();
+    const ref = (this.data.reference || '').trim();
+    if (!ref) {
+      this.snackBar.open('Référence du reçu manquante.', 'Fermer', { duration: 4000 });
+      return;
+    }
+    this.loadingPdf = true;
+    this.financeApi
+      .getReceiptPdfBlob(this.data.studentId, ref)
+      .pipe(finalize(() => (this.loadingPdf = false)))
+      .subscribe({
+        next: (blob) => {
+          if (blob.size === 0) {
+            this.snackBar.open('Fichier PDF vide.', 'Fermer', { duration: 5000 });
+            return;
+          }
+          const url = URL.createObjectURL(blob);
+          window.open(url, '_blank', 'noopener');
+          setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.snackBar.open(this.receiptPdfErrorMessage(err), 'Fermer', { duration: 6000 });
+        }
+      });
   }
 
   close(): void {
     this.dialogRef.close();
+  }
+
+  private receiptPdfErrorMessage(err: HttpErrorResponse): string {
+    if (err.status === 0) {
+      return 'Réseau indisponible ou requête bloquée.';
+    }
+    if (err.error instanceof Blob && err.error.type !== 'application/pdf') {
+      return 'Impossible d’ouvrir le reçu PDF. Vérifiez la connexion et vos droits.';
+    }
+    const obj = err.error as { message?: string } | undefined;
+    if (obj?.message) {
+      return obj.message;
+    }
+    if (err.status === 400) {
+      return 'Référence du reçu ou élève invalide.';
+    }
+    if (err.status === 401 || err.status === 403) {
+      return 'Accès refusé à ce reçu.';
+    }
+    return 'Impossible d’ouvrir le reçu PDF.';
   }
 }

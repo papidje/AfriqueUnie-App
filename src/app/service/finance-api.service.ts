@@ -48,5 +48,13 @@ export class FinanceApiService {
       catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
+
+  /** Reçu au format PDF (même moteur que l’attestation d’inscription) pour aperçu / impression. */
+  getReceiptPdfBlob(studentId: number, reference: string): Observable<Blob> {
+    const params = { reference };
+    return this.http
+      .get(`${this.base}/receipt/${studentId}/pdf`, { params, responseType: 'blob' })
+      .pipe(catchError((err: HttpErrorResponse) => throwError(() => err)));
+  }
 }
 

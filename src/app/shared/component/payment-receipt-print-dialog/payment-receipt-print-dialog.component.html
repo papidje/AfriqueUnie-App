@@ -30,10 +30,17 @@
     </tbody>
   </table>
 
-  <p class="hint" *ngIf="!data.duplicate">Souhaitez-vous imprimer le reçu ?</p>
+  <p class="hint" *ngIf="!data.duplicate">Ouvrez l’aperçu PDF pour vérifier ou imprimer (comme l’attestation d’inscription).</p>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button type="button" (click)="close()">Fermer</button>
-  <button mat-flat-button color="primary" type="button" (click)="printReceipt(); close()">Imprimer</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    [disabled]="loadingPdf"
+    (click)="previewReceiptPdf()">
+    {{ loadingPdf ? 'Chargement…' : 'Aperçu du reçu (PDF)' }}
+  </button>
 </mat-dialog-actions>

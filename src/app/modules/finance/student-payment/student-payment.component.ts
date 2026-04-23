@@ -192,8 +192,13 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res) => {
           this.submitting = false;
+          const studentId = this.studentId;
+          if (studentId == null) {
+            return;
+          }
           const focusSchoolClassId = res.schoolClassId ?? this.info?.schoolClassId;
           const printData: PaymentReceiptPrintData = {
+            studentId,
             studentName: this.info?.studentName ?? '',
             matricule: this.info?.matricule ?? '',
             reference: res.receiptReference,

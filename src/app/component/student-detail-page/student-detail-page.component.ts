@@ -281,7 +281,11 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   private openReceiptPrintDialog(dto: PaymentReceiptViewDto): void {
+    if (this.studentId == null) {
+      return;
+    }
     const data: PaymentReceiptPrintData = {
+      studentId: this.studentId,
       studentName: dto.studentName,
       matricule: dto.matricule,
       schoolYearLabel: dto.schoolYearLabel,

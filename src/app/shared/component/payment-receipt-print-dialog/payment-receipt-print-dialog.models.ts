@@ -7,6 +7,8 @@ export interface PaymentReceiptLine {
 
 /** Données pour impression / duplicata (reçu unique ou groupe de lignes même référence). */
 export interface PaymentReceiptPrintData {
+  /** Obligatoire pour l’aperçu PDF côté serveur (même ressource que l’impression Thymeleaf). */
+  studentId: number;
   studentName: string;
   matricule?: string | null;
   schoolYearLabel?: string | null;
