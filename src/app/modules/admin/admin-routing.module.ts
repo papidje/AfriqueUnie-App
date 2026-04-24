@@ -17,7 +17,7 @@ const routes: Routes = [
       {
         path: '',
         component: UserManagementComponent,
-        data: { roles: [AppRoles.ADMIN_ECOLE] }
+        data: { roles: [AppRoles.ADMIN_ECOLE, AppRoles.DIRECTOR] }
       },
       {
         path: 'staff',

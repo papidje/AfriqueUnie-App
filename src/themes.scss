@@ -1,0 +1,72 @@
+// White label — variables par thème (classe sur <body> : .theme-xxx)
+// Primary = sidebar / header / actions principales ; Secondary = accents / bordures
+
+:root,
+body.theme-classique {
+  --app-primary: #1e3a8a;
+  --app-primary-dark: #172554;
+  --app-primary-light: #3b4f9a;
+  --app-secondary: #64748b;
+  --app-on-primary: #ffffff;
+}
+
+body.theme-emeraude {
+  --app-primary: #059669;
+  --app-primary-dark: #047857;
+  --app-primary-light: #10b981;
+  --app-secondary: #10b981;
+  --app-on-primary: #ffffff;
+}
+
+body.theme-bordeaux {
+  --app-primary: #7f1d1d;
+  --app-primary-dark: #450a0a;
+  --app-primary-light: #991b1b;
+  --app-secondary: #b45309;
+  --app-on-primary: #ffffff;
+}
+
+body.theme-indigo {
+  --app-primary: #4f46e5;
+  --app-primary-dark: #4338ca;
+  --app-primary-light: #6366f1;
+  --app-secondary: #7c3aed;
+  --app-on-primary: #ffffff;
+}
+
+body.theme-terre-afrique {
+  --app-primary: #92400e;
+  --app-primary-dark: #78350f;
+  --app-primary-light: #b45309;
+  --app-secondary: #f59e0b;
+  --app-on-primary: #ffffff;
+}
+
+body.theme-ardoise {
+  --app-primary: #334155;
+  --app-primary-dark: #1e293b;
+  --app-primary-light: #475569;
+  --app-secondary: #0ea5e9;
+  --app-on-primary: #ffffff;
+}
+
+// Polices (associées à .font-xxx sur body)
+body.font-inter,
+body.font-inter .mat-typography {
+  font-family: 'Inter', Roboto, 'Helvetica Neue', sans-serif;
+}
+
+body.font-montserrat,
+body.font-montserrat .mat-typography {
+  font-family: 'Montserrat', Roboto, 'Helvetica Neue', sans-serif;
+}
+
+body.font-quicksand,
+body.font-quicksand .mat-typography {
+  font-family: 'Quicksand', Roboto, 'Helvetica Neue', sans-serif;
+}
+
+body.font-lora,
+body.font-lora .mat-typography {
+  font-family: 'Lora', Georgia, 'Times New Roman', serif;
+}

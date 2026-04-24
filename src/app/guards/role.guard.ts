@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, CanActivateChild, Router } from '@angular/router';
 import {AuthUtilsService} from "../service/auth-utils.service";
+import { AppRoles } from '../core/app-roles';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +25,11 @@ export class RoleGuard implements CanActivate, CanActivateChild {
       const userRoles = this.authUtils.getRoles();
       const hasAccess = allowedRoles.some(role => userRoles.includes(role));
       if (!hasAccess) {
-        this.router.navigate(['/unauthorized']);
+        if (userRoles.includes(AppRoles.SUPER_ADMIN)) {
+          this.router.navigate(['/super-admin/dashboard']);
+        } else {
+          this.router.navigate(['/dashboard'], { queryParams: { accessDenied: '1' } });
+        }
         return false;
       }
       return true;

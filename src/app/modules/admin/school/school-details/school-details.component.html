@@ -67,6 +67,55 @@
     </mat-card-content>
   </mat-card>
 
+  <mat-card class="block appearance-card">
+    <mat-card-title>Apparence (white label)</mat-card-title>
+    <mat-card-content>
+      <p class="hint">Couleurs de l’interface (barres latérale et d’en-tête, boutons principaux) et police pour toute l’application.</p>
+
+      <div class="visual-section">
+        <h3>Thème</h3>
+        <div class="theme-grid" role="radiogroup" aria-label="Choisir un thème">
+          <button
+            type="button"
+            class="theme-chip"
+            *ngFor="let key of themeKeys"
+            [class.selected]="selectedTheme === key"
+            (click)="selectedTheme = key"
+            [attr.aria-checked]="selectedTheme === key"
+            [attr.aria-label]="themeLabels[key]"
+          >
+            <span class="theme-swatch" [style.background]="themeSwatches[key]"></span>
+            <span class="theme-name">{{ themeLabels[key] }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="visual-section">
+        <h3>Police</h3>
+        <mat-form-field appearance="outline" class="font-select">
+          <mat-label>Police de l’interface</mat-label>
+          <mat-select [value]="selectedFont" (selectionChange)="selectedFont = $event.value">
+            <mat-option *ngFor="let fk of fontKeys" [value]="fk">
+              <span class="font-preview" [ngClass]="'preview-' + fk">{{ fontLabels[fk] }} — Aa Bb Élève 123</span>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="actions-row">
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="saveVisualPreferences()"
+          [disabled]="savingVisual || schoolId == null"
+        >
+          {{ savingVisual ? 'Enregistrement…' : 'Enregistrer les préférences visuelles' }}
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
   <mat-card class="block">
     <mat-card-title>Années scolaires</mat-card-title>
     <mat-card-content>

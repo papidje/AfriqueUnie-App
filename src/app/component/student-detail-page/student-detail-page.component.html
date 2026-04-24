@@ -42,7 +42,7 @@
           <div class="actions" *ngIf="editGeneral && generalForm.dirty"><button mat-flat-button color="primary" (click)="saveGeneral()">Enregistrer</button></div>
         </mat-tab>
 
-        <mat-tab label="Finances">
+        <mat-tab *ngIf="showStudentFinanceTab" label="Finances">
           <div class="finance-wrap" *ngIf="paymentInfo as fi">
             <div class="finance-cards">
               <div class="card">

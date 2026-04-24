@@ -13,6 +13,16 @@ import { SchoolYearService } from '../../../../service/school-year.service';
 import { SchoolYearDto } from '../../../../models/academic.models';
 import { ConfirmDialogComponent } from '../../../../shared/component/confirm-dialog/confirm-dialog.component';
 import { API_BASE_URL } from '../../../../core/api-base';
+import {
+  FONT_LABELS,
+  normalizeFontKey,
+  normalizeThemeKey,
+  SCHOOL_FONT_KEYS,
+  SCHOOL_THEME_KEYS,
+  THEME_LABELS,
+  THEME_SWATCH_PRIMARY
+} from '../../../../core/school-theme';
+import { ThemeService } from '../../../../service/theme.service';
 
 @Component({
   selector: 'app-school-details',
@@ -28,8 +38,18 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
   years: SchoolYearDto[] = [];
   loading = true;
   saving = false;
+  savingVisual = false;
   togglingActive = false;
   uploadingLogo = false;
+
+  selectedTheme = 'classique';
+  selectedFont = 'inter';
+
+  readonly themeKeys = [...SCHOOL_THEME_KEYS];
+  readonly themeLabels = THEME_LABELS;
+  readonly themeSwatches = THEME_SWATCH_PRIMARY;
+  readonly fontKeys = [...SCHOOL_FONT_KEYS];
+  readonly fontLabels = FONT_LABELS;
 
   readonly form = this.fb.group({
     name: ['', Validators.required],
@@ -46,7 +66,8 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
     private readonly userService: UserService,
     private readonly schoolYearService: SchoolYearService,
     private readonly dialog: MatDialog,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
@@ -121,6 +142,8 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
       contact: s.contact ?? '',
       openDate: od
     });
+    this.selectedTheme = normalizeThemeKey(s.themeName);
+    this.selectedFont = normalizeFontKey(s.fontName);
   }
 
   private loadAdmins(): void {
@@ -143,6 +166,33 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
+  saveVisualPreferences(): void {
+    if (this.schoolId == null || this.school == null) {
+      return;
+    }
+    this.savingVisual = true;
+    const s = this.school;
+    this.schoolService
+      .update(this.schoolId, {
+        name: s.name ?? '',
+        adress: s.adress ?? '',
+        contact: s.contact ?? '',
+        openDate: typeof s.openDate === 'string' ? s.openDate : '',
+        themeName: this.selectedTheme,
+        fontName: this.selectedFont
+      })
+      .pipe(finalize(() => (this.savingVisual = false)))
+      .subscribe({
+        next: (updated) => {
+          this.school = updated;
+          this.patchForm(updated);
+          this.themeService.applyFromSchool(updated);
+          this.snackBar.open('Préférences visuelles enregistrées.', 'Fermer', { duration: 3000 });
+        },
+        error: () => this.snackBar.open('Enregistrement impossible.', 'Fermer', { duration: 5000 })
+      });
+  }
+
   saveSchool(): void {
     if (this.schoolId == null || this.form.invalid) {
       this.form.markAllAsTouched();
@@ -155,12 +205,16 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
         name: (v.name || '').trim(),
         adress: (v.adress || '').trim(),
         contact: (v.contact || '').trim(),
-        openDate: v.openDate || ''
+        openDate: v.openDate || '',
+        themeName: this.selectedTheme,
+        fontName: this.selectedFont
       })
       .pipe(finalize(() => (this.saving = false)))
       .subscribe({
         next: (s) => {
           this.school = s;
+          this.patchForm(s);
+          this.themeService.applyFromSchool(s);
           this.snackBar.open('Établissement enregistré.', 'Fermer', { duration: 3000 });
         },
         error: () => this.snackBar.open('Enregistrement impossible.', 'Fermer', { duration: 5000 })

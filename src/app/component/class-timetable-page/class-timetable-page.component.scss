@@ -115,7 +115,8 @@ h2 {
     text-align: center;
     font-weight: 600;
     padding: 8px 6px;
-    background: rgba(63, 81, 181, 0.08);
+    background: color-mix(in srgb, var(--app-primary) 10%, #ffffff);
+    border-color: color-mix(in srgb, var(--app-primary) 22%, #e0e0e0);
   }
 
   .time {
@@ -146,7 +147,7 @@ h2 {
 }
 
 .cell.cdk-drop-list-receiving {
-  background: rgba(63, 81, 181, 0.12);
+  background: color-mix(in srgb, var(--app-primary) 16%, #ffffff);
 }
 
 .drag-chip {
@@ -158,21 +159,24 @@ h2 {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-.palette-chip {
-  background: #e8eaf6;
-  border: 1px solid #c5cae9;
+// Identité de l’école : fond pastelle issue du primaire, bordure en primaire foncé
+.palette-chip,
+.cell-chip {
+  background: color-mix(in srgb, var(--app-primary) 12%, #ffffff);
+  border: 1px solid var(--app-primary-dark);
+  color: rgba(0, 0, 0, 0.87);
 }
 
 .cell-chip {
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  // créneau posé : même recette, un peu plus marqué pour se détacher du fond cellule
+  background: color-mix(in srgb, var(--app-primary) 14%, #ffffff);
 }
 
 .code {
   display: inline-block;
   font-weight: 600;
   margin-right: 6px;
-  opacity: 0.85;
+  color: var(--app-primary-dark);
 }
 
 .teacher {

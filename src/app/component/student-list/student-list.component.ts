@@ -6,6 +6,8 @@ import { SchoolClassService } from '../../service/school-class.service';
 import { StudentApiService } from '../../service/student-api.service';
 import { SchoolClassDto } from '../../models/academic.models';
 import { StudentListRow } from '../../models/student-list.models';
+import { AuthUtilsService } from '../../service/auth-utils.service';
+import { ROLES_STUDENT_REGISTRATION } from '../../core/app-roles';
 import { Subject, of } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 
@@ -36,8 +38,13 @@ export class StudentListComponent implements OnInit, OnDestroy {
     private readonly studentApi: StudentApiService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly authUtils: AuthUtilsService
   ) {}
+
+  canRegisterStudent(): boolean {
+    return this.authUtils.hasAnyRole([...ROLES_STUDENT_REGISTRATION]);
+  }
 
   ngOnInit(): void {
     this.schoolId = this.activeSchool.getActiveSchoolId();

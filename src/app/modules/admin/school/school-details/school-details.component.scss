@@ -100,3 +100,86 @@
   color: rgba(0, 0, 0, 0.55);
   margin-top: 8px;
 }
+
+.hint {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.9rem;
+  margin: 0 0 16px;
+}
+
+.appearance-card h3 {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+
+.visual-section {
+  margin-bottom: 20px;
+}
+
+.theme-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.theme-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 88px;
+  padding: 10px 8px;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.25);
+  }
+
+  &.selected {
+    border-color: var(--app-primary, #1e3a8a);
+    box-shadow: 0 0 0 1px var(--app-primary, #1e3a8a);
+  }
+}
+
+.theme-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.theme-name {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-align: center;
+  max-width: 7rem;
+}
+
+.font-select {
+  width: 100%;
+  max-width: 420px;
+}
+
+.font-preview {
+  display: block;
+  padding: 2px 0;
+}
+
+.font-preview.preview-inter {
+  font-family: 'Inter', sans-serif;
+}
+.font-preview.preview-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
+.font-preview.preview-quicksand {
+  font-family: 'Quicksand', sans-serif;
+}
+.font-preview.preview-lora {
+  font-family: 'Lora', serif;
+}

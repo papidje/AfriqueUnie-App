@@ -1,14 +1,15 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {AuthService} from "./service/auth.service";
 import {NavigationEnd, Router} from "@angular/router";
 import {AuthUtilsService} from "./service/auth-utils.service";
 import {ActiveSchoolService} from "./service/active-school.service";
+import {ThemeService} from './service/theme.service';
 import {
-  ALL_APP_ROLES,
   AppRoles,
   ROLES_CLASSES_NAV,
   ROLES_FINANCIAL_NAV,
-  ROLES_STUDENTS_NAV
+  ROLES_STUDENTS_NAV,
+  SCHOOL_PORTAL_ROLES
 } from "./core/app-roles";
 
 @Component({
@@ -16,7 +17,7 @@ import {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   currentYear = new Date().getFullYear();
   sidebarExpanded = false;
   showLayout = true;
@@ -32,7 +33,8 @@ export class AppComponent {
     private service: AuthService,
     private router: Router,
     private authUtils: AuthUtilsService,
-    readonly activeSchool: ActiveSchoolService
+    readonly activeSchool: ActiveSchoolService,
+    private readonly themeService: ThemeService
   ) {
     router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
@@ -44,6 +46,10 @@ export class AppComponent {
         }
       }
     });
+  }
+
+  ngOnInit(): void {
+    this.themeService.init();
   }
 
   logout(): void {
@@ -70,27 +76,24 @@ export class AppComponent {
     return this.authUtils.hasAnyRole(roles);
   }
 
-  /** Mêmes rôles que l’endpoint backend /dashboard/summary */
+  /** Aligné sur `/dashboard` : app école uniquement (pas le super-admin). */
   hasDashboardAccess(): boolean {
-    return this.authUtils.hasAnyRole([...ALL_APP_ROLES]);
+    return this.authUtils.hasAnyRole([...SCHOOL_PORTAL_ROLES]);
+  }
+
+  /** Lien Finance : rôles financiers, jamais les enseignants. */
+  showFinanceNav(): boolean {
+    return this.hasAnyRole(this.navFinancialRoles) && !this.hasRole(AppRoles.TEACHER);
+  }
+
+  /** Bloc administration (staff / école) : jamais les enseignants. */
+  showAdministrationNav(): boolean {
+    return (this.hasRole(AppRoles.ADMIN_ECOLE) || this.hasRole(AppRoles.DIRECTOR))
+      && !this.hasRole(AppRoles.TEACHER);
   }
 
   get headerTitle(): string {
     return this.service.getHeaderDisplayTitle();
-  }
-
-  get tenantTitle(): string {
-    return this.headerTitle;
-  }
-
-  get tenantShortTitle(): string {
-    const words = (this.tenantTitle || '')
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean);
-    if (!words.length) return '—';
-    if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-    return (words[0][0] + words[1][0]).toUpperCase();
   }
 
   selectedSchoolName(vm: { schools: Array<{ id: number; name: string }>; selectedId: number | null }): string | null {

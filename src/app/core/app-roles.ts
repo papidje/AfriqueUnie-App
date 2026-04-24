@@ -25,8 +25,10 @@ export const AppRoles = {
 
 export type AppRoleAuthority = (typeof AppRoles)[keyof typeof AppRoles];
 
-export const ALL_APP_ROLES: AppRoleAuthority[] = [
-  AppRoles.SUPER_ADMIN,
+/**
+ * Rôles de l’app école (dashboard, pédagogie, finances) — le super-admin est cantonné à `/super-admin`.
+ */
+export const SCHOOL_PORTAL_ROLES: AppRoleAuthority[] = [
   AppRoles.ADMIN_ECOLE,
   AppRoles.DIRECTOR,
   AppRoles.STAFF,
@@ -34,18 +36,20 @@ export const ALL_APP_ROLES: AppRoleAuthority[] = [
   AppRoles.ACCOUNTANT,
 ];
 
-/** Navigation / routes : élèves (aligné sur les GET `/api/students` côté backend, y compris comptable). */
+/** Tous les rôles (ex. saisie, contrôles) — inclut le super-admin. */
+export const ALL_APP_ROLES: AppRoleAuthority[] = [...SCHOOL_PORTAL_ROLES, AppRoles.SUPER_ADMIN];
+
+/** Navigation / routes : élèves (GET `/api/students` + fiche, aligné backend). */
 export const ROLES_STUDENTS_NAV: AppRoleAuthority[] = [
-  AppRoles.SUPER_ADMIN,
   AppRoles.ADMIN_ECOLE,
   AppRoles.DIRECTOR,
   AppRoles.STAFF,
+  AppRoles.TEACHER,
   AppRoles.ACCOUNTANT,
 ];
 
 /** Édition fiche élève / parent (PUT/DELETE côté API, hors comptable). */
 export const ROLES_STUDENT_WRITE: AppRoleAuthority[] = [
-  AppRoles.SUPER_ADMIN,
   AppRoles.ADMIN_ECOLE,
   AppRoles.DIRECTOR,
   AppRoles.STAFF,
@@ -59,8 +63,19 @@ export const ROLES_CLASSES_NAV: AppRoleAuthority[] = [
   AppRoles.TEACHER,
 ];
 
-/** Création / paramétrage année scolaire (même périmètre que les classes). */
-export const ROLES_SCHOOL_YEAR_NAV: AppRoleAuthority[] = [...ROLES_CLASSES_NAV];
+/** Inscriptions (route dédiée) : pas les enseignants. */
+export const ROLES_STUDENT_REGISTRATION: AppRoleAuthority[] = [
+  AppRoles.ADMIN_ECOLE,
+  AppRoles.DIRECTOR,
+  AppRoles.STAFF,
+];
+
+/** Création d’année scolaire : admin, directeur, staff (pas enseignant / comptable). */
+export const ROLES_SCHOOL_YEAR_NAV: AppRoleAuthority[] = [
+  AppRoles.ADMIN_ECOLE,
+  AppRoles.DIRECTOR,
+  AppRoles.STAFF,
+];
 
 /** Navigation : gestion utilisateurs (hors staff-only) */
 export const ROLES_USERS_NAV: AppRoleAuthority[] = [
@@ -68,11 +83,22 @@ export const ROLES_USERS_NAV: AppRoleAuthority[] = [
   AppRoles.ADMIN_ECOLE,
 ];
 
-/** Navigation / routes : paramètres financiers */
+/** Navigation : lien « Finance » (hors enseignants). */
 export const ROLES_FINANCIAL_NAV: AppRoleAuthority[] = [
-  AppRoles.SUPER_ADMIN,
   AppRoles.ADMIN_ECOLE,
   AppRoles.DIRECTOR,
   AppRoles.STAFF,
   AppRoles.ACCOUNTANT,
+];
+
+/** Paramètres des tarifs (barèmes) : directeur + admin établissement uniquement. */
+export const ROLES_FEE_SETTINGS_NAV: AppRoleAuthority[] = [
+  AppRoles.ADMIN_ECOLE,
+  AppRoles.DIRECTOR,
+];
+
+/** Module administration Angular (/admin) : jamais le staff. */
+export const ROLES_ADMIN_MODULE: AppRoleAuthority[] = [
+  AppRoles.ADMIN_ECOLE,
+  AppRoles.DIRECTOR,
 ];

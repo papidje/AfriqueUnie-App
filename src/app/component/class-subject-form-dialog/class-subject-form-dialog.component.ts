@@ -45,7 +45,7 @@ export class ClassSubjectFormDialogComponent implements OnInit {
   ) {}
 
   get canEditTeachers(): boolean {
-    return this.authUtils.hasAnyRole([AppRoles.SUPER_ADMIN, AppRoles.ADMIN_ECOLE, AppRoles.STAFF, AppRoles.DIRECTOR]);
+    return this.authUtils.hasAnyRole([AppRoles.ADMIN_ECOLE, AppRoles.STAFF, AppRoles.DIRECTOR]);
   }
 
   get isEdit(): boolean {

@@ -6,7 +6,13 @@
         <p>Liste des élèves par classe (année active).</p>
       </div>
 
-      <button mat-stroked-button color="primary" type="button" (click)="goToRegistration()">
+      <button
+        *ngIf="canRegisterStudent()"
+        mat-stroked-button
+        color="primary"
+        type="button"
+        (click)="goToRegistration()"
+      >
         Inscrire un élève
       </button>
     </div>

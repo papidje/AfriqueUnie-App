@@ -13,10 +13,13 @@ import { DashboardPageComponent } from "./component/dashboard-page/dashboard-pag
 import { RoleGuard } from "./guards/role.guard";
 import { RegisterSchoolComponent } from "./component/register-school/register-school.component";
 import {
-  ALL_APP_ROLES,
   AppRoles,
+  SCHOOL_PORTAL_ROLES,
+  ROLES_ADMIN_MODULE,
   ROLES_CLASSES_NAV,
+  ROLES_FINANCIAL_NAV,
   ROLES_SCHOOL_YEAR_NAV,
+  ROLES_STUDENT_REGISTRATION,
   ROLES_STUDENTS_NAV,
   ROLES_STUDENT_WRITE,
 } from "./core/app-roles";
@@ -64,9 +67,10 @@ const routes: Routes = [
         component: DashboardPageComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: {
-          roles: [...ALL_APP_ROLES]
+          roles: [...SCHOOL_PORTAL_ROLES]
         }
       },
+      { path: 'super-admin', pathMatch: 'full', redirectTo: 'super-admin/dashboard' },
       {
         path: 'super-admin/dashboard',
         component: SuperAdminDashboardComponent,
@@ -126,6 +130,8 @@ const routes: Routes = [
       },
       {
         path: 'finance',
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [...ROLES_FINANCIAL_NAV] },
         loadChildren: () => import('./modules/finance/finance.module').then(m => m.FinanceModule)
       },
       { path: 'parametres-financiers', redirectTo: 'finance/settings', pathMatch: 'full' },
@@ -133,7 +139,7 @@ const routes: Routes = [
         path: 'students/inscription',
         component: StudentRegistrationComponent,
         canActivate: [AuthGuard, RoleGuard],
-        data: { roles: [...ROLES_STUDENTS_NAV] }
+        data: { roles: [...ROLES_STUDENT_REGISTRATION] }
       },
       {
         path: 'students/:studentId',
@@ -161,6 +167,8 @@ const routes: Routes = [
       },
       {
         path: 'admin',
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [...ROLES_ADMIN_MODULE] },
         loadChildren: () => import('./modules/admin/admin.module').then(m => m.AdminModule)
       },
     ]

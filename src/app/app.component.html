@@ -1,39 +1,76 @@
-<mat-sidenav-container class="app-container" *ngIf="showLayout" autosize>
+<div class="app-shell" *ngIf="showLayout">
+  <mat-toolbar color="primary" class="app-header header">
+    <button mat-icon-button (click)="toggleSidebar()" class="menu-btn" type="button">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <ng-container *ngIf="activeSchool.headerVm$ | async as vm; else defaultTitle">
+      <span class="header-title-group">
+        <span class="title">{{ selectedSchoolName(vm) || headerTitle }}</span>
+        <button
+          *ngIf="vm.showPicker"
+          type="button"
+          mat-icon-button
+          class="school-switch-btn"
+          [matMenuTriggerFor]="schoolSwitchMenu"
+          matTooltip="Changer d'établissement"
+          aria-label="Changer d'établissement actif"
+        >
+          <mat-icon>swap_horiz</mat-icon>
+        </button>
+      </span>
+      <mat-menu #schoolSwitchMenu="matMenu">
+        <button
+          mat-menu-item
+          *ngFor="let s of vm.schools"
+          type="button"
+          (click)="activeSchool.setActiveSchoolId(s.id)"
+        >
+          <mat-icon [style.opacity]="s.id === vm.selectedId ? 1 : 0">check</mat-icon>
+          <span>{{ s.name }}</span>
+        </button>
+      </mat-menu>
+    </ng-container>
+    <ng-template #defaultTitle>
+      <span class="title">{{ headerTitle }}</span>
+    </ng-template>
+    <span class="spacer"></span>
+    <button mat-icon-button routerLink="/profile" type="button" aria-label="Profil">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <mat-sidenav-container class="app-sidenav-container app-container" autosize>
   <!-- SIDENAV -->
   <mat-sidenav mode="side" [opened]="true" class="sidenav" [class.sidenav-collapsed]="!sidebarExpanded">
-    <mat-toolbar color="primary" class="sidenav-header">
-      <span class="tenant-title" [title]="tenantTitle">
-        {{ sidebarExpanded ? tenantTitle : tenantShortTitle }}
-      </span>
-    </mat-toolbar>
-
     <mat-nav-list>
-      <a
-        mat-list-item
-        *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
-        routerLink="/admin"
-        matTooltip="Gestion du staff"
-        [matTooltipDisabled]="sidebarExpanded"
-        matTooltipPosition="right"
-      >
-        <div class="nav-item-stack">
-          <mat-icon>settings</mat-icon>
-          <span *ngIf="sidebarExpanded">Gestion du staff</span>
-        </div>
-      </a>
-      <a
-        mat-list-item
-        *ngIf="hasRole(AppRoles.DIRECTOR)"
-        routerLink="/admin/staff"
-        matTooltip="Mon Staff"
-        [matTooltipDisabled]="sidebarExpanded"
-        matTooltipPosition="right"
-      >
-        <div class="nav-item-stack">
-          <mat-icon>groups</mat-icon>
-          <span *ngIf="sidebarExpanded">Mon Staff</span>
-        </div>
-      </a>
+      <ng-container *ngIf="showAdministrationNav()">
+        <a
+          mat-list-item
+          *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
+          routerLink="/admin"
+          matTooltip="Gestion du staff"
+          [matTooltipDisabled]="sidebarExpanded"
+          matTooltipPosition="right"
+        >
+          <div class="nav-item-stack">
+            <mat-icon>settings</mat-icon>
+            <span *ngIf="sidebarExpanded">Gestion du staff</span>
+          </div>
+        </a>
+        <a
+          mat-list-item
+          *ngIf="hasRole(AppRoles.DIRECTOR)"
+          routerLink="/admin/staff"
+          matTooltip="Mon Staff"
+          [matTooltipDisabled]="sidebarExpanded"
+          matTooltipPosition="right"
+        >
+          <div class="nav-item-stack">
+            <mat-icon>groups</mat-icon>
+            <span *ngIf="sidebarExpanded">Mon Staff</span>
+          </div>
+        </a>
+      </ng-container>
       <a
         mat-list-item
         *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
@@ -101,7 +138,7 @@
       </a>
       <a
         mat-list-item
-        *ngIf="hasAnyRole(navFinancialRoles)"
+        *ngIf="showFinanceNav()"
         routerLink="/finance"
         matTooltip="Finance"
         [matTooltipDisabled]="sidebarExpanded"
@@ -128,7 +165,7 @@
       <a
         mat-list-item
         *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
-        routerLink="/super-admin/dashboard"
+        routerLink="/super-admin"
         matTooltip="Tenants / écoles"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"
@@ -166,67 +203,30 @@
     </mat-nav-list>
   </mat-sidenav>
 
-  <!-- CONTENU PRINCIPAL -->
+  <!-- Contenu principal (sous le header global) -->
   <mat-sidenav-content class="main-content">
-    <mat-toolbar color="primary" class="header">
-      <button mat-icon-button (click)="toggleSidebar()" class="menu-btn">
-        <mat-icon>menu</mat-icon>
-      </button>
-      <ng-container *ngIf="activeSchool.headerVm$ | async as vm; else defaultTitle">
-        <span class="header-title-group">
-          <span class="title">{{ selectedSchoolName(vm) || headerTitle }}</span>
-          <button
-            *ngIf="vm.showPicker"
-            type="button"
-            mat-icon-button
-            class="school-switch-btn"
-            [matMenuTriggerFor]="schoolSwitchMenu"
-            matTooltip="Changer d'établissement"
-            aria-label="Changer d'établissement actif"
-          >
-            <mat-icon>swap_horiz</mat-icon>
-          </button>
-        </span>
-        <mat-menu #schoolSwitchMenu="matMenu">
-          <button
-            mat-menu-item
-            *ngFor="let s of vm.schools"
-            type="button"
-            (click)="activeSchool.setActiveSchoolId(s.id)"
-          >
-            <mat-icon [style.opacity]="s.id === vm.selectedId ? 1 : 0">check</mat-icon>
-            <span>{{ s.name }}</span>
-          </button>
-        </mat-menu>
-      </ng-container>
-      <ng-template #defaultTitle>
-        <span class="title">{{ headerTitle }}</span>
-      </ng-template>
-      <span class="spacer"></span>
-      <button mat-icon-button routerLink="/profile"><mat-icon>account_circle</mat-icon></button>
-    </mat-toolbar>
-
     <app-academic-context-banner></app-academic-context-banner>
 
     <main class="content">
       <router-outlet></router-outlet>
     </main>
-
-    <mat-toolbar color="primary" class="footer">
-      <div class="footer-left">
-        <span class="company">© {{ currentYear }} Friasoft</span>
-      </div>
-
-      <span class="spacer"></span>
-
-      <div class="footer-links">
-        <a mat-button routerLink="/about">À propos</a>
-        <a mat-button routerLink="/contact">Contact</a>
-        <a mat-button routerLink="/privacy">Confidentialité</a>
-      </div>
-    </mat-toolbar>
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+  <mat-toolbar color="primary" class="app-footer footer">
+    <div class="footer-left">
+      <span class="company">© {{ currentYear }} Friasoft</span>
+    </div>
+
+    <span class="spacer"></span>
+
+    <div class="footer-links">
+      <a mat-button routerLink="/about">À propos</a>
+      <a mat-button routerLink="/contact">Contact</a>
+      <a mat-button routerLink="/privacy">Confidentialité</a>
+    </div>
+  </mat-toolbar>
+</div>
 
 <!-- Si page d'auth, on affiche juste le router-outlet -->
 <router-outlet *ngIf="!showLayout"></router-outlet>

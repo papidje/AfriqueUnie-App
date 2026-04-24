@@ -5,8 +5,14 @@
         <h1>Finance</h1>
         <p>Tableau de suivi des paiements par classe.</p>
       </div>
-      <button mat-stroked-button color="primary" type="button" (click)="goToSettings()">
-        Paramètres financiers
+      <button
+        *ngIf="canAccessFeeSettings()"
+        mat-stroked-button
+        color="primary"
+        type="button"
+        (click)="goToSettings()"
+      >
+        Paramètres tarifs
       </button>
     </div>
 

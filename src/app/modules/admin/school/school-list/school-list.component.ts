@@ -15,6 +15,10 @@ export interface School {
   contact: string;
   openDate: string;
   logo?: string | null;
+  /** Thème white label (clé : classique, emeraude, …). */
+  themeName?: string;
+  /** Police (clé : inter, montserrat, …). */
+  fontName?: string;
   created_at: string;
   updated_at?: string;
   active?: boolean;

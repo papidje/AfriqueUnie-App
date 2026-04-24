@@ -9,6 +9,8 @@ import { SchoolClassService } from '../../../service/school-class.service';
 import { FinanceApiService } from '../../../service/finance-api.service';
 import { SchoolClassDto } from '../../../models/academic.models';
 import { StudentPaymentStatusDto } from '../../../models/finance.models';
+import { AuthUtilsService } from '../../../service/auth-utils.service';
+import { ROLES_FEE_SETTINGS_NAV } from '../../../core/app-roles';
 
 @Component({
   selector: 'app-finance-page',
@@ -39,8 +41,13 @@ export class FinancePageComponent implements OnInit, OnDestroy {
     private readonly snackBar: MatSnackBar,
     private readonly router: Router,
     private readonly cdr: ChangeDetectorRef,
-    private readonly location: Location
+    private readonly location: Location,
+    private readonly authUtils: AuthUtilsService
   ) {}
+
+  canAccessFeeSettings(): boolean {
+    return this.authUtils.hasAnyRole([...ROLES_FEE_SETTINGS_NAV]);
+  }
 
   ngOnInit(): void {
     this.activeSchool.activeSchoolId$
@@ -251,6 +258,14 @@ export class FinancePageComponent implements OnInit, OnDestroy {
   }
 
   goToSettings(): void {
+    if (!this.canAccessFeeSettings()) {
+      this.snackBar.open(
+        'Les paramètres tarifs sont réservés aux administrateurs d\'établissement et aux directeurs.',
+        'Fermer',
+        { duration: 5000 }
+      );
+      return;
+    }
     void this.router.navigate(['/finance/settings']);
   }
 

@@ -56,12 +56,14 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
 
   readonly canWriteStudent = this.authUtils.hasAnyRole([...ROLES_STUDENT_WRITE]);
   readonly canPrintReceiptDuplicate = this.authUtils.hasAnyRole([
-    AppRoles.SUPER_ADMIN,
     AppRoles.ADMIN_ECOLE,
     AppRoles.DIRECTOR,
     AppRoles.STAFF,
     AppRoles.ACCOUNTANT
   ]);
+
+  /** Onglet Finances (API finance réservée hors enseignants côté navigation). */
+  readonly showStudentFinanceTab = !this.authUtils.hasRole(AppRoles.TEACHER);
 
   readonly generalForm = this.fb.group({
     civility: ['MONSIEUR', Validators.required],
@@ -303,10 +305,15 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
 
   private load(studentId: number): void {
     this.loading = true;
+    const finance$ = this.showStudentFinanceTab;
     forkJoin({
       student: this.studentApi.getById(studentId).pipe(catchError((err) => { this.snackBar.open(err?.error?.message || 'Élève introuvable.', 'Fermer', { duration: 5000 }); return of<StudentDetailDto | null>(null); })),
-      paymentInfo: this.financeApi.getPaymentInfo(studentId).pipe(catchError(() => of<StudentPaymentInfoDto | null>(null))),
-      payments: this.financeApi.listPaymentsForStudent(studentId).pipe(catchError(() => of<StudentPaymentLedgerRow[]>([])))
+      paymentInfo: finance$
+        ? this.financeApi.getPaymentInfo(studentId).pipe(catchError(() => of<StudentPaymentInfoDto | null>(null)))
+        : of<StudentPaymentInfoDto | null>(null),
+      payments: finance$
+        ? this.financeApi.listPaymentsForStudent(studentId).pipe(catchError(() => of<StudentPaymentLedgerRow[]>([])))
+        : of<StudentPaymentLedgerRow[]>([])
     }).pipe(takeUntil(this.destroy$)).subscribe(({ student, paymentInfo, payments }) => {
       this.loading = false;
       if (!student) { void this.router.navigate(['/students']); return; }

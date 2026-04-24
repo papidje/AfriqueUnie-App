@@ -1,0 +1,81 @@
+// Surcharge Material (indigo-pink précompilé) : palette primaire → variables app
+// Prérequis : themes.scss chargé avant ce fichier
+.mat-toolbar.mat-primary,
+.mat-mdc-button.mat-primary,
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-fab.mat-primary,
+.mat-mdc-mini-fab.mat-primary {
+  --mat-primary-default-color: var(--app-primary) !important;
+  --mdc-protected-button-container-color: var(--app-primary) !important;
+  --mdc-filled-button-container-color: var(--app-primary) !important;
+  --mdc-fab-container-color: var(--app-primary) !important;
+  --mdc-theme-primary: var(--app-primary) !important;
+  background-color: var(--app-primary) !important;
+  color: var(--app-on-primary) !important;
+}
+
+.mat-toolbar.mat-primary,
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  --mdc-protected-button-label-text-color: var(--app-on-primary) !important;
+  --mdc-filled-button-label-text-color: var(--app-on-primary) !important;
+}
+
+.mat-mdc-stroked-button:not([color]) {
+  --mdc-outlined-button-label-text-color: var(--app-primary) !important;
+  --mdc-outlined-button-outline-color: var(--app-primary) !important;
+}
+
+// Pastilles « par classe » (pages Élèves & Finance) : même logique que l’emploi du temps
+.student-list-page .class-tabs,
+.finance-page .class-tabs {
+  .mat-mdc-stroked-button,
+  .mat-mdc-outlined-button {
+    --mdc-outlined-button-label-text-color: var(--app-primary-dark) !important;
+    --mdc-outlined-button-outline-color: var(--app-primary-dark) !important;
+    background: color-mix(in srgb, var(--app-primary) 12%, #ffffff) !important;
+  }
+
+  .mat-mdc-stroked-button.active,
+  .mat-mdc-outlined-button.active {
+    --mdc-outlined-button-label-text-color: var(--app-primary-dark) !important;
+    background: color-mix(in srgb, var(--app-primary) 24%, #ffffff) !important;
+    font-weight: 600;
+  }
+}
+
+mat-toolbar.header.mat-primary,
+mat-toolbar.sidenav-header.mat-primary,
+.mat-toolbar.header,
+.mat-toolbar.sidenav-header,
+.footer.mat-toolbar.mat-primary,
+.mat-toolbar.footer {
+  background-color: var(--app-primary) !important;
+  color: var(--app-on-primary) !important;
+}
+
+a.mat-mdc-list-item {
+  --mat-list-list-item-label-text-color: rgba(0, 0, 0, 0.87) !important;
+}
+
+.content {
+  background: #f5f5f5;
+}
+
+// Liens & accents qui utilisaient le bleu Material
+a.student-name-link,
+.mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: var(--app-primary) !important;
+}
+
+// Flat primary button text
+button.mat-mdc-unelevated-button.mat-primary,
+button.mat-mdc-raised-button.mat-primary {
+  --mat-mdc-button-persistent-ripple-color: var(--app-primary) !important;
+}
+
+// Progress / accent secondaires (optionnel)
+.mat-mdc-progress-bar .mdc-linear-progress__bar-inner {
+  border-color: var(--app-primary) !important;
+}

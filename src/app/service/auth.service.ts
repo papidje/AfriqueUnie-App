@@ -5,6 +5,7 @@ import {jwtDecode} from "jwt-decode";
 import {AppRoles} from "../core/app-roles";
 import {ACTIVE_SCHOOL_ID_SESSION_KEY} from "../core/storage-keys";
 import { API_BASE_URL } from '../core/api-base';
+import { ThemeService } from './theme.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,10 @@ export class AuthService {
   private readonly HEADER_TITLE_KEY = 'headerTitle';
   private readonly superAdminHeaderTitle = 'Gestion des écoles';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private readonly themeService: ThemeService
+  ) {}
 
   getToken(): string | null {
     return localStorage.getItem('jwt');
@@ -30,6 +34,7 @@ export class AuthService {
     localStorage.setItem('jwt', jwt);
     localStorage.setItem('refresh', refresh);
     this.saveClaims(jwt);
+    this.themeService.applyFromJwt();
   }
 
   clearTokens(): void {

@@ -1,4 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { distinctUntilChanged, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { DashboardService, DashboardSummary } from '../../service/dashboard.service';
@@ -23,10 +25,24 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   constructor(
     private readonly dashboardService: DashboardService,
     readonly activeSchool: ActiveSchoolService,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
+    const accessDenied = this.route.snapshot.queryParamMap.get('accessDenied');
+    if (accessDenied === '1' || accessDenied === 'true') {
+      this.snackBar.open('Cette page n\'est pas accessible avec votre rôle.', 'Fermer', { duration: 6000 });
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { accessDenied: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      });
+    }
+
     this.activeSchool
       .refreshSchools$()
       .pipe(

@@ -37,6 +37,10 @@ export class LoginComponent {
           console.log('Login successful', res);
           this.authService.saveTokens(res.bearer, res.refresh);
           const role = localStorage.getItem('role');
+          if (role === AppRoles.SUPER_ADMIN) {
+            this.router.navigate(['/super-admin/dashboard']);
+            return;
+          }
           if (role === AppRoles.ADMIN_ECOLE) {
             this.router.navigate(['/admin']);
             return;
