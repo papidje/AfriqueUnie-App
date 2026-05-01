@@ -1,0 +1,97 @@
+<div class="page" [class.embedded]="workspaceChild">
+  <ng-container *ngIf="!workspaceChild">
+    <p class="toolbar">
+      <a mat-stroked-button routerLink="/classes">Retour aux classes</a>
+    </p>
+  </ng-container>
+
+  <div class="head-row">
+    <button mat-stroked-button type="button" (click)="backToList()">
+      <mat-icon>arrow_back</mat-icon> Évaluations
+    </button>
+    <h1>{{ titleLine }}</h1>
+  </div>
+
+  <p class="sub" *ngIf="sheet as s">
+    {{ s.evaluation.subjectCode }} — {{ s.evaluation.subjectName }} — {{ s.evaluation.gradingPeriodName }} —
+    coefficient {{ s.evaluation.coefficient }} — note sur {{ maxScore }}
+  </p>
+
+  <div *ngIf="loading" class="loading">Chargement…</div>
+
+  <div *ngIf="!loading && !sheet" class="muted">Évaluation introuvable.</div>
+
+  <div class="save-row top" *ngIf="!loading && sheet && canWrite">
+    <p class="warn" *ngIf="hasInvalidNote">Corrigez les notes au-dessus du maximum ({{ maxScore }}) avant d’enregistrer.</p>
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      (click)="saveAll()"
+      [disabled]="saveDisabled"
+    >
+      <mat-icon>save</mat-icon> Sauvegarder tout
+    </button>
+  </div>
+
+  <div *ngIf="!loading && sheet" class="table-wrap mat-elevation-z1">
+    <table class="grade-table">
+      <thead>
+        <tr>
+          <th class="col-name">Nom</th>
+          <th class="col-name">Prénom</th>
+          <th class="col-note">Note (max. {{ maxScore }})</th>
+          <th class="col-comment">Commentaire</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let group of rowsArray.controls; let i = index; trackBy: trackByIndex"
+          [formGroup]="$any(group)"
+          [class.row-pending]="isRowDirty(i)"
+        >
+          <td>{{ rowMetas[i].lastName }}</td>
+          <td>{{ rowMetas[i].firstName }}</td>
+          <td class="cell-input">
+            <input
+              type="number"
+              formControlName="value"
+              [max]="maxScore"
+              [min]="0"
+              step="0.25"
+              class="in grade-note-input"
+              [class.in-pending-border]="isRowDirty(i)"
+              [class.in-flash]="isRowFlashing(i)"
+              [class.in-invalid]="isGroupOverMax($any(group))"
+              [attr.aria-invalid]="isGroupOverMax($any(group))"
+              appGradeNoteEnterNext
+              [appGradeNoteEnterNextGroup]="$any(group)"
+            />
+          </td>
+          <td class="cell-input">
+            <input
+              type="text"
+              formControlName="comment"
+              class="in wide"
+              [class.in-pending-border]="isRowDirty(i)"
+              [class.in-flash]="isRowFlashing(i)"
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="save-row bottom" *ngIf="!loading && sheet && canWrite">
+    <p class="warn" *ngIf="hasInvalidNote">Corrigez les notes au-dessus du maximum ({{ maxScore }}) avant d’enregistrer.</p>
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      (click)="saveAll()"
+      [disabled]="saveDisabled"
+    >
+      <mat-icon>save</mat-icon> Sauvegarder tout
+    </button>
+  </div>
+</div>

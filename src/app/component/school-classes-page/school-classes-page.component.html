@@ -66,6 +66,15 @@
             <mat-error>Entre 1 et 200.</mat-error>
           </mat-form-field>
 
+          <mat-form-field appearance="outline" class="field-period">
+            <mat-label>Périodes de notation</mat-label>
+            <mat-select formControlName="periodType" [disabled]="!canUseForm()">
+              <mat-option value="TRIMESTER">3 trimestres (sur l’année active)</mat-option>
+              <mat-option value="SEMESTER">2 semestres (sur l’année active)</mat-option>
+            </mat-select>
+            <mat-hint>Répartition automatique des dates selon l’année scolaire.</mat-hint>
+          </mat-form-field>
+
           <button
             mat-raised-button
             color="primary"
@@ -92,6 +101,10 @@
             <ng-container matColumnDef="level">
               <th mat-header-cell *matHeaderCellDef>Niveau</th>
               <td mat-cell *matCellDef="let row">{{ row.level?.name ?? '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="periods">
+              <th mat-header-cell *matHeaderCellDef>Périodes</th>
+              <td mat-cell *matCellDef="let row">{{ periodTypeLabel(row) }}</td>
             </ng-container>
             <ng-container matColumnDef="enrollment">
               <th mat-header-cell *matHeaderCellDef>Inscription</th>

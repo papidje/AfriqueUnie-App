@@ -42,10 +42,11 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
   readonly form = this.fb.group({
     levelId: [null as number | null, Validators.required],
     name: ['', [Validators.required, Validators.maxLength(50)]],
-    capacity: [40, [Validators.required, Validators.min(1), Validators.max(200)]]
+    capacity: [40, [Validators.required, Validators.min(1), Validators.max(200)]],
+    periodType: ['TRIMESTER' as 'TRIMESTER' | 'SEMESTER', Validators.required]
   });
 
-  readonly overviewColumns = ['name', 'level', 'enrollment', 'subjectCount', 'actions'];
+  readonly overviewColumns = ['name', 'level', 'periods', 'enrollment', 'subjectCount', 'actions'];
 
   constructor(
     private readonly fb: FormBuilder,
@@ -211,18 +212,20 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
           }
           return;
         }
+        const periodType = this.form.value.periodType ?? 'TRIMESTER';
         this.schoolClassService
           .create({
             name,
             year: { id: year.id },
             level: { id: levelId },
-            capacity: Number.isFinite(capacity) && capacity > 0 ? capacity : 40
+            capacity: Number.isFinite(capacity) && capacity > 0 ? capacity : 40,
+            periodType: periodType === 'SEMESTER' ? 'SEMESTER' : 'TRIMESTER'
           })
           .subscribe({
             next: () => {
               this.saving = false;
               this.snackBar.open('Classe ouverte avec succès.', 'Fermer', { duration: 3500 });
-              this.form.patchValue({ name: '' });
+              this.form.patchValue({ name: '', periodType: 'TRIMESTER' });
               this.refreshList();
             },
             error: () => {
@@ -242,6 +245,11 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
 
   canUseForm(): boolean {
     return this.schoolId != null && this.activeYear != null && !this.loadingLevels;
+  }
+
+  /** Libellé pour la colonne « périodes » (données overview). */
+  periodTypeLabel(row: SchoolClassDto): string {
+    return row.periodType === 'SEMESTER' ? '2 semestres' : '3 trimestres';
   }
 
   private readonly enrollmentPieCircumference = 2 * Math.PI * 14;

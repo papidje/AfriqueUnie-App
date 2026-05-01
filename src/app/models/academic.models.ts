@@ -28,11 +28,16 @@ export interface CreateSchoolYearPayload {
   active: boolean;
 }
 
+/** Aligné sur {@code PeriodType} côté API. */
+export type SchoolClassPeriodType = 'TRIMESTER' | 'SEMESTER';
+
 export interface SchoolClassDto {
   id: number;
   name: string;
   /** Présent sur l’endpoint overview et sur l’entité classe. */
   capacity?: number;
+  /** 3 trimestres ou 2 semestres (périodes générées à la création). */
+  periodType?: SchoolClassPeriodType;
   enrolledStudentCount?: number;
   subjectCount?: number;
   year?: { id: number; label?: string };

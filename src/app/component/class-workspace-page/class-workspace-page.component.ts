@@ -46,11 +46,15 @@ export class ClassWorkspacePageComponent implements OnInit, OnDestroy {
   }
 
   private updateWorkspaceSegment(): void {
-    const path = this.route.snapshot.firstChild?.routeConfig?.path ?? '';
-    if (path === 'emploi-du-temps') {
+    const url = this.router.url.split('?')[0];
+    if (url.includes('/emploi-du-temps')) {
       this.workspaceSegment = 'emploi-du-temps';
-    } else if (path === 'planning') {
+    } else if (url.includes('/planning')) {
       this.workspaceSegment = 'planning';
+    } else if (url.includes('/periodes')) {
+      this.workspaceSegment = 'periodes';
+    } else if (url.includes('/evaluations')) {
+      this.workspaceSegment = 'evaluations';
     } else {
       this.workspaceSegment = 'matieres';
     }

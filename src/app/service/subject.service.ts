@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../core/api-base';
 import { SchoolSubject } from '../models/subject.models';
@@ -10,23 +10,31 @@ export class SubjectService {
 
   constructor(private readonly http: HttpClient) {}
 
-  list(): Observable<SchoolSubject[]> {
-    return this.http.get<SchoolSubject[]>(this.base);
+  private schoolParams(schoolId: number): HttpParams {
+    return new HttpParams().set('schoolId', String(schoolId));
   }
 
-  getById(id: number): Observable<SchoolSubject> {
-    return this.http.get<SchoolSubject>(`${this.base}/${id}`);
+  list(schoolId: number): Observable<SchoolSubject[]> {
+    return this.http.get<SchoolSubject[]>(this.base, { params: this.schoolParams(schoolId) });
   }
 
-  create(body: Pick<SchoolSubject, 'code' | 'name'>): Observable<SchoolSubject> {
-    return this.http.post<SchoolSubject>(this.base, body);
+  getById(schoolId: number, id: number): Observable<SchoolSubject> {
+    return this.http.get<SchoolSubject>(`${this.base}/${id}`, { params: this.schoolParams(schoolId) });
   }
 
-  update(id: number, body: Pick<SchoolSubject, 'code' | 'name'>): Observable<SchoolSubject> {
-    return this.http.put<SchoolSubject>(`${this.base}/${id}`, body);
+  create(schoolId: number, body: Pick<SchoolSubject, 'code' | 'name'>): Observable<SchoolSubject> {
+    return this.http.post<SchoolSubject>(this.base, body, { params: this.schoolParams(schoolId) });
   }
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${id}`);
+  update(
+    schoolId: number,
+    id: number,
+    body: Pick<SchoolSubject, 'code' | 'name'>
+  ): Observable<SchoolSubject> {
+    return this.http.put<SchoolSubject>(`${this.base}/${id}`, body, { params: this.schoolParams(schoolId) });
+  }
+
+  delete(schoolId: number, id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`, { params: this.schoolParams(schoolId) });
   }
 }

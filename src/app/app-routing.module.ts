@@ -32,11 +32,15 @@ import { ClassSubjectsPageComponent } from "./component/class-subjects-page/clas
 import { ClassPlanningPageComponent } from "./component/class-planning-page/class-planning-page.component";
 import { ClassTimetablePageComponent } from "./component/class-timetable-page/class-timetable-page.component";
 import { ClassWorkspacePageComponent } from "./component/class-workspace-page/class-workspace-page.component";
+import { ClassEvaluationsPageComponent } from "./component/class-evaluations-page/class-evaluations-page.component";
+import { ClassPeriodsPageComponent } from "./component/class-periods-page/class-periods-page.component";
+import { EvaluationGradesPageComponent } from "./component/evaluation-grades-page/evaluation-grades-page.component";
 import { StudentRegistrationComponent } from "./component/student-registration/student-registration.component";
 import { StudentListComponent } from "./component/student-list/student-list.component";
 import { StudentDetailPageComponent } from "./component/student-detail-page/student-detail-page.component";
 import { ParentDetailPageComponent } from "./component/parent-detail-page/parent-detail-page.component";
 import { ParentListPageComponent } from "./component/parent-list-page/parent-list-page.component";
+import { PeriodNotesPageComponent } from "./component/period-notes-page/period-notes-page.component";
 
 const routes: Routes = [
   // 🔒 Layout d’authentification
@@ -103,8 +107,26 @@ const routes: Routes = [
             data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
           },
           {
+            path: 'periodes',
+            component: ClassPeriodsPageComponent,
+            canActivate: [AuthGuard, RoleGuard],
+            data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
+          },
+          {
             path: 'planning',
             component: ClassPlanningPageComponent,
+            canActivate: [AuthGuard, RoleGuard],
+            data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
+          },
+          {
+            path: 'evaluations/:evaluationId/notes',
+            component: EvaluationGradesPageComponent,
+            canActivate: [AuthGuard, RoleGuard],
+            data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
+          },
+          {
+            path: 'evaluations',
+            component: ClassEvaluationsPageComponent,
             canActivate: [AuthGuard, RoleGuard],
             data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
           }
@@ -119,6 +141,12 @@ const routes: Routes = [
       {
         path: 'referentiel/matieres',
         component: SubjectsCatalogPageComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [...ROLES_CLASSES_NAV] }
+      },
+      {
+        path: 'notes',
+        component: PeriodNotesPageComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: { roles: [...ROLES_CLASSES_NAV] }
       },

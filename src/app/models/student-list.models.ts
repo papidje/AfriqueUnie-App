@@ -41,6 +41,8 @@ export interface StudentDetailDto {
   photoPath?: string | null;
   enrollmentStatus?: string | null;
   classHistory?: string | null;
+  /** Présent si l’élève est affecté à une classe (périodes de notation, bulletin). */
+  schoolClassId?: number | null;
   schoolClassName?: string | null;
   schoolYearLabel?: string | null;
   father: ParentDetailDto | null;

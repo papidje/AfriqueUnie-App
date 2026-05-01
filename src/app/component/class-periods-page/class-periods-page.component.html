@@ -1,0 +1,114 @@
+<div class="class-periods">
+  <div class="loading" *ngIf="loading">Chargement…</div>
+
+  <ng-container *ngIf="!loading && classId != null">
+    <h2 class="h2">Périodes de notation</h2>
+    <p class="intro">
+      Découpage de l’année en trimestres ou semestres. Les dates doivent couvrir toute l’année scolaire active, sans trou ni chevauchement.
+    </p>
+
+    <p *ngIf="hasAnyEvaluation" class="warn-banner" role="status">
+      Des évaluations existent pour cette classe : le <strong>type de période</strong> (trimestre / semestre) ne peut plus être modifié. Les
+      périodes qui contiennent déjà des évaluations ne peuvent plus être déplacées.
+    </p>
+
+    <mat-card class="type-card" *ngIf="schoolClass">
+      <mat-card-title>Type de période</mat-card-title>
+      <mat-card-content>
+        <form [formGroup]="typeForm" (ngSubmit)="saveType()">
+          <mat-form-field appearance="outline" class="field-type">
+            <mat-label>Répartition</mat-label>
+            <mat-select formControlName="periodType">
+              <mat-option value="TRIMESTER">3 trimestres</mat-option>
+              <mat-option value="SEMESTER">2 semestres</mat-option>
+            </mat-select>
+            <mat-hint *ngIf="!hasAnyEvaluation && canEditSettings">
+              Changer le type recalcule les périodes (aucune évaluation ne doit exister sur cette classe).
+            </mat-hint>
+            <mat-hint *ngIf="!canEditSettings">Lecture seule (personnel pédagogique).</mat-hint>
+          </mat-form-field>
+          <button
+            *ngIf="canEditSettings"
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="savingType || typeForm.disabled || hasAnyEvaluation"
+          >
+            {{ savingType ? 'Enregistrement…' : 'Appliquer le type' }}
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="table-card" *ngIf="periods.length">
+      <mat-card-title>Calendrier des périodes</mat-card-title>
+      <mat-card-content>
+        <div class="table-wrap">
+          <table mat-table [dataSource]="periods" class="periods-table mat-elevation-z0">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Libellé</th>
+              <td mat-cell *matCellDef="let p">
+                <input
+                  class="cell-input"
+                  *ngIf="!periodRowLocked(p)"
+                  [value]="p.name"
+                  (input)="onNameChange(p, $any($event.target).value)"
+                />
+                <span *ngIf="periodRowLocked(p)">{{ p.name }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="start">
+              <th mat-header-cell *matHeaderCellDef>Début</th>
+              <td mat-cell *matCellDef="let p">
+                <input
+                  *ngIf="!periodRowLocked(p)"
+                  type="date"
+                  class="cell-date"
+                  [value]="toDateInputValue(p.startDate)"
+                  (input)="onStartChange(p, $any($event.target).value)"
+                />
+                <span *ngIf="periodRowLocked(p)">{{ p.startDate | date : 'dd/MM/yyyy' }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="end">
+              <th mat-header-cell *matHeaderCellDef>Fin</th>
+              <td mat-cell *matCellDef="let p">
+                <input
+                  *ngIf="!periodRowLocked(p)"
+                  type="date"
+                  class="cell-date"
+                  [value]="toDateInputValue(p.endDate)"
+                  (input)="onEndChange(p, $any($event.target).value)"
+                />
+                <span *ngIf="periodRowLocked(p)">{{ p.endDate | date : 'dd/MM/yyyy' }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="lock">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let p">
+                <mat-icon *ngIf="p.locked" class="lock-ic" matTooltip="Évaluations saisies sur cette période">lock</mat-icon>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
+        <p class="hint">
+          La première période doit commencer le premier jour d’année, la dernière se terminer le dernier jour, sans espace entre deux périodes.
+        </p>
+        <button
+          *ngIf="canEditSettings"
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="saveSchedule()"
+          [disabled]="savingSchedule"
+        >
+          {{ savingSchedule ? 'Enregistrement…' : 'Enregistrer les dates' }}
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <p *ngIf="!loading && !periods.length" class="empty">Aucune période de notation pour cette classe.</p>
+  </ng-container>
+</div>

@@ -14,6 +14,8 @@
 
   <p class="intro" *ngIf="classId != null">
     Semaine type (lundi–vendredi), créneaux d’une heure de 8h à 16h.
+    Les évaluations de la semaine (début le <strong>{{ weekStartLabel || '…' }}</strong>) sont
+    indiquées sur <strong>chaque créneau horaire</strong> qu’elles chevauchent, avec un fond distinct et le type sur l’étiquette.
     <span *ngIf="canEdit"> Glissez une matière depuis la liste vers un créneau, ou déplacez les créneaux entre eux. </span>
     <span *ngIf="!canEdit"> Affichage seul. </span>
   </p>
@@ -72,26 +74,39 @@
         <tbody>
           <tr *ngFor="let slot of slotDefs">
             <th class="time">{{ slot.label }}</th>
-            <td *ngFor="let d of days" class="slot-cell">
-              <div
-                cdkDropList
-                [id]="cellId(d.dow, slot.index)"
-                class="cell"
-                [cdkDropListData]="cellData(d.dow, slot.index)"
-                [cdkDropListConnectedTo]="dropListIds"
-                [cdkDropListSortingDisabled]="true"
-                [cdkDropListDisabled]="!canEdit"
-                (cdkDropListDropped)="onDrop($event)"
-              >
+            <td *ngFor="let d of days" class="slot-cell" [ngClass]="evalCellClasses(d.dow, slot.index)">
+              <div class="cell-stack">
                 <div
-                  *ngFor="let item of cellData(d.dow, slot.index)"
-                  cdkDrag
-                  [cdkDragDisabled]="!canEdit"
-                  class="drag-chip cell-chip"
+                  *ngFor="let ev of cellEvaluations(d.dow, slot.index)"
+                  class="eval-strip"
+                  [ngClass]="'eval-strip--' + ev.type"
+                  [matTooltip]="
+                    (ev.startDate | date: 'dd/MM à HH:mm') + ' – ' + (ev.endDate | date: 'dd/MM à HH:mm') + ' — ' + ev.subjectName
+                  "
                 >
-                  <span class="code">{{ item.subjectCode }}</span>
-                  {{ item.subjectName }}
-                  <div class="teacher" *ngIf="item.teacherFullname">Prof: {{ item.teacherFullname }}</div>
+                  <span class="eval-badge">{{ shortEvalBadge(ev.type) }}</span>
+                  <span class="eval-title-text">{{ ev.title }}</span>
+                </div>
+                <div
+                  cdkDropList
+                  [id]="cellId(d.dow, slot.index)"
+                  class="cell cell-drop"
+                  [cdkDropListData]="cellData(d.dow, slot.index)"
+                  [cdkDropListConnectedTo]="dropListIds"
+                  [cdkDropListSortingDisabled]="true"
+                  [cdkDropListDisabled]="!canEdit"
+                  (cdkDropListDropped)="onDrop($event)"
+                >
+                  <div
+                    *ngFor="let item of cellData(d.dow, slot.index)"
+                    cdkDrag
+                    [cdkDragDisabled]="!canEdit"
+                    class="drag-chip cell-chip"
+                  >
+                    <span class="code">{{ item.subjectCode }}</span>
+                    {{ item.subjectName }}
+                    <div class="teacher" *ngIf="item.teacherFullname">Prof: {{ item.teacherFullname }}</div>
+                  </div>
                 </div>
               </div>
             </td>

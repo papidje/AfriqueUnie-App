@@ -7,6 +7,10 @@ import { forkJoin, of, Subject } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { StudentApiService } from '../../service/student-api.service';
 import { FinanceApiService } from '../../service/finance-api.service';
+import { GradingApiService } from '../../service/grading-api.service';
+import { EvaluationApiService } from '../../service/evaluation-api.service';
+import { GradingPeriodSummary } from '../../models/evaluation.models';
+import { StudentPeriodDashboardResponse } from '../../models/grading.models';
 import { StudentDetailDto } from '../../models/student-list.models';
 import { PaymentReceiptViewDto, StudentPaymentInfoDto, StudentPaymentLedgerRow } from '../../models/finance.models';
 import { AuthUtilsService } from '../../service/auth-utils.service';
@@ -49,6 +53,13 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
   loadingReceiptRef: string | null = null;
   uploadingPhoto = false;
   generatingEnrollmentCertificate = false;
+  /** Périodes de notation (classe de l’élève). */
+  gradingPeriods: GradingPeriodSummary[] = [];
+  selectedGradingPeriodId: number | null = null;
+  periodDashboard: StudentPeriodDashboardResponse | null = null;
+  loadingGradingPeriods = false;
+  loadingPeriodDashboard = false;
+  printingBulletin = false;
 
   editGeneral = false;
   editSchooling = false;
@@ -98,11 +109,15 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     'recordedBy', 'validatedByUserName', 'amount', 'actions'
   ];
 
+  readonly gradeColumns = ['subject', 'coefficient', 'continuous', 'composition', 'periodFinal'];
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly studentApi: StudentApiService,
     private readonly financeApi: FinanceApiService,
+    private readonly gradingApi: GradingApiService,
+    private readonly evaluationApi: EvaluationApiService,
     private readonly snackBar: MatSnackBar,
     private readonly fb: FormBuilder,
     private readonly authUtils: AuthUtilsService,
@@ -218,6 +233,119 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  onGradingPeriodChange(event: { value: number | string | null }): void {
+    const v = event?.value;
+    if (v == null) return;
+    this.selectedGradingPeriodId = typeof v === 'string' ? +v : v;
+    this.reloadPeriodDashboard();
+  }
+
+  printBulletin(): void {
+    if (this.studentId == null || this.selectedGradingPeriodId == null) {
+      return;
+    }
+    this.printingBulletin = true;
+    this.gradingApi.downloadStudentBulletinPdf(this.studentId, this.selectedGradingPeriodId).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => { this.printingBulletin = false; })
+    ).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank', 'noopener');
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      },
+      error: (err) => this.snackBar.open(
+        err?.error?.message || 'Génération du bulletin impossible.',
+        'Fermer',
+        { duration: 5000 }
+      )
+    });
+  }
+
+  snapshotNotesDisclaimer(dash: StudentPeriodDashboardResponse | null): string | null {
+    if (!dash?.dataFromSnapshot || !dash.snapshotAsOf) {
+      return null;
+    }
+    return this.formatSnapshotAsOfText(dash.snapshotAsOf);
+  }
+
+  private formatSnapshotAsOfText(iso: string): string {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) {
+      return (
+        'Les moyennes et rangs proviennent d’un enregistrement en base. ' +
+        'Les notes saisies après le dernier calcul seront intégrées au prochain recalcul nocturne.'
+      );
+    }
+    const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+    const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    return (
+      `Les moyennes et rangs ont été mis à jour le ${dateStr} à ${timeStr}. ` +
+      'Les notes saisies après cette heure seront prises en compte lors du prochain calcul nocturne.'
+    );
+  }
+
+  formatScore(v: number | null | undefined): string {
+    if (v == null || Number.isNaN(Number(v))) {
+      return '—';
+    }
+    return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+  }
+
+  enrollmentStatusLabel(status: string | null | undefined): string {
+    if (!status) return '—';
+    const labels: Record<string, string> = { INSCRIT: 'Inscrit', TRANSFERE: 'Transféré' };
+    return labels[status] ?? status;
+  }
+
+  bannerEnrollmentLabel(): string {
+    if (this.editSchooling) {
+      const v = this.schoolingForm.get('enrollmentStatus')?.value as string | undefined;
+      return this.enrollmentStatusLabel(v);
+    }
+    return this.enrollmentStatusLabel(this.student?.enrollmentStatus);
+  }
+
+  private loadGradingPeriodsForClass(schoolClassId: number | null | undefined): void {
+    this.gradingPeriods = [];
+    this.selectedGradingPeriodId = null;
+    this.periodDashboard = null;
+    if (schoolClassId == null) {
+      return;
+    }
+    this.loadingGradingPeriods = true;
+    this.evaluationApi.listGradingPeriods(schoolClassId).pipe(
+      takeUntil(this.destroy$),
+      catchError(() => of<GradingPeriodSummary[]>([])),
+      finalize(() => { this.loadingGradingPeriods = false; })
+    ).subscribe((periods) => {
+      this.gradingPeriods = periods;
+      if (periods.length > 0) {
+        this.selectedGradingPeriodId = periods[0].id;
+        this.reloadPeriodDashboard();
+      }
+    });
+  }
+
+  private reloadPeriodDashboard(): void {
+    if (this.studentId == null || this.selectedGradingPeriodId == null) {
+      this.periodDashboard = null;
+      return;
+    }
+    this.periodDashboard = null;
+    this.loadingPeriodDashboard = true;
+    this.gradingApi.getStudentPeriodDashboard(this.studentId, this.selectedGradingPeriodId).pipe(
+      takeUntil(this.destroy$),
+      catchError((err) => {
+        this.snackBar.open(err?.error?.message || 'Chargement des notes impossible.', 'Fermer', { duration: 5000 });
+        return of<StudentPeriodDashboardResponse | null>(null);
+      }),
+      finalize(() => { this.loadingPeriodDashboard = false; })
+    ).subscribe((dash) => {
+      this.periodDashboard = dash;
+    });
+  }
+
   generateEnrollmentCertificate(): void {
     if (!this.studentId) return;
     this.generatingEnrollmentCertificate = true;
@@ -326,6 +454,7 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
 
   private applyStudent(s: StudentDetailDto): void {
     this.student = s;
+    this.loadGradingPeriodsForClass(s.schoolClassId ?? null);
     this.generalForm.patchValue({
       civility: s.civility === 'MADAME' ? 'MADAME' : 'MONSIEUR',
       firstName: s.firstName,

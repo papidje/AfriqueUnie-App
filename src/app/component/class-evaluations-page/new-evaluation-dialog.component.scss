@@ -1,0 +1,25 @@
+.loading {
+  padding: 16px 0;
+}
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 12px;
+  padding-top: 4px;
+  min-width: 280px;
+}
+
+.full {
+  width: 100%;
+}
+
+.half {
+  flex: 1 1 120px;
+  min-width: 0;
+}
+
+.third {
+  flex: 1 1 100px;
+  min-width: 0;
+}

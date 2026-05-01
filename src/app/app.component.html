@@ -138,6 +138,19 @@
       </a>
       <a
         mat-list-item
+        *ngIf="hasAnyRole(navClassesRoles)"
+        routerLink="/notes"
+        matTooltip="Notes (période)"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
+      >
+        <div class="nav-item-stack">
+          <mat-icon>grid_on</mat-icon>
+          <span *ngIf="sidebarExpanded">Notes</span>
+        </div>
+      </a>
+      <a
+        mat-list-item
         *ngIf="showFinanceNav()"
         routerLink="/finance"
         matTooltip="Finance"

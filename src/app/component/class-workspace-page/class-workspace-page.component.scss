@@ -33,21 +33,11 @@
   justify-self: end;
 }
 
-.segment-pills {
+.class-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 8px;
-}
-
-.segment-pills a {
-  text-decoration: none;
-}
-
-.segment-pills a.active {
-  background: #1976d2;
-  color: #fff;
-  border-color: #1976d2;
 }
 
 .tab-panel {

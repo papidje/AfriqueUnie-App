@@ -5,11 +5,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject as RxSubject, concatMap, forkJoin, from } from 'rxjs';
 import { last, takeUntil } from 'rxjs/operators';
 import { AppRoles } from '../../core/app-roles';
-import { TimetableDragItem } from '../../models/timetable.models';
+import { TimetableDragItem, TimetableEvaluationDto, TimetableViewDto } from '../../models/timetable.models';
 import { AuthUtilsService } from '../../service/auth-utils.service';
 import { ClassSubjectService } from '../../service/class-subject.service';
 import { ClassTimetableService } from '../../service/class-timetable.service';
 import { resolveSchoolClassId } from '../../util/class-route.util';
+import { evaluationOverlapsTimetableSlot } from '../../util/timetable-evaluation-cell.util';
+import type { EvaluationType } from '../../models/evaluation.models';
 
 @Component({
   selector: 'app-class-timetable-page',
@@ -44,6 +46,14 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
 
   dropListIds: string[] = [];
 
+  /** Évaluations dont l’intervalle chevauche la semaine du lundi courant. */
+  weekEvaluations: TimetableEvaluationDto[] = [];
+  weekStartLabel = '';
+  private lastWeekStartIso: string | null = null;
+
+  /** Clé `dayOfWeek-slotIndex` → évaluations affichées dans la cellule (début = créneau). */
+  private readonly evaluationByCell = new Map<string, TimetableEvaluationDto[]>();
+
   /** Empêche de déposer un créneau dans la palette (réserve aux modèles). */
   readonly blockExternalDropIntoPalette = (drag: CdkDrag, _drop: CdkDropList): boolean =>
     drag.dropContainer.id === 'palette';
@@ -58,6 +68,36 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
 
   get canEdit(): boolean {
     return this.authUtils.hasAnyRole([AppRoles.ADMIN_ECOLE, AppRoles.STAFF, AppRoles.DIRECTOR]);
+  }
+
+  cellEvaluations(dow: number, slotIndex: number): TimetableEvaluationDto[] {
+    return this.evaluationByCell.get(this.key(dow, slotIndex)) ?? [];
+  }
+
+  evalCellClasses(dow: number, slotIndex: number): Record<string, boolean> {
+    const list = this.cellEvaluations(dow, slotIndex);
+    if (list.length === 0) {
+      return {};
+    }
+    return {
+      'slot-cell--has-eval': true,
+      [`slot-cell--t-${list[0].type}`]: true
+    };
+  }
+
+  shortEvalBadge(t: EvaluationType): string {
+    switch (t) {
+      case 'INTERROGATION':
+        return '[INTERRO]';
+      case 'DEVOIR':
+        return '[DEV]';
+      case 'COMPOSITION':
+        return '[COMP]';
+      case 'QUIZ':
+        return '[QUIZ]';
+      default:
+        return '[ — ]';
+    }
   }
 
   ngOnInit(): void {
@@ -196,6 +236,7 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (view) => {
           this.applyServerView(view);
+          this.refreshWeekEvaluationsFromApi();
           this.syncing = false;
         },
         error: () => {
@@ -211,8 +252,14 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
       return;
     }
     this.loading = true;
+    const weekStart = this.mondayIsoInWeek(new Date());
+    this.lastWeekStartIso = weekStart;
+    this.weekStartLabel = this.formatFrenchDate(weekStart);
     forkJoin({
-      timetable: this.timetableService.getTimetable(this.classId),
+      timetable: this.timetableService.getTimetable(this.classId, {
+        weekStart,
+        includeEvaluations: true
+      }),
       subjects: this.classSubjectService.listForClass(this.classId)
     })
       .pipe(takeUntil(this.destroy$))
@@ -224,6 +271,8 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
             subjectName: s.subjectName,
             teacherFullname: s.teacherFullname
           }));
+          this.weekEvaluations = timetable.evaluations ?? [];
+          this.rebuildEvaluationCellMap();
           this.applyServerView(timetable);
           this.rebuildDropListIds();
           this.loading = false;
@@ -254,7 +303,7 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
     this.dropListIds = ids;
   }
 
-  private applyServerView(view: { slots: { dayOfWeek: number; slotIndex: number; classSubjectId: number; subjectCode: string; subjectName: string; teacherFullname?: string | null }[] }): void {
+  private applyServerView(view: TimetableViewDto): void {
     this.initGridKeys();
     for (const sl of view.slots) {
       const arr = this.cellData(sl.dayOfWeek, sl.slotIndex);
@@ -265,6 +314,67 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
         teacherFullname: sl.teacherFullname ?? null
       });
     }
+  }
+
+  /** Lundi (ISO) de la semaine calendaire contenant `d` (lundi = premier jour de la semaine affichée). */
+  private mondayIsoInWeek(d: Date): string {
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    const mon = new Date(d.getFullYear(), d.getMonth(), d.getDate() + diff);
+    const y = mon.getFullYear();
+    const m = String(mon.getMonth() + 1).padStart(2, '0');
+    const daynum = String(mon.getDate()).padStart(2, '0');
+    return `${y}-${m}-${daynum}`;
+  }
+
+  /** Le PUT d’une cellule renvoie l’EDT sans overlay évaluations : on rechargement léger. */
+  private refreshWeekEvaluationsFromApi(): void {
+    if (this.classId == null || this.lastWeekStartIso == null) {
+      return;
+    }
+    this.timetableService
+      .getTimetable(this.classId, { weekStart: this.lastWeekStartIso, includeEvaluations: true })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((v) => {
+        this.weekEvaluations = v.evaluations ?? [];
+        this.rebuildEvaluationCellMap();
+      });
+  }
+
+  private rebuildEvaluationCellMap(): void {
+    this.evaluationByCell.clear();
+    const monday = this.lastWeekStartIso;
+    if (monday == null) {
+      return;
+    }
+    for (const e of this.weekEvaluations) {
+      for (const d of this.days) {
+        for (const s of this.slotDefs) {
+          if (!evaluationOverlapsTimetableSlot(e.startDate, e.endDate, monday, d.dow, s.index)) {
+            continue;
+          }
+          const k = this.key(d.dow, s.index);
+          const arr = this.evaluationByCell.get(k) ?? [];
+          if (!arr.some((x) => x.id === e.id)) {
+            arr.push(e);
+          }
+          this.evaluationByCell.set(k, arr);
+        }
+      }
+    }
+  }
+
+  private formatFrenchDate(isoDate: string): string {
+    const [y, m, day] = isoDate.split('-').map((x) => Number(x));
+    if (!y || !m || !day) {
+      return isoDate;
+    }
+    return new Date(y, m - 1, day).toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
   }
 
   private key(dow: number, slot: number): string {

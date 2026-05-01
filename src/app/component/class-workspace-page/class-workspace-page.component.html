@@ -18,23 +18,43 @@
 
   <app-class-workspace-context-bar [workspaceSegment]="workspaceSegment"></app-class-workspace-context-bar>
 
-  <div class="segment-pills" role="navigation" aria-label="Sections classe">
-    <a
+  <div class="class-tabs" role="navigation" aria-label="Sections classe">
+    <button
+      type="button"
       mat-stroked-button
       routerLink="matieres"
       routerLinkActive="active"
       [routerLinkActiveOptions]="{ exact: true }"
     >
       Matières
-    </a>
-    <a
+    </button>
+    <button
+      type="button"
       mat-stroked-button
       routerLink="emploi-du-temps"
       routerLinkActive="active"
       [routerLinkActiveOptions]="{ exact: true }"
     >
       Emploi du temps
-    </a>
+    </button>
+    <button
+      type="button"
+      mat-stroked-button
+      routerLink="periodes"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Périodes
+    </button>
+    <button
+      type="button"
+      mat-stroked-button
+      routerLink="evaluations"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: false }"
+    >
+      Évaluations
+    </button>
   </div>
   <div class="tab-panel">
     <router-outlet></router-outlet>

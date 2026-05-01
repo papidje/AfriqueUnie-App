@@ -3,6 +3,8 @@ export interface SchoolSubject {
   id: number;
   code: string;
   name: string;
+  /** Absent ou `null` = référentiel global ; sinon matière propre à l’établissement. */
+  schoolId?: number | null;
 }
 
 export interface ClassSubjectRow {

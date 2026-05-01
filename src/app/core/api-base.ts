@@ -1,17 +1,18 @@
 /**
  * Base de l’API (context-path Spring : /api/rest).
  *
- * En local : {@code http://localhost:8080/api/rest}.
- * Depuis un téléphone / tablette sur le LAN (ex. {@code http://192.168.x.x:4200}) :
- * même hôte que la page, port 8080 — à condition que le backend tourne sur le Mac.
+ * - {@code ng serve} (port 4200) : API sur le même hôte, port 8080.
+ * - Docker / prod (Nginx sur 80/443) : même origine, reverse proxy vers le backend → /api/rest.
  */
 function resolveApiBaseUrl(): string {
   if (typeof window === 'undefined' || !window.location) {
     return 'http://localhost:8080/api/rest';
   }
-  const { hostname } = window.location;
-  const port = 8080;
-  return `http://${hostname}:${port}/api/rest`;
+  const { hostname, port, protocol, origin } = window.location;
+  if (port === '4200') {
+    return `${protocol}//${hostname}:8080/api/rest`;
+  }
+  return `${origin}/api/rest`;
 }
 
 /** Résolu une fois au chargement du module (hostname = machine qui affiche l’appli). */

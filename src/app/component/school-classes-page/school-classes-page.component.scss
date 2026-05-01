@@ -51,6 +51,11 @@ mat-card-subtitle.warn {
   flex: 0 0 160px;
 }
 
+.field-period {
+  min-width: 260px;
+  flex: 1 1 280px;
+}
+
 .loading,
 .empty {
   color: rgba(0, 0, 0, 0.6);

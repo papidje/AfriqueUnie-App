@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin, of, Subject as RxSubject } from 'rxjs';
-import { catchError, takeUntil } from 'rxjs/operators';
+import { catchError, map, switchMap, takeUntil } from 'rxjs/operators';
 import { ClassPlanningView, ClassSubjectRow, SchoolSubject } from '../../models/subject.models';
 import { ClassSubjectService } from '../../service/class-subject.service';
 import { SubjectService } from '../../service/subject.service';
@@ -79,24 +79,36 @@ export class ClassSubjectsPageComponent implements OnInit, OnDestroy {
     }
     this.loading = true;
     const id = this.classId;
-    forkJoin({
-      planning: this.classSubjectService.getPlanning(id).pipe(
+    this.classSubjectService
+      .getPlanning(id)
+      .pipe(
         catchError(() =>
           of<ClassPlanningView>({ classId: id, className: '', schoolId: 0, subjects: [] })
-        )
-      ),
-      rows: this.classSubjectService.listForClass(id),
-      catalog: this.subjectService.list()
-    })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: ({ planning, rows, catalog }) => {
+        ),
+        switchMap((planning) => {
           const name = planning.className?.trim();
           this.className = name && name.length > 0 ? name : null;
+          const sid = planning.schoolId > 0 ? planning.schoolId : null;
+          this.schoolIdForTeachers = sid;
+          if (sid == null || sid <= 0) {
+            return this.classSubjectService.listForClass(id).pipe(
+              map((rows) => ({ rows, catalog: [] as SchoolSubject[] }))
+            );
+          }
+          return forkJoin({
+            rows: this.classSubjectService.listForClass(id),
+            catalog: this.subjectService.list(sid)
+          });
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: ({ rows, catalog }) => {
           this.rows = rows;
           this.catalog = catalog;
-          const sid = planning.schoolId > 0 ? planning.schoolId : rows[0]?.schoolId ?? null;
-          this.schoolIdForTeachers = sid != null && sid > 0 ? sid : null;
+          if ((this.schoolIdForTeachers == null || this.schoolIdForTeachers <= 0) && rows.length > 0) {
+            this.schoolIdForTeachers = rows[0].schoolId;
+          }
           this.loading = false;
         },
         error: () => {

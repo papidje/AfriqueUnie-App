@@ -1,0 +1,46 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page.embedded .toolbar,
+.page.embedded h1 {
+  display: none;
+}
+
+.intro {
+  color: #555;
+  margin: 0 0 12px;
+}
+
+.actions {
+  margin-bottom: 12px;
+}
+
+.loading,
+.empty {
+  padding: 12px 0;
+  color: #666;
+}
+
+.table-wrap {
+  overflow: auto;
+  border-radius: 4px;
+}
+
+.eval-table {
+  width: 100%;
+}
+
+.code {
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.click-row {
+  cursor: pointer;
+}
+
+.eval-table .mat-mdc-row:hover {
+  background: rgba(0, 0, 0, 0.04);
+}

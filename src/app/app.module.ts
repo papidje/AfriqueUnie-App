@@ -5,7 +5,7 @@ import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {LoginComponent} from './component/login/login.component';
-import {ReactiveFormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {ActivateComponent} from './component/activate/activate.component';
 import {AuthInterceptor} from "./interceptors/auth.interceptor";
 import {HeaderComponent} from './component/header/header.component';
@@ -39,6 +39,7 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { ApiUnavailableComponent } from './component/api-unavailable/api-unavailable.component';
@@ -55,11 +56,17 @@ import { ClassSubjectFormDialogComponent } from './component/class-subject-form-
 import { ClassPlanningPageComponent } from './component/class-planning-page/class-planning-page.component';
 import { ClassTimetablePageComponent } from './component/class-timetable-page/class-timetable-page.component';
 import { ClassWorkspacePageComponent } from './component/class-workspace-page/class-workspace-page.component';
+import { ClassEvaluationsPageComponent } from './component/class-evaluations-page/class-evaluations-page.component';
+import { ClassPeriodsPageComponent } from './component/class-periods-page/class-periods-page.component';
+import { NewEvaluationDialogComponent } from './component/class-evaluations-page/new-evaluation-dialog.component';
+import { EvaluationGradesPageComponent } from './component/evaluation-grades-page/evaluation-grades-page.component';
+import { GradeNoteEnterNextDirective } from './directives/grade-note-enter-next.directive';
 import { StudentRegistrationComponent } from './component/student-registration/student-registration.component';
 import { StudentListComponent } from './component/student-list/student-list.component';
 import { StudentDetailPageComponent } from './component/student-detail-page/student-detail-page.component';
 import { ParentDetailPageComponent } from './component/parent-detail-page/parent-detail-page.component';
 import { ParentListPageComponent } from './component/parent-list-page/parent-list-page.component';
+import { PeriodNotesPageComponent } from './component/period-notes-page/period-notes-page.component';
 import { AuthService } from './service/auth.service';
 
 export function initializeAuthFactory(authService: AuthService) {
@@ -100,12 +107,19 @@ export function initializeAuthFactory(authService: AuthService) {
     StudentListComponent,
     StudentDetailPageComponent,
     ParentDetailPageComponent,
-    ParentListPageComponent
+    ParentListPageComponent,
+    PeriodNotesPageComponent,
+    ClassEvaluationsPageComponent,
+    ClassPeriodsPageComponent,
+    NewEvaluationDialogComponent,
+    EvaluationGradesPageComponent,
+    GradeNoteEnterNextDirective
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
+    FormsModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
     MatToolbarModule,
@@ -127,6 +141,7 @@ export function initializeAuthFactory(authService: AuthService) {
     MatStepperModule
     ,
     MatTabsModule,
+    MatButtonToggleModule,
     MatTooltipModule,
     MatMenuModule,
     SharedModule
