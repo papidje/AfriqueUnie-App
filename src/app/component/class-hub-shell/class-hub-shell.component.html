@@ -1,0 +1,32 @@
+<section class="class-hub-shell-page">
+  <mat-card>
+    <div class="head">
+      <div>
+        <h1>{{ hubTitle }}</h1>
+        <p>{{ hubSubtitle }}</p>
+      </div>
+    </div>
+
+    <div class="loading" *ngIf="loadingClasses">Chargement des classes…</div>
+
+    <div *ngIf="!loadingClasses && sortedClasses.length" class="class-tabs">
+      <button
+        type="button"
+        mat-stroked-button
+        *ngFor="let cl of sortedClasses"
+        [class.active]="isTabActive(cl)"
+        (click)="onClassTabClick(cl)"
+      >
+        {{ cl.name }}
+      </button>
+    </div>
+
+    <div class="tab-content" *ngIf="selectionReady">
+      <router-outlet></router-outlet>
+    </div>
+
+    <div class="empty" *ngIf="!loadingClasses && sortedClasses.length === 0">
+      Aucune classe trouvée pour l’année active.
+    </div>
+  </mat-card>
+</section>

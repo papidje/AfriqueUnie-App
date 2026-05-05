@@ -7,12 +7,7 @@ import { ActiveSchoolService } from '../../../service/active-school.service';
 import { SchoolClassService } from '../../../service/school-class.service';
 import { SchoolYearService } from '../../../service/school-year.service';
 
-export type ClassWorkspaceSegment =
-  | 'planning'
-  | 'emploi-du-temps'
-  | 'matieres'
-  | 'periodes'
-  | 'evaluations';
+export type ClassWorkspaceSegment = 'planning' | 'matieres' | 'periodes';
 
 interface SchoolContext {
   schoolId: number | null;

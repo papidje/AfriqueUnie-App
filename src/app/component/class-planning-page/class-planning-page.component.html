@@ -2,7 +2,7 @@
   <ng-container *ngIf="!workspaceChild">
     <div class="toolbar">
       <a mat-stroked-button routerLink="/classes">Retour aux classes</a>
-      <a mat-stroked-button [routerLink]="['/classes', classId, 'emploi-du-temps']" *ngIf="classId != null">
+      <a mat-stroked-button [routerLink]="['/emploi-du-temps', classId]" *ngIf="classId != null">
         Emploi du temps
       </a>
       <a

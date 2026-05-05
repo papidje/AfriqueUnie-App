@@ -1,5 +1,5 @@
-<div class="page" [class.embedded]="workspaceChild">
-  <ng-container *ngIf="!workspaceChild">
+<div class="page" [class.embedded]="workspaceChild || hubEmbedded">
+  <ng-container *ngIf="!workspaceChild && !hubEmbedded">
     <p class="toolbar">
       <a mat-stroked-button routerLink="/classes">Retour aux classes</a>
     </p>

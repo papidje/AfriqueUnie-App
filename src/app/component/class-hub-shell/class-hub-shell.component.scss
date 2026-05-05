@@ -1,0 +1,41 @@
+.class-hub-shell-page {
+  padding: 16px;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.head h1 {
+  margin: 0;
+}
+
+.head p {
+  margin: 6px 0 0;
+  color: #607d8b;
+}
+
+.loading {
+  padding: 16px 0;
+  color: #607d8b;
+}
+
+.empty {
+  padding: 16px 0;
+  color: #607d8b;
+}
+
+.class-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tab-content {
+  padding: 12px 4px 4px;
+}

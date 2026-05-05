@@ -23,6 +23,8 @@ export class EvaluationGradesPageComponent implements OnInit, OnDestroy {
   evaluationId: number | null = null;
   classId: number | null = null;
   workspaceChild = false;
+  /** Saisie des notes ouverte depuis le hub /evaluations/… (pas la barre « Retour aux classes »). */
+  gradesHub = false;
   loading = true;
   saving = false;
   sheet: GradeSheetResponse | null = null;
@@ -90,6 +92,7 @@ export class EvaluationGradesPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.workspaceChild = !!this.route.snapshot.data['workspaceChild'];
+    this.gradesHub = !!this.route.snapshot.data['evaluationGradesHub'];
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(() => {
       const eid = Number(this.route.snapshot.paramMap.get('evaluationId'));
       this.evaluationId = Number.isFinite(eid) && eid > 0 ? eid : null;
@@ -112,9 +115,9 @@ export class EvaluationGradesPageComponent implements OnInit, OnDestroy {
 
   backToList(): void {
     if (this.classId != null) {
-      void this.router.navigate(['/classes', this.classId, 'evaluations']);
+      void this.router.navigate(['/evaluations', this.classId]);
     } else {
-      void this.router.navigate(['/classes']);
+      void this.router.navigate(['/evaluations']);
     }
   }
 

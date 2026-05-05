@@ -70,8 +70,9 @@ export class RegisterSchoolComponent {
       email: adminValues.email,
       tenantName: tenantLabel,
       schoolName: establishmentName,
-      tenantAddress: `${schoolValues.tenantAddress} | Tel: ${schoolValues.phone}`,
-      tenantLogo: ''
+      tenantAddress: (schoolValues.tenantAddress ?? '').trim(),
+      tenantLogo: '',
+      schoolContact: (schoolValues.phone ?? '').trim()
     }).subscribe({
       next: () => {
         this.loading = false;
