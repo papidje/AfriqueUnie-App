@@ -23,6 +23,8 @@ export class ClassEvaluationsPageComponent implements OnInit, OnDestroy {
 
   classId: number | null = null;
   workspaceChild = false;
+  /** Liste dédiée sidebar (carte + onglets classe), sans barre « espace classe ». */
+  hubEmbedded = false;
   loading = true;
   evaluations: EvaluationResponse[] = [];
 
@@ -49,6 +51,7 @@ export class ClassEvaluationsPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.workspaceChild = !!this.route.snapshot.data['workspaceChild'];
+    this.hubEmbedded = !!this.route.snapshot.data['hubEmbedded'];
     const param$ =
       this.workspaceChild && this.route.parent != null ? this.route.parent.paramMap : this.route.paramMap;
     param$.pipe(takeUntil(this.destroy$)).subscribe(() => {
@@ -85,7 +88,7 @@ export class ClassEvaluationsPageComponent implements OnInit, OnDestroy {
     if (this.classId == null) {
       return;
     }
-    void this.router.navigate(['/classes', this.classId, 'evaluations', e.id, 'notes']);
+    void this.router.navigate(['/evaluations', this.classId, e.id, 'notes']);
   }
 
   private reload(): void {

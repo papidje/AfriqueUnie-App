@@ -113,7 +113,7 @@
                   *ngIf="canSaisirNote() && currentClassId != null"
                   mat-raised-button
                   color="primary"
-                  [routerLink]="['/classes', currentClassId, 'evaluations']"
+                  [routerLink]="['/evaluations', currentClassId]"
                 >
                   Saisir une note
                 </a>

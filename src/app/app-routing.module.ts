@@ -41,6 +41,7 @@ import { StudentDetailPageComponent } from "./component/student-detail-page/stud
 import { ParentDetailPageComponent } from "./component/parent-detail-page/parent-detail-page.component";
 import { ParentListPageComponent } from "./component/parent-list-page/parent-list-page.component";
 import { PeriodNotesPageComponent } from "./component/period-notes-page/period-notes-page.component";
+import { ClassHubShellComponent } from "./component/class-hub-shell/class-hub-shell.component";
 
 const routes: Routes = [
   // 🔒 Layout d’authentification
@@ -101,12 +102,6 @@ const routes: Routes = [
             data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
           },
           {
-            path: 'emploi-du-temps',
-            component: ClassTimetablePageComponent,
-            canActivate: [AuthGuard, RoleGuard],
-            data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
-          },
-          {
             path: 'periodes',
             component: ClassPeriodsPageComponent,
             canActivate: [AuthGuard, RoleGuard],
@@ -115,18 +110,6 @@ const routes: Routes = [
           {
             path: 'planning',
             component: ClassPlanningPageComponent,
-            canActivate: [AuthGuard, RoleGuard],
-            data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
-          },
-          {
-            path: 'evaluations/:evaluationId/notes',
-            component: EvaluationGradesPageComponent,
-            canActivate: [AuthGuard, RoleGuard],
-            data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
-          },
-          {
-            path: 'evaluations',
-            component: ClassEvaluationsPageComponent,
             canActivate: [AuthGuard, RoleGuard],
             data: { roles: [...ROLES_CLASSES_NAV], workspaceChild: true }
           }
@@ -149,6 +132,51 @@ const routes: Routes = [
         component: PeriodNotesPageComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: { roles: [...ROLES_CLASSES_NAV] }
+      },
+      {
+        path: 'evaluations',
+        component: ClassHubShellComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: {
+          roles: [...ROLES_CLASSES_NAV],
+          classHubTitle: 'Évaluations',
+          classHubSubtitle: 'Contrôles, devoirs et compositions par classe (année active).',
+          classHubSegment: 'evaluations'
+        },
+        children: [
+          {
+            path: ':classId/:evaluationId/notes',
+            component: EvaluationGradesPageComponent,
+            canActivate: [AuthGuard, RoleGuard],
+            data: { roles: [...ROLES_CLASSES_NAV], evaluationGradesHub: true }
+          },
+          {
+            path: ':classId',
+            component: ClassEvaluationsPageComponent,
+            canActivate: [AuthGuard, RoleGuard],
+            data: { roles: [...ROLES_CLASSES_NAV], hubEmbedded: true }
+          }
+        ]
+      },
+      {
+        path: 'emploi-du-temps',
+        component: ClassHubShellComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: {
+          roles: [...ROLES_CLASSES_NAV],
+          classHubTitle: 'Emploi du temps',
+          classHubSubtitle:
+            'Semaine type par classe (année active). Les évaluations de la semaine apparaissent sur les créneaux concernés.',
+          classHubSegment: 'emploi-du-temps'
+        },
+        children: [
+          {
+            path: ':classId',
+            component: ClassTimetablePageComponent,
+            canActivate: [AuthGuard, RoleGuard],
+            data: { roles: [...ROLES_CLASSES_NAV], hubEmbedded: true }
+          }
+        ]
       },
       {
         path: 'annee-scolaire/nouvelle',

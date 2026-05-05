@@ -151,6 +151,32 @@
       </a>
       <a
         mat-list-item
+        *ngIf="hasAnyRole(navClassesRoles)"
+        routerLink="/emploi-du-temps"
+        matTooltip="Emploi du temps"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
+      >
+        <div class="nav-item-stack">
+          <mat-icon>schedule</mat-icon>
+          <span *ngIf="sidebarExpanded">Emploi du temps</span>
+        </div>
+      </a>
+      <a
+        mat-list-item
+        *ngIf="hasAnyRole(navClassesRoles)"
+        routerLink="/evaluations"
+        matTooltip="Évaluations"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
+      >
+        <div class="nav-item-stack">
+          <mat-icon>assignment</mat-icon>
+          <span *ngIf="sidebarExpanded">Évaluations</span>
+        </div>
+      </a>
+      <a
+        mat-list-item
         *ngIf="showFinanceNav()"
         routerLink="/finance"
         matTooltip="Finance"

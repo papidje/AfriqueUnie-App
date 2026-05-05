@@ -67,6 +67,7 @@ import { StudentDetailPageComponent } from './component/student-detail-page/stud
 import { ParentDetailPageComponent } from './component/parent-detail-page/parent-detail-page.component';
 import { ParentListPageComponent } from './component/parent-list-page/parent-list-page.component';
 import { PeriodNotesPageComponent } from './component/period-notes-page/period-notes-page.component';
+import { ClassHubShellComponent } from './component/class-hub-shell/class-hub-shell.component';
 import { AuthService } from './service/auth.service';
 
 export function initializeAuthFactory(authService: AuthService) {
@@ -109,6 +110,7 @@ export function initializeAuthFactory(authService: AuthService) {
     ParentDetailPageComponent,
     ParentListPageComponent,
     PeriodNotesPageComponent,
+    ClassHubShellComponent,
     ClassEvaluationsPageComponent,
     ClassPeriodsPageComponent,
     NewEvaluationDialogComponent,

@@ -36,6 +36,7 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
 
   classId: number | null = null;
   workspaceChild = false;
+  hubEmbedded = false;
   loading = true;
   syncing = false;
 
@@ -102,6 +103,7 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.workspaceChild = !!this.route.snapshot.data['workspaceChild'];
+    this.hubEmbedded = !!this.route.snapshot.data['hubEmbedded'];
     const param$ =
       this.workspaceChild && this.route.parent != null ? this.route.parent.paramMap : this.route.paramMap;
     param$.pipe(takeUntil(this.destroy$)).subscribe(() => {

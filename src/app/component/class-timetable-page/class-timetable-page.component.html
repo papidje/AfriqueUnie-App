@@ -1,16 +1,7 @@
-<div class="page" [class.embedded]="workspaceChild">
-  <ng-container *ngIf="!workspaceChild">
-    <div class="toolbar">
-      <a mat-stroked-button routerLink="/classes">Retour aux classes</a>
-      <a mat-stroked-button *ngIf="classId != null" [routerLink]="['/classes', classId, 'planning']">
-        Planning & professeurs
-      </a>
-    </div>
-
-    <h1>Emploi du temps</h1>
-
-    <app-class-workspace-context-bar workspaceSegment="emploi-du-temps"></app-class-workspace-context-bar>
-  </ng-container>
+<div class="page" [class.embedded]="workspaceChild || hubEmbedded">
+  <p class="hub-extra" *ngIf="hubEmbedded && classId != null">
+    <a mat-stroked-button [routerLink]="['/classes', classId, 'planning']">Planning &amp; professeurs</a>
+  </p>
 
   <p class="intro" *ngIf="classId != null">
     Semaine type (lundi–vendredi), créneaux d’une heure de 8h à 16h.
@@ -18,10 +9,6 @@
     indiquées sur <strong>chaque créneau horaire</strong> qu’elles chevauchent, avec un fond distinct et le type sur l’étiquette.
     <span *ngIf="canEdit"> Glissez une matière depuis la liste vers un créneau, ou déplacez les créneaux entre eux. </span>
     <span *ngIf="!canEdit"> Affichage seul. </span>
-  </p>
-
-  <p class="workspace-extra" *ngIf="workspaceChild && classId != null">
-    <a mat-button [routerLink]="['/classes', classId, 'planning']">Planning &amp; professeurs</a>
   </p>
 
   <div *ngIf="loading" class="loading">Chargement…</div>
