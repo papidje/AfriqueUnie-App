@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>{{ data.row.title || 'Notification' }}</h2>
+
+<mat-dialog-content class="dlg-content">
+  <p class="meta">
+    {{ data.row.createdAt | date : 'medium' }}
+    <span class="dot">·</span> {{ data.row.source }}
+    <span class="dot">·</span> {{ data.row.eventType }}
+    <span class="dot">·</span> {{ data.row.channel }}
+    <span class="dot">·</span> {{ data.row.status }}
+  </p>
+  <p *ngIf="data.row.recipientsSummary" class="recipients">
+    <strong>Destinataires :</strong> {{ data.row.recipientsSummary }}
+  </p>
+  <p *ngIf="data.row.errorMessage" class="error-msg">
+    <strong>Erreur :</strong> {{ data.row.errorMessage }}
+  </p>
+  <h3 class="section-title">Contenu</h3>
+  <pre class="body-text">{{ bodyText() }}</pre>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">Fermer</button>
+</mat-dialog-actions>

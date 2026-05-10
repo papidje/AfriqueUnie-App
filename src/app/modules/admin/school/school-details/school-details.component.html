@@ -131,7 +131,7 @@
         </ng-container>
         <ng-container matColumnDef="dates">
           <th mat-header-cell *matHeaderCellDef>Période</th>
-          <td mat-cell *matCellDef="let y">{{ y.startDate }} → {{ y.endDate }}</td>
+          <td mat-cell *matCellDef="let y">{{ y.startDate | displayDate }} → {{ y.endDate | displayDate }}</td>
         </ng-container>
         <ng-container matColumnDef="active">
           <th mat-header-cell *matHeaderCellDef>Active</th>

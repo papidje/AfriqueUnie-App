@@ -13,7 +13,7 @@
       <div class="head">
         <div>
           <h1>{{ s.lastName }} {{ s.firstName }}</h1>
-          <p class="sub">Matricule {{ s.matricule }} · Né(e) le {{ formatBirth(s.birthDate) }}</p>
+          <p class="sub">Matricule {{ s.matricule }} · Né(e) le {{ s.birthDate | displayDate }}</p>
         </div>
       </div>
 
@@ -58,7 +58,7 @@
             </div>
             <div class="table-wrap" *ngIf="paymentGroups.length">
               <table mat-table [dataSource]="paymentGroups" class="mat-elevation-z0 payments-table">
-                <ng-container matColumnDef="paymentDate"><th mat-header-cell *matHeaderCellDef>Date</th><td mat-cell *matCellDef="let row">{{ row.paymentDate | date : 'dd/MM/yyyy HH:mm' }}</td></ng-container>
+                <ng-container matColumnDef="paymentDate"><th mat-header-cell *matHeaderCellDef>Date</th><td mat-cell *matCellDef="let row">{{ row.paymentDate | displayDate:'datetime' }}</td></ng-container>
                 <ng-container matColumnDef="schoolYearLabel"><th mat-header-cell *matHeaderCellDef>Année</th><td mat-cell *matCellDef="let row">{{ row.schoolYearLabel }}</td></ng-container>
                 <ng-container matColumnDef="receiptReference"><th mat-header-cell *matHeaderCellDef>Réf.</th><td mat-cell *matCellDef="let row">{{ row.receiptReference || '—' }}</td></ng-container>
                 <ng-container matColumnDef="paymentType"><th mat-header-cell *matHeaderCellDef>Type</th><td mat-cell *matCellDef="let row">{{ row.paymentTypeLabel }}</td></ng-container>

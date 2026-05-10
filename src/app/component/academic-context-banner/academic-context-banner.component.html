@@ -6,7 +6,7 @@
       <ng-container *ngIf="vm.year as y">
         <span class="banner-sep">·</span>
         <strong class="banner-value">{{ y.label }}</strong>
-        <span class="banner-dates muted">({{ y.startDate }} → {{ y.endDate }})</span>
+        <span class="banner-dates muted">({{ y.startDate | displayDate }} → {{ y.endDate | displayDate }})</span>
       </ng-container>
       <ng-container *ngIf="!vm.year">
         <span class="banner-sep">·</span>

@@ -68,7 +68,7 @@
                   class="eval-strip"
                   [ngClass]="'eval-strip--' + ev.type"
                   [matTooltip]="
-                    (ev.startDate | date: 'dd/MM à HH:mm') + ' – ' + (ev.endDate | date: 'dd/MM à HH:mm') + ' — ' + ev.subjectName
+                    (ev.startDate | displayDate:'datetime') + ' – ' + (ev.endDate | displayDate:'datetime') + ' — ' + ev.subjectName
                   "
                 >
                   <span class="eval-badge">{{ shortEvalBadge(ev.type) }}</span>

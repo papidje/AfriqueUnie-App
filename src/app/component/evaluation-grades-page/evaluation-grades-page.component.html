@@ -14,7 +14,7 @@
 
   <p class="sub" *ngIf="sheet as s">
     {{ s.evaluation.subjectCode }} — {{ s.evaluation.subjectName }} — {{ s.evaluation.gradingPeriodName }} —
-    coefficient {{ s.evaluation.coefficient }} — note sur {{ maxScore }}
+    coef. matière {{ s.evaluation.coefficient }} — note sur {{ maxScore }}
   </p>
 
   <div *ngIf="loading" class="loading">Chargement…</div>

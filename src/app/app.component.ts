@@ -7,6 +7,7 @@ import {ThemeService} from './service/theme.service';
 import {
   AppRoles,
   ROLES_CLASSES_NAV,
+  ROLES_COMMUNICATION_NAV,
   ROLES_FINANCIAL_NAV,
   ROLES_STUDENTS_NAV,
   SCHOOL_PORTAL_ROLES
@@ -28,6 +29,7 @@ export class AppComponent implements OnInit {
   readonly navClassesRoles = ROLES_CLASSES_NAV;
   readonly navParentsRoles = ROLES_STUDENTS_NAV;
   readonly navFinancialRoles = ROLES_FINANCIAL_NAV;
+  readonly navCommunicationRoles = ROLES_COMMUNICATION_NAV;
 
   constructor(
     private service: AuthService,
@@ -55,13 +57,6 @@ export class AppComponent implements OnInit {
   logout(): void {
     this.service.logout().subscribe({
       next: () => {
-        this.service.clearTokens();
-        this.activeSchool.clear();
-        this.router.navigate(['/login']);
-      },
-      error: (err) => {
-        console.error('Erreur lors du logout :', err);
-        this.service.clearTokens();
         this.activeSchool.clear();
         this.router.navigate(['/login']);
       }

@@ -40,7 +40,6 @@ export interface CreateEvaluationRequest {
   title: string;
   description: string | null;
   type: EvaluationType;
-  coefficient: number;
   maxScore: number;
   startDate: string;
   endDate: string;

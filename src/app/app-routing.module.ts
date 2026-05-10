@@ -18,6 +18,7 @@ import {
   ROLES_ADMIN_MODULE,
   ROLES_CLASSES_NAV,
   ROLES_FINANCIAL_NAV,
+  ROLES_COMMUNICATION_NAV,
   ROLES_SCHOOL_YEAR_NAV,
   ROLES_STUDENT_REGISTRATION,
   ROLES_STUDENTS_NAV,
@@ -42,6 +43,7 @@ import { ParentDetailPageComponent } from "./component/parent-detail-page/parent
 import { ParentListPageComponent } from "./component/parent-list-page/parent-list-page.component";
 import { PeriodNotesPageComponent } from "./component/period-notes-page/period-notes-page.component";
 import { ClassHubShellComponent } from "./component/class-hub-shell/class-hub-shell.component";
+import { CommunicationCenterPageComponent } from "./component/communication-center-page/communication-center-page.component";
 
 const routes: Routes = [
   // 🔒 Layout d’authentification
@@ -123,6 +125,11 @@ const routes: Routes = [
       },
       {
         path: 'referentiel/matieres',
+        redirectTo: 'matieres',
+        pathMatch: 'full'
+      },
+      {
+        path: 'matieres',
         component: SubjectsCatalogPageComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: { roles: [...ROLES_CLASSES_NAV] }
@@ -189,6 +196,12 @@ const routes: Routes = [
         canActivate: [AuthGuard, RoleGuard],
         data: { roles: [...ROLES_FINANCIAL_NAV] },
         loadChildren: () => import('./modules/finance/finance.module').then(m => m.FinanceModule)
+      },
+      {
+        path: 'communication',
+        component: CommunicationCenterPageComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [...ROLES_COMMUNICATION_NAV] }
       },
       { path: 'parametres-financiers', redirectTo: 'finance/settings', pathMatch: 'full' },
       {

@@ -40,10 +40,10 @@
       </ng-container>
       <ng-container matColumnDef="start">
         <th mat-header-cell *matHeaderCellDef>Début</th>
-        <td mat-cell *matCellDef="let row">{{ row.startDate | date: 'dd/MM/yyyy à HH:mm' }}</td>
+        <td mat-cell *matCellDef="let row">{{ row.startDate | displayDate:'at' }}</td>
       </ng-container>
       <ng-container matColumnDef="coeff">
-        <th mat-header-cell *matHeaderCellDef>Coef.</th>
+        <th mat-header-cell *matHeaderCellDef>Coef. matière</th>
         <td mat-cell *matCellDef="let row">{{ row.coefficient }}</td>
       </ng-container>
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

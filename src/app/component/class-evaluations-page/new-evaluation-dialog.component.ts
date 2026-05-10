@@ -50,7 +50,6 @@ export class NewEvaluationDialogComponent implements OnInit, OnDestroy {
         examDate: [today, Validators.required],
         startTime: ['08:00', Validators.required],
         endTime: ['09:00', Validators.required],
-        coefficient: [1, [Validators.required, Validators.min(0.01), Validators.max(100)]],
         maxScore: [20, [Validators.required, Validators.min(0.01), Validators.max(10000)]]
       },
       { validators: [NewEvaluationDialogComponent.endAfterStart] }
@@ -100,6 +99,15 @@ export class NewEvaluationDialogComponent implements OnInit, OnDestroy {
 
   subjects: ClassSubjectRow[] = [];
 
+  /** Coefficient matière/classe (même valeur que sur « Matières de la classe ») — utilisé pour les moyennes. */
+  get selectedSubjectCoefficient(): number | null {
+    const id = this.form.get('classSubjectId')?.value as number | null;
+    if (id == null) {
+      return null;
+    }
+    return this.subjects.find((s) => s.id === id)?.coefficient ?? null;
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -126,7 +134,6 @@ export class NewEvaluationDialogComponent implements OnInit, OnDestroy {
         title: (v.title as string).trim(),
         description: null,
         type: v.type,
-        coefficient: Number(v.coefficient),
         maxScore: Number(v.maxScore),
         startDate,
         endDate

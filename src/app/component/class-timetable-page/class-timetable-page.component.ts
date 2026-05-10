@@ -12,6 +12,7 @@ import { ClassTimetableService } from '../../service/class-timetable.service';
 import { resolveSchoolClassId } from '../../util/class-route.util';
 import { evaluationOverlapsTimetableSlot } from '../../util/timetable-evaluation-cell.util';
 import type { EvaluationType } from '../../models/evaluation.models';
+import { formatDisplayDate } from '../../shared/util/display-date.util';
 
 @Component({
   selector: 'app-class-timetable-page',
@@ -256,7 +257,7 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
     this.loading = true;
     const weekStart = this.mondayIsoInWeek(new Date());
     this.lastWeekStartIso = weekStart;
-    this.weekStartLabel = this.formatFrenchDate(weekStart);
+    this.weekStartLabel = formatDisplayDate(weekStart);
     forkJoin({
       timetable: this.timetableService.getTimetable(this.classId, {
         weekStart,
@@ -364,19 +365,6 @@ export class ClassTimetablePageComponent implements OnInit, OnDestroy {
         }
       }
     }
-  }
-
-  private formatFrenchDate(isoDate: string): string {
-    const [y, m, day] = isoDate.split('-').map((x) => Number(x));
-    if (!y || !m || !day) {
-      return isoDate;
-    }
-    return new Date(y, m - 1, day).toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
   }
 
   private key(dow: number, slot: number): string {
