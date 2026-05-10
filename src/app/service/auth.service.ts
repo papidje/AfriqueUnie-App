@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
-import {Observable, of, tap, catchError} from "rxjs";
+import {HttpClient, HttpErrorResponse} from "@angular/common/http";
+import {Observable, of, tap, catchError, throwError, finalize} from "rxjs";
 import {jwtDecode} from "jwt-decode";
 import {AppRoles} from "../core/app-roles";
 import {ACTIVE_SCHOOL_ID_SESSION_KEY} from "../core/storage-keys";
@@ -55,13 +55,33 @@ export class AuthService {
     return localStorage.getItem(this.HEADER_TITLE_KEY) || 'Mon organisation';
   }
 
-  refreshToken(): Observable<any> {
+  getPostLoginCommands(): string[] {
+    const role = localStorage.getItem(this.ROLE_KEY);
+    if (role === AppRoles.SUPER_ADMIN) {
+      return ['/super-admin/dashboard'];
+    }
+    if (role === AppRoles.ADMIN_ECOLE) {
+      return ['/admin'];
+    }
+    return ['/dashboard'];
+  }
+
+  /** JWT encore valide (exp > maintenant). */
+  isAccessTokenValid(): boolean {
+    const token = this.getToken();
+    return !!token && this.isTokenValid(token);
+  }
+
+  refreshToken(): Observable<{ bearer: string; refresh: string }> {
     const refresh = this.getRefreshToken();
-    return this.http.post(`${this.apiUrl}/auth/refresh-token`, { refresh: refresh }).pipe(
-      tap((response: any) => {
-        this.saveTokens(response.bearer, response.refresh);
-      })
-    );
+    if (!refresh) {
+      return throwError(
+        () => new HttpErrorResponse({ status: 401, statusText: 'No refresh token' })
+      );
+    }
+    return this.http
+      .post<{ bearer: string; refresh: string }>(`${this.apiUrl}/auth/refresh-token`, { refresh })
+      .pipe(tap((response) => this.saveTokens(response.bearer, response.refresh)));
   }
 
   login(credentials: {userName: string, password: string}): Observable<any> {
@@ -72,8 +92,20 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/auth/activate`, data);
   }
 
+  /**
+   * Révoque le JWT côté serveur si possible, puis efface impérativement le stockage local
+   * (même en cas d’erreur réseau).
+   */
   logout(): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/auth/logout`, {});
+    const token = this.getToken();
+    if (!token) {
+      this.clearTokens();
+      return of(void 0);
+    }
+    return this.http.post<void>(`${this.apiUrl}/auth/logout`, {}).pipe(
+      catchError(() => of(void 0)),
+      finalize(() => this.clearTokens())
+    );
   }
 
   resetPassword(data: {email: string}): Observable<void> {

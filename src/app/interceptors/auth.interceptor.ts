@@ -1,14 +1,19 @@
 import {Injectable} from '@angular/core';
 import {HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
-import {BehaviorSubject, catchError, filter, Observable, switchMap, take, throwError} from 'rxjs';
+import {catchError, finalize, Observable, of, shareReplay, switchMap, throwError} from 'rxjs';
 import {AuthService} from "../service/auth.service";
 import {Router} from "@angular/router";
 
+/**
+ * JWT sur les requêtes métier ; sur 401 une seule vague de refresh partagée (shareReplay),
+ * puis rejoue chaque requête avec le nouveau bearer. Les appels /auth/* (sauf logout) ne passent pas
+ * par ce flux pour éviter toute boucle avec /auth/refresh-token.
+ */
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  private isRefreshing = false;
-  private refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+  /** Refresh HTTP unique tant que des abonnés sont actifs (file d’attente implicite). */
+  private refreshInFlight$: Observable<string> | null = null;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -36,7 +41,6 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   private isAuthEndpoint(url: string): boolean {
-    // tu peux adapter selon ton backend (ici baseUrl = /api/rest)
     const isAuth = url.includes('/api/rest/auth/');
     const isLogout = url.endsWith('/auth/logout');
     return isAuth && !isLogout;
@@ -48,31 +52,39 @@ export class AuthInterceptor implements HttpInterceptor {
     });
   }
 
-  private handleAuthError(request: HttpRequest<any>, next: HttpHandler) {
-    if (!this.isRefreshing) {
-      this.isRefreshing = true;
-      this.refreshTokenSubject.next(null);
+  private handleAuthError(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    if (!this.authService.getRefreshToken()) {
+      this.authService.clearTokens();
+      this.router.navigate(['/login']);
+      return throwError(() => new HttpErrorResponse({ status: 401 }));
+    }
 
-      return this.authService.refreshToken().pipe(
-        switchMap((response: any) => {
-          this.isRefreshing = false;
-          this.refreshTokenSubject.next(response.bearer);
-          return next.handle(this.addTokenHeader(request, response.bearer));
+    return this.refreshSessionJwt().pipe(
+      switchMap((newJwt) => next.handle(this.addTokenHeader(request, newJwt))),
+      catchError((err) => {
+        this.authService.clearTokens();
+        this.router.navigate(['/login']);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  /**
+   * Une seule requête refresh pour N appels 401 parallèles ; finalize réinitialise pour le prochain cycle.
+   */
+  private refreshSessionJwt(): Observable<string> {
+    if (!this.refreshInFlight$) {
+      this.refreshInFlight$ = this.authService.refreshToken().pipe(
+        switchMap((res: { bearer?: string }) => {
+          const bearer = res?.bearer ?? this.authService.getToken();
+          return bearer ? of(bearer) : throwError(() => new HttpErrorResponse({ status: 401 }));
         }),
-        catchError((err) => {
-          this.isRefreshing = false;
-          this.authService.clearTokens();
-          this.router.navigate(['/login']);
-          return throwError(() => err);
+        shareReplay({ bufferSize: 1, refCount: true }),
+        finalize(() => {
+          this.refreshInFlight$ = null;
         })
       );
-    } else {
-      // Si un refresh est déjà en cours, on attend qu’il soit terminé
-      return this.refreshTokenSubject.pipe(
-        filter(token => token != null),
-        take(1),
-        switchMap(token => next.handle(this.addTokenHeader(request, token!)))
-      );
     }
+    return this.refreshInFlight$;
   }
 }

@@ -91,6 +91,13 @@ export const ROLES_FINANCIAL_NAV: AppRoleAuthority[] = [
   AppRoles.ACCOUNTANT,
 ];
 
+/** Centre de communication (API `/api/communication`) : admin, directeur, staff uniquement. */
+export const ROLES_COMMUNICATION_NAV: AppRoleAuthority[] = [
+  AppRoles.ADMIN_ECOLE,
+  AppRoles.DIRECTOR,
+  AppRoles.STAFF,
+];
+
 /** Paramètres des tarifs (barèmes) : directeur + admin établissement uniquement. */
 export const ROLES_FEE_SETTINGS_NAV: AppRoleAuthority[] = [
   AppRoles.ADMIN_ECOLE,

@@ -20,6 +20,7 @@ import { PaymentReceiptPrintDialogComponent } from '../../shared/component/payme
 import { PaymentReceiptPrintData } from '../../shared/component/payment-receipt-print-dialog/payment-receipt-print-dialog.models';
 import { API_BASE_URL } from '../../core/api-base';
 import { prepareStudentPhotoFile } from '../../util/student-photo-upload.util';
+import { formatDisplayDateTimeAt } from '../../shared/util/display-date.util';
 
 export interface StudentPaymentHistoryGroupRow {
   receiptReference: string | null;
@@ -270,17 +271,15 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   private formatSnapshotAsOfText(iso: string): string {
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) {
+    const line = formatDisplayDateTimeAt(iso);
+    if (line === '—') {
       return (
         'Les moyennes et rangs proviennent d’un enregistrement en base. ' +
         'Les notes saisies après le dernier calcul seront intégrées au prochain recalcul nocturne.'
       );
     }
-    const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
-    const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     return (
-      `Les moyennes et rangs ont été mis à jour le ${dateStr} à ${timeStr}. ` +
+      `Les moyennes et rangs ont été mis à jour le ${line}. ` +
       'Les notes saisies après cette heure seront prises en compte lors du prochain calcul nocturne.'
     );
   }
@@ -383,19 +382,6 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
   asMoney(value: number, currency: string): string {
     const cur = (currency || 'GNF').trim();
     return `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(Number(value || 0))} ${cur}`;
-  }
-
-  formatBirth(raw: StudentDetailDto['birthDate'] | null | undefined): string {
-    if (raw == null) return '—';
-    if (typeof raw === 'string') {
-      const d = new Date(raw);
-      return Number.isNaN(d.getTime()) ? raw : d.toLocaleDateString('fr-FR');
-    }
-    if (Array.isArray(raw) && raw.length >= 3) {
-      const [y,m,d] = raw;
-      return new Date(Number(y), Number(m)-1, Number(d)).toLocaleDateString('fr-FR');
-    }
-    return '—';
   }
 
   openReceiptDuplicate(row: StudentPaymentHistoryGroupRow): void {

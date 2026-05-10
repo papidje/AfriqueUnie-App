@@ -48,6 +48,8 @@
           mat-list-item
           *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
           routerLink="/admin"
+          routerLinkActive="sidenav-link-active"
+          [routerLinkActiveOptions]="{ exact: false }"
           matTooltip="Gestion du staff"
           [matTooltipDisabled]="sidebarExpanded"
           matTooltipPosition="right"
@@ -61,6 +63,8 @@
           mat-list-item
           *ngIf="hasRole(AppRoles.DIRECTOR)"
           routerLink="/admin/staff"
+          routerLinkActive="sidenav-link-active"
+          [routerLinkActiveOptions]="{ exact: true }"
           matTooltip="Mon Staff"
           [matTooltipDisabled]="sidebarExpanded"
           matTooltipPosition="right"
@@ -75,6 +79,8 @@
         mat-list-item
         *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
         routerLink="/mes-etablissements"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: true }"
         matTooltip="Mes établissements"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"
@@ -88,6 +94,8 @@
         mat-list-item
         *ngIf="hasDashboardAccess()"
         routerLink="/dashboard"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: true }"
         matTooltip="Dashboard"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"
@@ -99,8 +107,25 @@
       </a>
       <a
         mat-list-item
+        *ngIf="hasAnyRole(navClassesRoles)"
+        routerLink="/classes"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: false }"
+        matTooltip="Classes"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
+      >
+        <div class="nav-item-stack">
+          <mat-icon>class</mat-icon>
+          <span *ngIf="sidebarExpanded">Classes</span>
+        </div>
+      </a>
+      <a
+        mat-list-item
         *ngIf="hasAnyRole(navStudentsRoles)"
         routerLink="/students"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: false }"
         matTooltip="Élèves"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"
@@ -113,33 +138,24 @@
       <a
         mat-list-item
         *ngIf="hasAnyRole(navClassesRoles)"
-        routerLink="/classes"
-        matTooltip="Classes"
-        [matTooltipDisabled]="sidebarExpanded"
-        matTooltipPosition="right"
-      >
-        <div class="nav-item-stack">
-          <mat-icon>class</mat-icon>
-          <span *ngIf="sidebarExpanded">Classes</span>
-        </div>
-      </a>
-      <a
-        mat-list-item
-        *ngIf="hasAnyRole(navClassesRoles)"
-        routerLink="/referentiel/matieres"
-        matTooltip="Matières (référentiel)"
+        routerLink="/matieres"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        matTooltip="Matières"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"
       >
         <div class="nav-item-stack">
           <mat-icon>menu_book</mat-icon>
-          <span *ngIf="sidebarExpanded">Matières (référentiel)</span>
+          <span *ngIf="sidebarExpanded">Matières</span>
         </div>
       </a>
       <a
         mat-list-item
         *ngIf="hasAnyRole(navClassesRoles)"
         routerLink="/notes"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: true }"
         matTooltip="Notes (période)"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"
@@ -153,6 +169,8 @@
         mat-list-item
         *ngIf="hasAnyRole(navClassesRoles)"
         routerLink="/emploi-du-temps"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: false }"
         matTooltip="Emploi du temps"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"
@@ -166,6 +184,8 @@
         mat-list-item
         *ngIf="hasAnyRole(navClassesRoles)"
         routerLink="/evaluations"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: false }"
         matTooltip="Évaluations"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"
@@ -179,6 +199,8 @@
         mat-list-item
         *ngIf="showFinanceNav()"
         routerLink="/finance"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: false }"
         matTooltip="Finance"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"
@@ -190,8 +212,25 @@
       </a>
       <a
         mat-list-item
+        *ngIf="hasAnyRole(navCommunicationRoles)"
+        routerLink="/communication"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        matTooltip="Communication"
+        [matTooltipDisabled]="sidebarExpanded"
+        matTooltipPosition="right"
+      >
+        <div class="nav-item-stack">
+          <mat-icon>campaign</mat-icon>
+          <span *ngIf="sidebarExpanded">Communication</span>
+        </div>
+      </a>
+      <a
+        mat-list-item
         *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
         routerLink="/schools"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: false }"
         matTooltip="Écoles"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"
@@ -205,6 +244,8 @@
         mat-list-item
         *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
         routerLink="/super-admin"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: false }"
         matTooltip="Tenants / écoles"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"
@@ -218,6 +259,8 @@
         mat-list-item
         *ngIf="hasAnyRole(navParentsRoles)"
         routerLink="/parents"
+        routerLinkActive="sidenav-link-active"
+        [routerLinkActiveOptions]="{ exact: false }"
         matTooltip="Parents"
         [matTooltipDisabled]="sidebarExpanded"
         matTooltipPosition="right"

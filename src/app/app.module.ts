@@ -42,6 +42,8 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ApiUnavailableComponent } from './component/api-unavailable/api-unavailable.component';
 import { RegisterSchoolComponent } from './component/register-school/register-school.component';
 import { SuperAdminDashboardComponent } from './component/super-admin-dashboard/super-admin-dashboard.component';
@@ -68,6 +70,9 @@ import { ParentDetailPageComponent } from './component/parent-detail-page/parent
 import { ParentListPageComponent } from './component/parent-list-page/parent-list-page.component';
 import { PeriodNotesPageComponent } from './component/period-notes-page/period-notes-page.component';
 import { ClassHubShellComponent } from './component/class-hub-shell/class-hub-shell.component';
+import { CommunicationCenterPageComponent } from './component/communication-center-page/communication-center-page.component';
+import { CommunicationBatchSettingsDialogComponent } from './component/communication-center-page/communication-batch-settings-dialog.component';
+import { CommunicationHistoryDetailDialogComponent } from './component/communication-center-page/communication-history-detail-dialog.component';
 import { AuthService } from './service/auth.service';
 
 export function initializeAuthFactory(authService: AuthService) {
@@ -115,7 +120,10 @@ export function initializeAuthFactory(authService: AuthService) {
     ClassPeriodsPageComponent,
     NewEvaluationDialogComponent,
     EvaluationGradesPageComponent,
-    GradeNoteEnterNextDirective
+    GradeNoteEnterNextDirective,
+    CommunicationCenterPageComponent,
+    CommunicationBatchSettingsDialogComponent,
+    CommunicationHistoryDetailDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -146,6 +154,8 @@ export function initializeAuthFactory(authService: AuthService) {
     MatButtonToggleModule,
     MatTooltipModule,
     MatMenuModule,
+    MatPaginatorModule,
+    MatSlideToggleModule,
     SharedModule
   ],
   providers: [

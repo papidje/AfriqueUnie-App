@@ -5,6 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 import { FinanceApiService } from '../../../service/finance-api.service';
 import { PaymentReceiptPrintData } from './payment-receipt-print-dialog.models';
+import { formatDisplayDateTime } from '../../util/display-date.util';
 
 @Component({
   selector: 'app-payment-receipt-print-dialog',
@@ -62,10 +63,10 @@ export class PaymentReceiptPrintDialogComponent {
 
   formatDate(raw: string | null | undefined): string {
     if (!raw) {
-      return new Date().toLocaleString('fr-FR');
+      return formatDisplayDateTime(new Date());
     }
-    const d = new Date(raw);
-    return Number.isNaN(d.getTime()) ? raw : d.toLocaleString('fr-FR');
+    const formatted = formatDisplayDateTime(raw);
+    return formatted === '—' ? String(raw) : formatted;
   }
 
   /**

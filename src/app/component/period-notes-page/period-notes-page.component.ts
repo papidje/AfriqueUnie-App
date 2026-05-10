@@ -12,6 +12,7 @@ import { PeriodNotesGridResponse } from '../../models/grading.models';
 import { SchoolClassDto } from '../../models/academic.models';
 import { AuthUtilsService } from '../../service/auth-utils.service';
 import { AppRoles } from '../../core/app-roles';
+import { formatDisplayDateTimeAt } from '../../shared/util/display-date.util';
 
 @Component({
   selector: 'app-period-notes-page',
@@ -179,17 +180,15 @@ export class PeriodNotesPageComponent implements OnInit, OnDestroy {
     if (!g?.dataFromSnapshot || g.snapshotAsOf == null) {
       return null;
     }
-    const d = new Date(g.snapshotAsOf);
-    if (Number.isNaN(d.getTime())) {
+    const line = formatDisplayDateTimeAt(g.snapshotAsOf);
+    if (line === '—') {
       return (
         'Les moyennes et rangs proviennent d’un enregistrement en base. ' +
         'Les notes saisies après le dernier calcul seront intégrées au prochain recalcul nocturne.'
       );
     }
-    const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
-    const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     return (
-      `Les moyennes et rangs ont été mis à jour le ${dateStr} à ${timeStr}. ` +
+      `Les moyennes et rangs ont été mis à jour le ${line}. ` +
       'Les notes saisies après cette heure seront prises en compte lors du prochain calcul nocturne.'
     );
   }

@@ -1,15 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../service/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AppRoles } from '../../core/app-roles';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   activationSuccessMessage: string | null = null;
 
@@ -30,22 +29,28 @@ export class LoginComponent {
     });
   }
 
+  ngOnInit(): void {
+    if (this.authService.isAccessTokenValid()) {
+      this.router.navigate(this.authService.getPostLoginCommands());
+      return;
+    }
+    const refresh = this.authService.getRefreshToken();
+    if (!refresh) {
+      return;
+    }
+    this.authService.refreshToken().subscribe({
+      next: () => this.router.navigate(this.authService.getPostLoginCommands()),
+      error: () => this.authService.clearTokens()
+    });
+  }
+
   onSubmit() {
     if (this.loginForm.valid) {
       this.authService.login(this.loginForm.value).subscribe({
         next: (res) => {
           console.log('Login successful', res);
           this.authService.saveTokens(res.bearer, res.refresh);
-          const role = localStorage.getItem('role');
-          if (role === AppRoles.SUPER_ADMIN) {
-            this.router.navigate(['/super-admin/dashboard']);
-            return;
-          }
-          if (role === AppRoles.ADMIN_ECOLE) {
-            this.router.navigate(['/admin']);
-            return;
-          }
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(this.authService.getPostLoginCommands());
         },
         error: (err) => console.error('Login failed', err)
       });

@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>Notifications automatiques</h2>
+
+<mat-dialog-content class="dialog-body">
+  <div *ngIf="loading" class="loading-row">
+    <mat-spinner diameter="36"></mat-spinner>
+    <span>Chargement…</span>
+  </div>
+
+  <form *ngIf="!loading" [formGroup]="form" class="settings-form">
+    <p class="hint">
+      Ces réglages s’appliquent au tenant courant. Le traitement planifié est géré côté serveur (cron).
+    </p>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Jours avant une évaluation (rappel)</mat-label>
+      <input matInput type="number" formControlName="evaluationReminderDaysBefore" min="1" max="30" />
+      <mat-hint>Entre 1 et 30</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Taille des lots (parents par passe)</mat-label>
+      <input matInput type="number" formControlName="batchChunkSize" min="10" max="500" />
+      <mat-hint>Entre 10 et 500</mat-hint>
+    </mat-form-field>
+
+    <div class="toggle-grid">
+      <mat-slide-toggle formControlName="evaluationReminderEnabled">Rappels d’évaluation</mat-slide-toggle>
+      <mat-slide-toggle formControlName="paymentReminderEnabled">Relances paiement</mat-slide-toggle>
+      <mat-slide-toggle formControlName="timetableChangeEnabled">Changements d’emploi du temps</mat-slide-toggle>
+      <mat-slide-toggle formControlName="emailEnabled">Canal e-mail (batch)</mat-slide-toggle>
+      <mat-slide-toggle formControlName="smsEnabled">Canal SMS (batch, mock)</mat-slide-toggle>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="saving">Annuler</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()" [disabled]="loading || saving || form.invalid">
+    Enregistrer
+  </button>
+</mat-dialog-actions>

@@ -52,12 +52,12 @@
     L’heure de fin doit être après l’heure de début.
   </p>
 
-  <mat-form-field appearance="outline" class="half">
-    <mat-label>Coefficient</mat-label>
-    <input matInput type="number" formControlName="coefficient" min="0.01" step="0.1" required />
-  </mat-form-field>
+  <p class="coef-hint" *ngIf="selectedSubjectCoefficient != null">
+    Coefficient matière (pour les moyennes)&nbsp;: <strong>{{ selectedSubjectCoefficient }}</strong>
+    — modifiable dans «&nbsp;Matières&nbsp;» de la classe.
+  </p>
 
-  <mat-form-field appearance="outline" class="half">
+  <mat-form-field appearance="outline" class="full">
     <mat-label>Note max.</mat-label>
     <input matInput type="number" formControlName="maxScore" min="0.01" step="0.5" required />
     <mat-hint>Barème (souvent 20)</mat-hint>

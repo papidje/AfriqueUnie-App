@@ -67,7 +67,7 @@
                   [value]="toDateInputValue(p.startDate)"
                   (input)="onStartChange(p, $any($event.target).value)"
                 />
-                <span *ngIf="periodRowLocked(p)">{{ p.startDate | date : 'dd/MM/yyyy' }}</span>
+                <span *ngIf="periodRowLocked(p)">{{ p.startDate | displayDate }}</span>
               </td>
             </ng-container>
             <ng-container matColumnDef="end">
@@ -80,7 +80,7 @@
                   [value]="toDateInputValue(p.endDate)"
                   (input)="onEndChange(p, $any($event.target).value)"
                 />
-                <span *ngIf="periodRowLocked(p)">{{ p.endDate | date : 'dd/MM/yyyy' }}</span>
+                <span *ngIf="periodRowLocked(p)">{{ p.endDate | displayDate }}</span>
               </td>
             </ng-container>
             <ng-container matColumnDef="lock">
