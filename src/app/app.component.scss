@@ -33,7 +33,17 @@ html, body {
   align-items: center;
 }
 
-/* Zone entre header et footer : sidenav + contenu (hauteur = flex, équivalente au reste de la fenêtre) */
+.header-app-brand {
+  font-weight: 500;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+
+.main-content--minimal .content.content--minimal-fill {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
 .app-container.app-sidenav-container {
   flex: 1 1 0;
   min-height: 0;
@@ -97,6 +107,12 @@ html, body {
   margin-right: 8px;
 }
 
+.header-school-picker {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-right: 8px;
+}
+
 .header-title-group {
   display: inline-flex;
   align-items: center;
@@ -123,6 +139,136 @@ html, body {
 
 .spacer {
   flex: 1 1 auto;
+}
+
+/* Déclencheur menu compte (toolbar primary) */
+.profile-menu-trigger.mat-mdc-button {
+  margin-left: 4px;
+  min-width: auto;
+  max-width: min(320px, 42vw);
+  padding: 4px 10px 4px 8px;
+  border-radius: 999px;
+  height: auto;
+  line-height: 1.2;
+  --mdc-text-button-label-text-color: var(--app-on-primary, #fff);
+  --mat-text-button-state-layer-color: color-mix(in srgb, var(--app-on-primary, #fff) 18%, transparent);
+  color: var(--app-on-primary, #fff);
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--app-on-primary, #fff) 10%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--app-on-primary, #fff) 65%, transparent);
+    outline-offset: 2px;
+  }
+
+  .mat-mdc-button-touch-target {
+    height: 44px;
+  }
+}
+
+.profile-trigger-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.profile-avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: color-mix(in srgb, var(--app-on-primary, #fff) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-on-primary, #fff) 35%, transparent);
+  color: inherit;
+}
+
+.profile-trigger-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  min-width: 0;
+}
+
+.profile-trigger-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-trigger-role {
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.88;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-trigger-chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  margin-left: -2px;
+  opacity: 0.9;
+}
+
+@media (max-width: 720px) {
+  .profile-trigger-text {
+    display: none;
+  }
+
+  .profile-menu-trigger.mat-mdc-button {
+    max-width: none;
+    padding: 4px 8px;
+  }
+
+  .profile-trigger-inner {
+    gap: 6px;
+  }
+
+  .profile-trigger-chevron {
+    display: none;
+  }
+}
+
+/* Menu compte : deux actions seulement (Mon profil / Déconnexion) */
+::ng-deep .app-user-account-menu-panel {
+  --mat-menu-container-shape: 10px;
+
+  .mat-mdc-menu-content {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    min-width: 200px;
+  }
+
+  .mat-mdc-menu-item .mat-icon {
+    margin-right: 12px;
+    color: rgba(0, 0, 0, 0.54);
+  }
+
+  .user-menu-logout {
+    color: #c62828;
+
+    .mat-icon {
+      color: #c62828;
+    }
+  }
 }
 
 .content {

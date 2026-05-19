@@ -14,6 +14,7 @@
           formControlName="userName"
           placeholder="Entrez votre adresse e-mail"
           required
+          (input)="loginErrorMessage = null"
         />
       </div>
 
@@ -25,7 +26,18 @@
           formControlName="password"
           placeholder="Entrez votre mot de passe"
           required
+          (input)="loginErrorMessage = null"
+          [attr.aria-invalid]="loginErrorMessage ? 'true' : 'false'"
+          [attr.aria-describedby]="loginErrorMessage ? 'login-password-error' : null"
         />
+        <p
+          *ngIf="loginErrorMessage"
+          id="login-password-error"
+          class="login-password-error"
+          role="alert"
+        >
+          {{ loginErrorMessage }}
+        </p>
       </div>
 
       <button type="submit" class="btn-submit" [disabled]="loginForm.invalid">

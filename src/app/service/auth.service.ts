@@ -6,6 +6,7 @@ import {AppRoles} from "../core/app-roles";
 import {ACTIVE_SCHOOL_ID_SESSION_KEY} from "../core/storage-keys";
 import { API_BASE_URL } from '../core/api-base';
 import { ThemeService } from './theme.service';
+import { formatRoleLabel, formatRoleLabelsList } from '../core/role-labels';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,43 @@ export class AuthService {
   private readonly TENANT_KEY = 'tenantId';
   private readonly HEADER_TITLE_KEY = 'headerTitle';
   private readonly superAdminHeaderTitle = 'Gestion des écoles';
+
+  /**
+   * Réponses API {@code accountDisabled} — évite d’écraser l’état « portail bloqué » dans refreshSchools$.
+   */
+  private accountDisabledSession = false;
+
+  private accountDisabledNavigated = false;
+
+  /** Snapshot pour menu entête (JWT + rôle stocké). */
+  getIdentitySnapshot(): { displayName: string; roleLabel: string } {
+    const token = this.getToken();
+    const fallbackRole = formatRoleLabel(localStorage.getItem(this.ROLE_KEY));
+    if (!token) {
+      return { displayName: 'Utilisateur', roleLabel: fallbackRole };
+    }
+    try {
+      const decoded = jwtDecode<any>(token);
+      const displayName =
+        (typeof decoded?.name === 'string' && decoded.name.trim()) ||
+        (typeof decoded?.fullname === 'string' && decoded.fullname.trim()) ||
+        (typeof decoded?.email === 'string' && decoded.email.trim()) ||
+        (typeof decoded?.username === 'string' && decoded.username.trim()) ||
+        'Utilisateur';
+      const roles = this.extractJwtRoleAuthorities(decoded);
+      const stored = localStorage.getItem(this.ROLE_KEY);
+      const roleLabel =
+        roles.length > 1
+          ? formatRoleLabelsList(roles)
+          : formatRoleLabel(roles[0] || stored || '');
+      return {
+        displayName,
+        roleLabel
+      };
+    } catch {
+      return { displayName: 'Utilisateur', roleLabel: fallbackRole };
+    }
+  }
 
   constructor(
     private http: HttpClient,
@@ -31,6 +69,8 @@ export class AuthService {
   }
 
   saveTokens(jwt: string, refresh: string): void {
+    this.accountDisabledSession = false;
+    this.accountDisabledNavigated = false;
     localStorage.setItem('jwt', jwt);
     localStorage.setItem('refresh', refresh);
     this.saveClaims(jwt);
@@ -38,12 +78,43 @@ export class AuthService {
   }
 
   clearTokens(): void {
+    this.accountDisabledSession = false;
+    this.accountDisabledNavigated = false;
     localStorage.removeItem('jwt');
     localStorage.removeItem('refresh');
     localStorage.removeItem(this.ROLE_KEY);
     localStorage.removeItem(this.TENANT_KEY);
     localStorage.removeItem(this.HEADER_TITLE_KEY);
     sessionStorage.removeItem(ACTIVE_SCHOOL_ID_SESSION_KEY);
+  }
+
+  /** Masque le nom d’établissement dans la barre (ex. accès suspendu, avant synchro annuaire). */
+  clearSchoolHeaderTitle(): void {
+    localStorage.removeItem(this.HEADER_TITLE_KEY);
+  }
+
+  /** Restaure le libellé depuis le JWT courant après regain d’accès. */
+  reapplyHeaderTitleFromJwt(): void {
+    const token = this.getToken();
+    if (token) {
+      this.saveClaims(token);
+    }
+  }
+
+  isAccountDisabledSession(): boolean {
+    return this.accountDisabledSession;
+  }
+
+  /**
+   * Marque la session comme désactivée ; {@code true} uniquement au premier appel (navigation shell unique).
+   */
+  beginAccountDisabledFlow(): boolean {
+    this.accountDisabledSession = true;
+    if (this.accountDisabledNavigated) {
+      return false;
+    }
+    this.accountDisabledNavigated = true;
+    return true;
   }
 
   /** Titre barre d’app : super admin = libellé global, sinon nom école / tenant depuis le JWT. */
@@ -56,6 +127,23 @@ export class AuthService {
   }
 
   getPostLoginCommands(): string[] {
+    const token = this.getToken();
+    if (token) {
+      try {
+        const decoded = jwtDecode<any>(token);
+        const roles = this.extractJwtRoleAuthorities(decoded);
+        const primary = this.pickPrimaryRoleAuthority(roles);
+        if (primary === AppRoles.SUPER_ADMIN) {
+          return ['/super-admin/dashboard'];
+        }
+        if (primary === AppRoles.ADMIN_ECOLE) {
+          return ['/admin'];
+        }
+        return ['/dashboard'];
+      } catch {
+        /* fallback below */
+      }
+    }
     const role = localStorage.getItem(this.ROLE_KEY);
     if (role === AppRoles.SUPER_ADMIN) {
       return ['/super-admin/dashboard'];
@@ -168,23 +256,17 @@ export class AuthService {
   }
 
   /**
-   * STAFF / TEACHER / DIRECTOR / ACCOUNTANT doivent embarquer `school_id` pour initialiser l’école active
+   * STAFF / TEACHER / DIRECTOR doivent embarquer `school_id` pour initialiser l’école active
    * dans les pages métiers (classes, élèves, finance, ...).
    */
   private tokenHasRequiredSchoolClaim(token: string): boolean {
     try {
       const decoded = jwtDecode<any>(token);
-      const rolesRaw = decoded?.roles;
-      const roles: string[] = Array.isArray(rolesRaw)
-        ? rolesRaw
-            .map((r: any) => (typeof r === 'string' ? r : r?.authority))
-            .filter((r: string | undefined): r is string => !!r)
-        : [];
+      const roles = this.extractJwtRoleAuthorities(decoded);
       const needsSchoolClaim =
         roles.includes(AppRoles.STAFF) ||
         roles.includes(AppRoles.TEACHER) ||
-        roles.includes(AppRoles.DIRECTOR) ||
-        roles.includes(AppRoles.ACCOUNTANT);
+        roles.includes(AppRoles.DIRECTOR);
       if (!needsSchoolClaim) {
         return true;
       }
@@ -204,13 +286,45 @@ export class AuthService {
     }
   }
 
+  private extractJwtRoleAuthorities(decoded: unknown): string[] {
+    if (!decoded || typeof decoded !== 'object') {
+      return [];
+    }
+    const rolesRaw = (decoded as { roles?: unknown }).roles;
+    if (!Array.isArray(rolesRaw)) {
+      return [];
+    }
+    return rolesRaw
+      .map((r: { authority?: string } | string) =>
+        typeof r === 'string' ? r : (r as { authority?: string }).authority
+      )
+      .filter((r: string | undefined): r is string => !!r);
+  }
+
+  /** Routage / stockage local : priorité métier lorsque le JWT porte plusieurs autorités (multi-affiliation). */
+  private pickPrimaryRoleAuthority(authorities: string[]): string | null {
+    const order: string[] = [
+      AppRoles.SUPER_ADMIN,
+      AppRoles.ADMIN_ECOLE,
+      AppRoles.DIRECTOR,
+      AppRoles.TEACHER,
+      AppRoles.STAFF
+    ];
+    for (const o of order) {
+      if (authorities.includes(o)) {
+        return o;
+      }
+    }
+    return authorities[0] ?? null;
+  }
+
   private saveClaims(jwt: string): void {
     try {
       const decoded = jwtDecode<any>(jwt);
-      const roles = (decoded?.roles || []) as Array<{ authority?: string }>;
-      const firstRole = roles[0]?.authority;
-      if (firstRole) {
-        localStorage.setItem(this.ROLE_KEY, firstRole);
+      const authorities = this.extractJwtRoleAuthorities(decoded);
+      const primary = this.pickPrimaryRoleAuthority(authorities);
+      if (primary) {
+        localStorage.setItem(this.ROLE_KEY, primary);
       }
       if (decoded?.tenant_id !== undefined && decoded?.tenant_id !== null) {
         localStorage.setItem(this.TENANT_KEY, String(decoded.tenant_id));

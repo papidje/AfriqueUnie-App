@@ -4,22 +4,6 @@
       <h1>Dashboard</h1>
       <p>Indicateurs pour l’année scolaire <strong>active</strong> de l’établissement sélectionné.</p>
     </div>
-    <ng-container *ngIf="activeSchool.headerVm$ | async as vm">
-      <mat-form-field
-        *ngIf="vm.showPicker"
-        appearance="outline"
-        class="dashboard-school-picker"
-        subscriptSizing="dynamic"
-      >
-        <mat-label>Établissement</mat-label>
-        <mat-select
-          [value]="vm.selectedId"
-          (selectionChange)="activeSchool.setActiveSchoolId($event.value)"
-        >
-          <mat-option *ngFor="let s of vm.schools" [value]="s.id">{{ s.name }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </ng-container>
   </header>
 
   <div *ngIf="loading" class="loading-state">

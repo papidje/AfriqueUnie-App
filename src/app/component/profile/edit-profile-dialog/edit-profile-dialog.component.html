@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Modifier le profil</h2>
+
+<mat-dialog-content class="dialog-body">
+  <p class="hint">Le nom affiché est utilisé dans l’application et sur les documents où votre identité apparaît.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" id="edit-profile-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nom complet</mat-label>
+      <input matInput formControlName="fullname" autocomplete="name" />
+      <mat-error *ngIf="form.get('fullname')?.hasError('required')">Le nom est requis.</mat-error>
+      <mat-error *ngIf="form.get('fullname')?.hasError('maxlength')">Nom trop long.</mat-error>
+    </mat-form-field>
+  </form>
+
+  <p *ngIf="serverError" class="server-error" role="alert">{{ serverError }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="saving">Annuler</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="submit"
+    form="edit-profile-form"
+    [disabled]="saving || form.invalid"
+  >
+    Enregistrer
+  </button>
+</mat-dialog-actions>

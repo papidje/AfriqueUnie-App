@@ -1,9 +1,13 @@
-import {Component, OnInit} from '@angular/core';
-import {AuthService} from "./service/auth.service";
-import {NavigationEnd, Router} from "@angular/router";
-import {AuthUtilsService} from "./service/auth-utils.service";
-import {ActiveSchoolService} from "./service/active-school.service";
-import {ThemeService} from './service/theme.service';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatMenuTrigger } from '@angular/material/menu';
+import { AuthService } from './service/auth.service';
+import { NavigationEnd, Router } from '@angular/router';
+import { AuthUtilsService } from './service/auth-utils.service';
+import { ActiveSchoolService } from './service/active-school.service';
+import { ThemeService } from './service/theme.service';
+import { InAppNotificationApiService } from './service/in-app-notification-api.service';
+import { Subject, interval, merge, of } from 'rxjs';
+import { catchError, filter, switchMap, take, takeUntil } from 'rxjs/operators';
 import {
   AppRoles,
   ROLES_CLASSES_NAV,
@@ -18,10 +22,15 @@ import {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
+  @ViewChild('userMenuTrigger') userMenuTrigger?: MatMenuTrigger;
+
+  private readonly destroy$ = new Subject<void>();
+
   currentYear = new Date().getFullYear();
   sidebarExpanded = false;
   showLayout = true;
+  unreadBadgeCount = 0;
 
   /** Exposés au template : mêmes chaînes que JWT / Spring */
   readonly AppRoles = AppRoles;
@@ -32,31 +41,107 @@ export class AppComponent implements OnInit {
   readonly navCommunicationRoles = ROLES_COMMUNICATION_NAV;
 
   constructor(
-    private service: AuthService,
+    readonly authService: AuthService,
     private router: Router,
     private authUtils: AuthUtilsService,
     readonly activeSchool: ActiveSchoolService,
-    private readonly themeService: ThemeService
+    private readonly themeService: ThemeService,
+    private readonly inAppNotifications: InAppNotificationApiService
   ) {
-    router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((event) => {
         const url = event.urlAfterRedirects.split('?')[0];
         const authPages = ['/login', '/register', '/register-school', '/activate', '/resetPwd', '/newPwd'];
         this.showLayout = !authPages.some((p) => url === p || url.startsWith(p + '/'));
-        if (this.showLayout) {
-          this.activeSchool.refreshSchools();
+        if (this.showLayout && this.authUtils.isAuthenticated()) {
+          if (!this.isSchoolDirectoryDeferredRoute(url)) {
+            this.activeSchool.refreshSchools();
+            this.activeSchool.ensureBackgroundSchoolListPolling();
+          } else {
+            this.activeSchool.stopBackgroundSchoolListPolling();
+          }
+          this.refreshUnreadBadgeCount();
+        } else {
+          this.activeSchool.stopBackgroundSchoolListPolling();
+          this.unreadBadgeCount = 0;
         }
-      }
-    });
+      });
   }
 
   ngOnInit(): void {
     this.themeService.init();
+    merge(this.inAppNotifications.unreadBump$, interval(60000))
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(() => this.authUtils.isAuthenticated()),
+        switchMap(() =>
+          this.inAppNotifications.getUnreadCount().pipe(catchError(() => of(0)))
+        )
+      )
+      .subscribe((n) => (this.unreadBadgeCount = n));
   }
 
-  logout(): void {
-    this.service.logout().subscribe({
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Sur ces routes le portail est réduit (pas d’école active) : ne pas relancer GET /schools ni le polling annuaire ;
+   * le badge utilise uniquement les endpoints notifications.
+   */
+  private isSchoolDirectoryDeferredRoute(url: string): boolean {
+    return (
+      url === '/notifications' ||
+      url === '/acces-indisponible' ||
+      url.startsWith('/notifications/') ||
+      url.startsWith('/acces-indisponible/')
+    );
+  }
+
+  private refreshUnreadBadgeCount(): void {
+    if (!this.authUtils.isAuthenticated()) {
+      this.unreadBadgeCount = 0;
+      return;
+    }
+    this.inAppNotifications
+      .getUnreadCount()
+      .pipe(take(1), takeUntil(this.destroy$))
+      .subscribe({
+        next: (n) => (this.unreadBadgeCount = n),
+        error: () => (this.unreadBadgeCount = 0)
+      });
+  }
+
+  /** Identité affichée dans le menu compte (header). */
+  get identity(): { displayName: string; roleLabel: string } {
+    return this.authService.getIdentitySnapshot();
+  }
+
+  /** Initiales pour l’avatar (première lettre prénom + première lettre nom si disponible). */
+  get userInitials(): string {
+    const raw = this.identity.displayName.trim();
+    const parts = raw.split(/\s+/).filter(Boolean);
+    if (parts.length === 0) {
+      return '?';
+    }
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    const a = parts[0][0] ?? '';
+    const b = parts[parts.length - 1][0] ?? '';
+    return (a + b).toUpperCase();
+  }
+
+  logoutFromMenu(): void {
+    this.userMenuTrigger?.closeMenu();
+    this.authService.logout().subscribe({
       next: () => {
+        this.unreadBadgeCount = 0;
         this.activeSchool.clear();
         this.router.navigate(['/login']);
       }
@@ -88,13 +173,7 @@ export class AppComponent implements OnInit {
   }
 
   get headerTitle(): string {
-    return this.service.getHeaderDisplayTitle();
-  }
-
-  selectedSchoolName(vm: { schools: Array<{ id: number; name: string }>; selectedId: number | null }): string | null {
-    if (vm.selectedId == null) return null;
-    const selected = vm.schools.find((s) => s.id === vm.selectedId);
-    return selected?.name ?? null;
+    return this.authService.getHeaderDisplayTitle();
   }
 
   toggleSidebar(): void {

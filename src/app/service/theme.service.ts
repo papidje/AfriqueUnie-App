@@ -1,11 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { jwtDecode } from 'jwt-decode';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { SchoolService } from '../modules/admin/school/school.service';
 import { School } from '../modules/admin/school/school-list/school-list.component';
 import { AuthUtilsService } from './auth-utils.service';
 import { ActiveSchoolService } from './active-school.service';
-import { AppRoles } from '../core/app-roles';
 import {
   ALL_FONT_BODY_CLASSES,
   ALL_THEME_BODY_CLASSES,
@@ -19,7 +18,8 @@ import {
 export class ThemeService {
   constructor(
     private readonly authUtils: AuthUtilsService,
-    private readonly activeSchool: ActiveSchoolService,
+    /** Évite ActiveSchoolService au constructeur : sinon cycle AuthService → ThemeService → ActiveSchoolService → AuthService. */
+    private readonly injector: Injector,
     private readonly schoolService: SchoolService
   ) {}
 
@@ -34,7 +34,8 @@ export class ThemeService {
       return;
     }
 
-    this.activeSchool.activeSchoolId$
+    const activeSchool = this.injector.get(ActiveSchoolService);
+    activeSchool.activeSchoolId$
       .pipe(
         filter((id): id is number => id != null),
         distinctUntilChanged()

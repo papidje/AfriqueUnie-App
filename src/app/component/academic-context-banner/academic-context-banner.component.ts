@@ -30,7 +30,6 @@ export class AcademicContextBannerComponent {
           AppRoles.STAFF,
           AppRoles.DIRECTOR,
           AppRoles.TEACHER,
-          AppRoles.ACCOUNTANT
         ]) &&
         schoolId != null;
 

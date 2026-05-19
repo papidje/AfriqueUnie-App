@@ -4,8 +4,8 @@
       <div>
         <h2 *ngIf="!isDirectorStaff">Gestion des utilisateurs</h2>
         <h2 *ngIf="isDirectorStaff">Mon Staff</h2>
-        <p *ngIf="!isDirectorStaff">Administrez les membres de votre établissement.</p>
-        <p *ngIf="isDirectorStaff">Invitez des enseignants ou des comptables rattachés à votre établissement.</p>
+        <p *ngIf="!isDirectorStaff">Administrez les membres et leurs rattachements par établissement.</p>
+        <p *ngIf="isDirectorStaff">Invitez des enseignants ou du personnel administratif rattachés à votre établissement.</p>
       </div>
       <button mat-raised-button color="primary" (click)="openInviteDialog()">
         Inviter un membre
@@ -15,13 +15,14 @@
     <div class="quick-filters" *ngIf="!isDirectorStaff">
       <button mat-stroked-button [class.active]="quickFilter === 'ALL'" (click)="setQuickFilter('ALL')">Tous</button>
       <button mat-stroked-button [class.active]="quickFilter === 'TEACHER'" (click)="setQuickFilter('TEACHER')">Enseignants</button>
-      <button mat-stroked-button [class.active]="quickFilter === 'STAFF'" (click)="setQuickFilter('STAFF')">Staff + Admin</button>
-      <button mat-stroked-button [class.active]="quickFilter === 'ACCOUNTANT'" (click)="setQuickFilter('ACCOUNTANT')">Comptables</button>
+      <button mat-stroked-button [class.active]="quickFilter === 'STAFF'" (click)="setQuickFilter('STAFF')">
+        Personnel &amp; administrateurs d’école
+      </button>
     </div>
     <div class="quick-filters" *ngIf="isDirectorStaff">
       <button mat-stroked-button [class.active]="quickFilter === 'ALL'" (click)="setQuickFilter('ALL')">Tous</button>
       <button mat-stroked-button [class.active]="quickFilter === 'TEACHER'" (click)="setQuickFilter('TEACHER')">Enseignants</button>
-      <button mat-stroked-button [class.active]="quickFilter === 'ACCOUNTANT'" (click)="setQuickFilter('ACCOUNTANT')">Comptables</button>
+      <button mat-stroked-button [class.active]="quickFilter === 'STAFF'" (click)="setQuickFilter('STAFF')">Personnel administratif</button>
     </div>
 
     <div *ngIf="loading" class="loading">Chargement...</div>
@@ -30,7 +31,7 @@
       <table mat-table [dataSource]="filteredUsers" class="mat-elevation-z1">
         <ng-container matColumnDef="fullname">
           <th mat-header-cell *matHeaderCellDef>Nom</th>
-          <td mat-cell *matCellDef="let user">{{ user.fullname }}</td>
+          <td mat-cell *matCellDef="let user">{{ user.fullname || '—' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="email">
@@ -38,10 +39,21 @@
           <td mat-cell *matCellDef="let user">{{ user.email }}</td>
         </ng-container>
 
-        <ng-container matColumnDef="role">
-          <th mat-header-cell *matHeaderCellDef>Rôle</th>
+        <ng-container matColumnDef="affiliations">
+          <th mat-header-cell *matHeaderCellDef>Établissements</th>
           <td mat-cell *matCellDef="let user">
-            <span class="role-badge" [ngClass]="roleBadgeClass(user)">{{ roleLabel(user) }}</span>
+            <div class="affiliation-badges" *ngIf="hasAffiliationBadges(user); else roleFallback">
+              <span class="affiliation-chip" *ngFor="let a of user.activeAffiliations">
+                <span class="aff-school">{{ a.schoolName }}</span>
+                <span class="aff-sep">·</span>
+                <span class="aff-role">{{ formatRoleLabel(a.role) }}</span>
+                <span class="aff-pending" *ngIf="a.invitationPending"> (invitation)</span>
+                <span class="aff-suspended" *ngIf="a.reactivationEligible"> (suspendu)</span>
+              </span>
+            </div>
+            <ng-template #roleFallback>
+              <span class="role-badge" [ngClass]="roleBadgeClass(user)">{{ roleLabel(user) }}</span>
+            </ng-template>
           </td>
         </ng-container>
 
@@ -55,6 +67,15 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef class="col-actions"></th>
           <td mat-cell *matCellDef="let user" class="col-actions">
+            <button
+              mat-icon-button
+              type="button"
+              matTooltip="Gérer les affiliations"
+              *ngIf="canEditAffiliations(user)"
+              (click)="openEditAffiliationsDialog(user, $event)"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
             <button
               mat-icon-button
               type="button"

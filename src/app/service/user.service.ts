@@ -22,6 +22,7 @@ export class UserService {
     email: string;
     role: UserRoleNameType;
     schoolId?: number | null;
+    schoolAssignments?: { schoolId: number; role: UserRoleNameType }[];
   }): Observable<any> {
     const body: Record<string, unknown> = {
       nom: data.nom,
@@ -31,7 +32,27 @@ export class UserService {
     if (data.schoolId != null && Number.isFinite(data.schoolId)) {
       body['schoolId'] = data.schoolId;
     }
+    if (data.schoolAssignments?.length) {
+      body['schoolAssignments'] = data.schoolAssignments;
+    }
     return this.http.post(`${this.apiUrl}/invite`, body);
+  }
+
+  patchUserAffiliations(
+    userId: number,
+    assignments: { schoolId: number; role: UserRoleNameType }[]
+  ): Observable<unknown> {
+    return this.http.patch<unknown>(`${this.apiUrl}/${userId}/affiliations`, { assignments });
+  }
+
+  /** Fondateur : suspend l’accès à un établissement (toutes les lignes d’affiliation pour cette école). */
+  suspendAffiliation(userId: number, schoolId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${userId}/schools/${schoolId}/suspend`, {});
+  }
+
+  /** Fondateur : lève la suspension pour cet établissement. */
+  reactivateAffiliation(userId: number, schoolId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${userId}/schools/${schoolId}/reactivate`, {});
   }
 
   getUsers(): Observable<any[]> {
@@ -49,6 +70,10 @@ export class UserService {
 
   changePassword(body: ChangePasswordPayload): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/change-password`, body);
+  }
+
+  updateOwnProfile(body: { fullname: string }): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/profile`, body);
   }
 
   getAdmins(): Observable<any> {

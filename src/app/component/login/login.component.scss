@@ -1,1 +1,8 @@
 @import 'src/styles/auth-layout';
+
+.login-password-error {
+  color: #c62828;
+  margin: 8px 0 0;
+  font-size: 0.875rem;
+  line-height: 1.35;
+}

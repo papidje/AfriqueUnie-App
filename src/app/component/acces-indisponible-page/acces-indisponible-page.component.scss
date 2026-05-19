@@ -1,0 +1,33 @@
+.acces-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.acces-card {
+  max-width: 560px;
+  width: 100%;
+}
+
+.lead {
+  font-size: 1.05rem;
+  margin-top: 0;
+}
+
+.identity-line {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  opacity: 0.88;
+}
+
+mat-card-content p:last-child {
+  margin-bottom: 0;
+}
+
+mat-card-actions {
+  padding: 16px;
+  gap: 8px;
+  flex-wrap: wrap;
+}

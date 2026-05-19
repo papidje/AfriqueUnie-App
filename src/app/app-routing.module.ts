@@ -44,6 +44,10 @@ import { ParentListPageComponent } from "./component/parent-list-page/parent-lis
 import { PeriodNotesPageComponent } from "./component/period-notes-page/period-notes-page.component";
 import { ClassHubShellComponent } from "./component/class-hub-shell/class-hub-shell.component";
 import { CommunicationCenterPageComponent } from "./component/communication-center-page/communication-center-page.component";
+import { NotificationPageComponent } from "./component/notification-page/notification-page.component";
+import { AccesIndisponiblePageComponent } from "./component/acces-indisponible-page/acces-indisponible-page.component";
+import { PortalSchoolAccessGuard } from "./guards/portal-school-access.guard";
+import { AccesIndisponibleGuard } from "./guards/acces-indisponible.guard";
 
 const routes: Routes = [
   // 🔒 Layout d’authentification
@@ -64,10 +68,20 @@ const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
-    canActivateChild: [AuthGuard],
+    canActivateChild: [AuthGuard, PortalSchoolAccessGuard],
     children: [
+      {
+        path: 'acces-indisponible',
+        component: AccesIndisponiblePageComponent,
+        canActivate: [AccesIndisponibleGuard]
+      },
       { path: 'home', pathMatch: 'full', redirectTo: 'dashboard' },
       { path: 'profile', component: ProfileComponent },
+      {
+        path: 'notifications',
+        component: NotificationPageComponent,
+        canActivate: [AuthGuard]
+      },
 
       {
         path: 'dashboard',

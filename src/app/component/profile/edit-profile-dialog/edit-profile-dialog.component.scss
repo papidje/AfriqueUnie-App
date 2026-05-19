@@ -1,0 +1,21 @@
+.dialog-body {
+  padding-top: 8px;
+  min-width: min(100%, 360px);
+}
+
+.hint {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.server-error {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #c62828;
+}
