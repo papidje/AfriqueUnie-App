@@ -224,10 +224,14 @@ export class NotificationPageComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Même logique que {@link AccesIndisponiblePageComponent} : détecter une réactivation admin via GET /schools.
+   * Détecte une réactivation admin via GET /schools **uniquement** lorsque le portail est encore bloqué
+   * (aucune école). Sinon le premier {@code timer(0)} déclencherait une redirection immédiate pour tout utilisateur actif.
    */
   private startReactivationPolling(): void {
     if (!this.activeSchool.shouldLoadSchoolsForPicker()) {
+      return;
+    }
+    if (!this.activeSchool.isPortalAccessBlocked()) {
       return;
     }
     timer(0, 15000)
