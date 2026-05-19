@@ -21,6 +21,7 @@ import {MatInputModule} from "@angular/material/input";
 import {MatButtonModule} from "@angular/material/button";
 import { AdminShellComponent } from './admin-shell/admin-shell.component';
 import {MatSelectModule} from "@angular/material/select";
+import { EditUserAffiliationsDialogComponent } from './user-management/edit-user-affiliations-dialog/edit-user-affiliations-dialog.component';
 import { UserManagementComponent } from './user-management/user-management.component';
 import { InviteMemberDialogComponent } from './user-management/invite-member-dialog/invite-member-dialog.component';
 import { RouterModule } from '@angular/router';
@@ -36,7 +37,8 @@ import { SharedModule } from '../../shared/shared.module';
     AssignAdminDialogComponent,
     SchoolDialogComponent,
     UserManagementComponent,
-    InviteMemberDialogComponent
+    InviteMemberDialogComponent,
+    EditUserAffiliationsDialogComponent
   ],
   imports: [
     CommonModule,

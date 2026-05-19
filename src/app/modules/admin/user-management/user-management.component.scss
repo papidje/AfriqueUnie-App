@@ -38,6 +38,49 @@ table {
   width: 100%;
 }
 
+.affiliation-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 420px;
+}
+
+.affiliation-chip {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 4px 10px;
+  font-weight: 600;
+  background: #eceff1;
+  color: #37474f;
+  line-height: 1.3;
+
+  .aff-school {
+    font-weight: 700;
+  }
+
+  .aff-sep {
+    opacity: 0.45;
+  }
+
+  .aff-role {
+    font-weight: 500;
+  }
+
+  .aff-pending,
+  .aff-suspended {
+    font-weight: 600;
+    opacity: 0.85;
+  }
+
+  .aff-suspended {
+    color: #c62828;
+  }
+}
+
 .role-badge {
   display: inline-block;
   border-radius: 999px;
@@ -66,11 +109,6 @@ table {
   color: #ef6c00;
 }
 
-.role-accountant {
-  background: #e3f2fd;
-  color: #1565c0;
-}
-
 .status-chip {
   display: inline-block;
   border-radius: 999px;
@@ -95,7 +133,7 @@ table {
 }
 
 .col-actions {
-  width: 56px;
+  width: 112px;
   text-align: right;
   padding-right: 4px;
 }

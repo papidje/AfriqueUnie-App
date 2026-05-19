@@ -86,3 +86,21 @@ export function formatDisplayDateTimeAt(value: unknown): string {
   const d = parseFlexibleDate(value);
   return d == null ? '—' : safeFormat(d, 'at');
 }
+
+/** Affichage type 18/05/2026 à 23h48 (notifications). */
+export function formatNotificationDateTime(value: unknown): string {
+  const d = parseFlexibleDate(value);
+  if (d == null) {
+    return '—';
+  }
+  try {
+    return formatDate(d, "dd/MM/yyyy ' à ' HH'h'mm", LOCALE);
+  } catch {
+    const dd = pad2(d.getDate());
+    const mm = pad2(d.getMonth() + 1);
+    const yyyy = d.getFullYear();
+    const HH = pad2(d.getHours());
+    const min = pad2(d.getMinutes());
+    return `${dd}/${mm}/${yyyy} à ${HH}h${min}`;
+  }
+}

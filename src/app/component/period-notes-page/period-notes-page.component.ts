@@ -32,7 +32,7 @@ export class PeriodNotesPageComponent implements OnInit, OnDestroy {
   periods: GradingPeriodSummary[] = [];
   loadingClasses = true;
 
-  /** Rôles pouvant saisir des notes / accéder aux évaluations de la classe (hors simple lecture comptable). */
+  /** Rôles pouvant saisir des notes / accéder aux évaluations de la classe (pas le personnel en lecture seule). */
   private static readonly SAISIE_NOTES_ROLES = [
     AppRoles.ADMIN_ECOLE,
     AppRoles.DIRECTOR,

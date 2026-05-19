@@ -1,0 +1,29 @@
+<ng-container *ngIf="activeSchool.headerVm$ | async as vm">
+  <span class="header-title-group">
+    <ng-container *ngIf="vm.showPicker">
+      <button
+        mat-button
+        type="button"
+        class="school-picker-trigger"
+        [matMenuTriggerFor]="schoolSwitcherMenu"
+        [attr.aria-label]="'Changer d’établissement : ' + displayName(vm)"
+        [attr.aria-haspopup]="true"
+      >
+        <span class="school-picker-label">{{ displayName(vm) }}</span>
+        <mat-icon class="school-picker-swap-icon" aria-hidden="true">swap_horiz</mat-icon>
+      </button>
+      <mat-menu #schoolSwitcherMenu="matMenu" panelClass="school-picker-menu-panel">
+        <button
+          mat-menu-item
+          type="button"
+          *ngFor="let s of otherSchools(vm)"
+          (click)="onSchoolSelected(s.id, vm)"
+        >
+          {{ s.name }}
+        </button>
+      </mat-menu>
+    </ng-container>
+
+    <span *ngIf="!vm.showPicker" class="title static-school-title">{{ displayName(vm) }}</span>
+  </span>
+</ng-container>

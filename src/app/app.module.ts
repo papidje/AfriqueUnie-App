@@ -22,6 +22,7 @@ import {AuthLayoutComponent} from './component/auth-layout/auth-layout.component
 import {MainLayoutComponent} from './component/main-layout/main-layout.component';
 import { ProfileComponent } from './component/profile/profile.component';
 import { ChangePasswordDialogComponent } from './component/profile/change-password-dialog/change-password-dialog.component';
+import { EditProfileDialogComponent } from './component/profile/edit-profile-dialog/edit-profile-dialog.component';
 import {MatCardModule} from "@angular/material/card";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -44,6 +45,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatBadgeModule } from '@angular/material/badge';
 import { ApiUnavailableComponent } from './component/api-unavailable/api-unavailable.component';
 import { RegisterSchoolComponent } from './component/register-school/register-school.component';
 import { SuperAdminDashboardComponent } from './component/super-admin-dashboard/super-admin-dashboard.component';
@@ -73,7 +76,10 @@ import { ClassHubShellComponent } from './component/class-hub-shell/class-hub-sh
 import { CommunicationCenterPageComponent } from './component/communication-center-page/communication-center-page.component';
 import { CommunicationBatchSettingsDialogComponent } from './component/communication-center-page/communication-batch-settings-dialog.component';
 import { CommunicationHistoryDetailDialogComponent } from './component/communication-center-page/communication-history-detail-dialog.component';
+import { NotificationPageComponent } from './component/notification-page/notification-page.component';
+import { AccesIndisponiblePageComponent } from './component/acces-indisponible-page/acces-indisponible-page.component';
 import { AuthService } from './service/auth.service';
+import { SchoolPickerComponent } from './shared/component/school-picker/school-picker.component';
 
 export function initializeAuthFactory(authService: AuthService) {
   return () => authService.initializeAuthState();
@@ -92,6 +98,7 @@ export function initializeAuthFactory(authService: AuthService) {
     MainLayoutComponent,
     ProfileComponent,
     ChangePasswordDialogComponent,
+    EditProfileDialogComponent,
     UnautorizedComponent,
     DashboardPageComponent,
     ClassWorkspaceContextBarComponent,
@@ -123,7 +130,10 @@ export function initializeAuthFactory(authService: AuthService) {
     GradeNoteEnterNextDirective,
     CommunicationCenterPageComponent,
     CommunicationBatchSettingsDialogComponent,
-    CommunicationHistoryDetailDialogComponent
+    CommunicationHistoryDetailDialogComponent,
+    SchoolPickerComponent,
+    NotificationPageComponent,
+    AccesIndisponiblePageComponent
   ],
   imports: [
     BrowserModule,
@@ -154,6 +164,8 @@ export function initializeAuthFactory(authService: AuthService) {
     MatButtonToggleModule,
     MatTooltipModule,
     MatMenuModule,
+    MatDividerModule,
+    MatBadgeModule,
     MatPaginatorModule,
     MatSlideToggleModule,
     SharedModule

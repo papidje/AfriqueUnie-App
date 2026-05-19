@@ -1,0 +1,117 @@
+<section class="notification-page">
+  <mat-card *ngIf="restrictionBanner === 'sans-ecole'" class="restriction-banner" role="status">
+    <mat-card-content>
+      <p class="restriction-banner-title">Aucun établissement accessible</p>
+      <p>
+        Vous n’êtes actif sur <strong>aucune école</strong> pour le moment (par exemple accès suspendu). Ce centre de
+        notifications est le seul écran disponible : vous y retrouverez les messages de l’administration. Pour le reste du
+        portail, la situation doit être régularisée côté organisation.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="restrictionBanner === 'compte'" class="restriction-banner restriction-banner--warn" role="alert">
+    <mat-card-content>
+      <p class="restriction-banner-title">Compte désactivé</p>
+      <p>
+        Votre compte utilisateur a été désactivé. Seules vos notifications restent consultables ici ; reconnectez-vous
+        après réactivation si besoin.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>Notifications</h1>
+      <p class="sub">Messages et invitations liés à votre compte.</p>
+    </div>
+    <button
+      *ngIf="hasUnreadVisibleInList"
+      mat-stroked-button
+      type="button"
+      class="mark-all-btn"
+      [disabled]="markAllBusy || loading"
+      (click)="markAllRead()"
+    >
+      <mat-icon>done_all</mat-icon>
+      Tout marquer comme lu
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">Chargement…</div>
+
+  <div *ngIf="loadError" class="empty empty--error" role="alert">
+    Impossible de charger les notifications pour le moment.
+  </div>
+
+  <div *ngIf="!loading && !loadError && !items.length" class="empty">Aucune notification pour le moment.</div>
+
+  <mat-card *ngFor="let n of items" class="notif-card" [class.read]="n.read" [class.user-targeted-card]="isUserTargeted(n)">
+    <mat-card-header class="notif-card-header">
+      <div class="header-text">
+        <mat-card-title>{{ n.title }}</mat-card-title>
+        <mat-card-subtitle>
+          <span class="created">{{ formatCreatedAt(n.createdAt) }}</span>
+          <span *ngIf="n.read && n.updatedAt" class="handled-meta">
+            · Prise en compte : {{ formatCreatedAt(n.updatedAt) }}
+          </span>
+        </mat-card-subtitle>
+      </div>
+      <button
+        mat-icon-button
+        type="button"
+        class="close-btn"
+        [disabled]="dismissingId === n.id"
+        [attr.aria-label]="'Masquer la notification'"
+        matTooltip="Masquer"
+        (click)="dismiss(n)"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="content">{{ n.content }}</p>
+
+      <div *ngIf="isUserTargeted(n) && n.schoolName" class="user-targeted-school">
+        <mat-icon aria-hidden="true">apartment</mat-icon>
+        <span>{{ n.schoolName }}</span>
+      </div>
+
+      <div *ngIf="isInvitation(n)" class="invitation-block">
+        <div class="school-line">
+          <mat-icon aria-hidden="true">apartment</mat-icon>
+          <span class="school-name">{{ n.schoolName || 'Établissement' }}</span>
+        </div>
+        <div *ngIf="canActOnInvitation(n)" class="actions">
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            [disabled]="actionAffiliationId === n.linkId"
+            (click)="accept(n)"
+          >
+            Accepter
+          </button>
+          <button
+            mat-stroked-button
+            color="warn"
+            type="button"
+            [disabled]="actionAffiliationId === n.linkId"
+            (click)="refuse(n)"
+          >
+            Refuser
+          </button>
+        </div>
+        <div *ngIf="n.read" class="handled-hint">
+          <span *ngIf="invitationClosureNorm(n) === 'INVITATION_ACCEPTED' || (!invitationClosureNorm(n) && n.processed)">
+            Invitation acceptée.
+          </span>
+          <span *ngIf="invitationClosureNorm(n) === 'INVITATION_REFUSED'">Invitation refusée.</span>
+          <span *ngIf="invitationClosureNorm(n) === 'MARK_READ'">
+            Marquée comme lue — vous pouvez encore répondre.
+          </span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</section>

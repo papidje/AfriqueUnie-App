@@ -8,7 +8,6 @@ export const UserRoleName = {
   DIRECTOR: 'DIRECTOR',
   STAFF: 'STAFF',
   TEACHER: 'TEACHER',
-  ACCOUNTANT: 'ACCOUNTANT',
 } as const;
 
 export type UserRoleNameType = (typeof UserRoleName)[keyof typeof UserRoleName];
@@ -20,7 +19,6 @@ export const AppRoles = {
   DIRECTOR: 'ROLE_DIRECTOR',
   STAFF: 'ROLE_STAFF',
   TEACHER: 'ROLE_TEACHER',
-  ACCOUNTANT: 'ROLE_ACCOUNTANT',
 } as const;
 
 export type AppRoleAuthority = (typeof AppRoles)[keyof typeof AppRoles];
@@ -33,7 +31,6 @@ export const SCHOOL_PORTAL_ROLES: AppRoleAuthority[] = [
   AppRoles.DIRECTOR,
   AppRoles.STAFF,
   AppRoles.TEACHER,
-  AppRoles.ACCOUNTANT,
 ];
 
 /** Tous les rôles (ex. saisie, contrôles) — inclut le super-admin. */
@@ -45,10 +42,9 @@ export const ROLES_STUDENTS_NAV: AppRoleAuthority[] = [
   AppRoles.DIRECTOR,
   AppRoles.STAFF,
   AppRoles.TEACHER,
-  AppRoles.ACCOUNTANT,
 ];
 
-/** Édition fiche élève / parent (PUT/DELETE côté API, hors comptable). */
+/** Édition fiche élève / parent (PUT/DELETE côté API, hors lecture seule enseignant). */
 export const ROLES_STUDENT_WRITE: AppRoleAuthority[] = [
   AppRoles.ADMIN_ECOLE,
   AppRoles.DIRECTOR,
@@ -70,7 +66,7 @@ export const ROLES_STUDENT_REGISTRATION: AppRoleAuthority[] = [
   AppRoles.STAFF,
 ];
 
-/** Création d’année scolaire : admin, directeur, staff (pas enseignant / comptable). */
+/** Création d’année scolaire : admin, directeur, staff (pas enseignant). */
 export const ROLES_SCHOOL_YEAR_NAV: AppRoleAuthority[] = [
   AppRoles.ADMIN_ECOLE,
   AppRoles.DIRECTOR,
@@ -88,7 +84,6 @@ export const ROLES_FINANCIAL_NAV: AppRoleAuthority[] = [
   AppRoles.ADMIN_ECOLE,
   AppRoles.DIRECTOR,
   AppRoles.STAFF,
-  AppRoles.ACCOUNTANT,
 ];
 
 /** Centre de communication (API `/api/communication`) : admin, directeur, staff uniquement. */

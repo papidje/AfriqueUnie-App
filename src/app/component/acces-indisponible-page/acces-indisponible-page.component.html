@@ -1,0 +1,28 @@
+<div class="acces-wrap">
+  <mat-card class="acces-card">
+    <mat-card-title>{{ compteDesactive ? 'Compte désactivé' : 'Accès aux établissements indisponible' }}</mat-card-title>
+    <mat-card-content>
+      <p class="identity-line" *ngIf="displayName?.trim()">Session : <strong>{{ displayName }}</strong></p>
+      <ng-container *ngIf="compteDesactive; else sansEcoleTpl">
+        <p class="lead">
+          Votre <strong>compte utilisateur</strong> a été désactivé. Vous ne pouvez pas utiliser le portail école avec cette session.
+        </p>
+        <p>
+          Vous pouvez consulter vos <strong>notifications</strong> (messages, invitations en attente). Pour le reste, contactez l’administration de votre organisation.
+        </p>
+      </ng-container>
+      <ng-template #sansEcoleTpl>
+        <p class="lead">
+          Vous n’avez actuellement <strong>aucun établissement</strong> auquel vous pouvez accéder dans SchoolApp (par exemple après une suspension de tous vos accès).
+        </p>
+        <p>
+          Les autres sections du portail ne sont pas disponibles. Utilisez le <strong>centre de notifications</strong> pour lire les messages de l’administration ou traiter une invitation éventuelle.
+        </p>
+      </ng-template>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <a mat-flat-button color="primary" routerLink="/notifications">Ouvrir les notifications</a>
+      <button mat-stroked-button type="button" (click)="logout()">Se déconnecter</button>
+    </mat-card-actions>
+  </mat-card>
+</div>

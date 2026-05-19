@@ -71,7 +71,6 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     AppRoles.ADMIN_ECOLE,
     AppRoles.DIRECTOR,
     AppRoles.STAFF,
-    AppRoles.ACCOUNTANT
   ]);
 
   /** Onglet Finances (API finance réservée hors enseignants côté navigation). */

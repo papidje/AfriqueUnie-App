@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>{{ directorMode ? 'Inviter un membre du staff' : 'Inviter un membre' }}</h2>
+<h2 mat-dialog-title>{{ directorMode ? 'Inviter un membre du personnel' : 'Inviter un membre' }}</h2>
 
 <mat-dialog-content>
   <form [formGroup]="form" class="invite-form">
@@ -12,21 +12,77 @@
       <input matInput type="email" formControlName="email" />
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Rôle</mat-label>
-      <mat-select formControlName="role">
-        <mat-option *ngFor="let role of roleOptions" [value]="role">{{ role }}</mat-option>
+    <!-- Fondateur : un seul choix de profil ; pas de doublon avec « rôle sur site » -->
+    <mat-form-field *ngIf="!directorMode" appearance="outline">
+      <mat-label>Profil invité</mat-label>
+      <mat-select formControlName="founderProfile">
+        <mat-option *ngFor="let opt of founderProfileOptions" [value]="opt">{{ founderProfileLabel(opt) }}</mat-option>
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field *ngIf="showSchoolField" appearance="outline">
-      <mat-label>Établissement</mat-label>
+    <!-- Directeur invitant : choix enseignant / personnel sur son établissement uniquement -->
+    <mat-form-field *ngIf="directorMode" appearance="outline">
+      <mat-label>Rôle</mat-label>
+      <mat-select formControlName="directorInviteRole">
+        <mat-option [value]="UserRoleName.TEACHER">{{ formatRoleLabel(UserRoleName.TEACHER) }}</mat-option>
+        <mat-option [value]="UserRoleName.STAFF">{{ formatRoleLabel(UserRoleName.STAFF) }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field *ngIf="showSingleSchoolSelect" appearance="outline">
+      <mat-label>Établissement du directeur</mat-label>
       <mat-select formControlName="schoolId">
         <mat-option *ngFor="let s of schools" [value]="s.id">{{ s.name }}</mat-option>
       </mat-select>
       <mat-hint *ngIf="loadingSchools">Chargement des écoles…</mat-hint>
       <mat-error *ngIf="form.get('schoolId')?.hasError('required')">Choisissez un établissement.</mat-error>
     </mat-form-field>
+
+    <div *ngIf="showAssignmentsBlock" class="assignments-block">
+      <div class="assignments-head">
+        <span class="label">Établissements et rôles</span>
+        <button mat-stroked-button type="button" color="primary" (click)="addAssignmentRow()">
+          <mat-icon>add</mat-icon>
+          Ajouter un établissement
+        </button>
+      </div>
+      <p class="hint">Une ligne par établissement : choisissez l’école et le rôle sur place (enseignant ou personnel).</p>
+
+      <div formArrayName="assignments" class="assignment-rows">
+        <div
+          *ngFor="let row of assignments.controls; let i = index"
+          [formGroupName]="i"
+          class="assignment-row"
+        >
+          <mat-form-field appearance="outline" class="fld-school">
+            <mat-label>Établissement</mat-label>
+            <mat-select formControlName="schoolId">
+              <mat-option *ngFor="let s of schools" [value]="s.id">{{ s.name }}</mat-option>
+            </mat-select>
+            <mat-hint *ngIf="loadingSchools">Chargement…</mat-hint>
+            <mat-error *ngIf="row.get('schoolId')?.hasError('required')">Requis.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="fld-role">
+            <mat-label>Rôle</mat-label>
+            <mat-select formControlName="role">
+              <mat-option *ngFor="let r of assignmentRoleOptions" [value]="r">{{ formatRoleLabel(r) }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button
+            mat-icon-button
+            type="button"
+            class="remove-row"
+            *ngIf="assignments.length > 1"
+            (click)="removeAssignmentRow(i)"
+            matTooltip="Retirer cette ligne"
+          >
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
   </form>
 </mat-dialog-content>
 

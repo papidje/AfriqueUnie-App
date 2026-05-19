@@ -1,6 +1,11 @@
 <section class="profile-page">
-  <h1>Mon profil</h1>
-  <p class="subtitle">Informations de votre compte utilisateur.</p>
+  <div class="profile-hero" *ngIf="!loading && user">
+    <div class="profile-avatar" aria-hidden="true">{{ user ? avatarInitials(user.fullname) : '' }}</div>
+    <div class="profile-hero-text">
+      <h1>Mon profil</h1>
+      <p class="subtitle">Informations de votre compte utilisateur.</p>
+    </div>
+  </div>
 
   <div *ngIf="loading" class="loading-wrap">
     <mat-progress-spinner diameter="48"></mat-progress-spinner>
@@ -15,17 +20,14 @@
   ></app-api-unavailable>
 
   <mat-card *ngIf="!loading && user" class="profile-card">
-    <mat-card-header>
-      <mat-card-title>Informations</mat-card-title>
-      <mat-card-subtitle>Compte et accès</mat-card-subtitle>
+    <mat-card-header class="profile-card-header-inner">
+      <div mat-card-avatar class="card-avatar-mini">{{ avatarInitials(user.fullname) }}</div>
+      <mat-card-title>Informations du compte</mat-card-title>
+      <mat-card-subtitle>Nom, contact et accès</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
       <dl class="profile-dl">
-        <div class="row">
-          <dt>Identifiant</dt>
-          <dd>{{ user.id }}</dd>
-        </div>
         <div class="row">
           <dt>Nom complet</dt>
           <dd>{{ user.fullname }}</dd>
@@ -35,8 +37,12 @@
           <dd>{{ user.username }}</dd>
         </div>
         <div class="row">
-          <dt>Email</dt>
+          <dt>E-mail</dt>
           <dd>{{ user.email || '—' }}</dd>
+        </div>
+        <div class="row">
+          <dt>Dernière connexion</dt>
+          <dd>{{ user.lastLoginAt | displayDate:'at' }}</dd>
         </div>
         <div class="row">
           <dt>Statut</dt>
@@ -47,16 +53,43 @@
           </dd>
         </div>
         <div class="row">
-          <dt>Rôles</dt>
+          <dt>Rôle effectif</dt>
           <dd>
-            <span *ngIf="user.roles?.length; else noRoles">{{ user.roles.join(', ') }}</span>
-            <ng-template #noRoles>Aucun rôle attribué</ng-template>
+            {{ formatRoles(user.roles) }}
+            <span class="field-hint"> Selon l’établissement sélectionné dans la barre supérieure.</span>
+          </dd>
+        </div>
+        <div class="row" *ngIf="user.activeAffiliations.length > 0">
+          <dt>Rattachements</dt>
+          <dd>
+            <div class="affiliation-badges">
+              <span class="affiliation-chip" *ngFor="let a of user.activeAffiliations">
+                <span class="aff-school">{{ a.schoolName }}</span>
+                <span class="aff-sep">·</span>
+                <span class="aff-role">{{ formatRoleLabel(a.role) }}</span>
+              </span>
+            </div>
+          </dd>
+        </div>
+        <div class="row row-schools" *ngIf="user.activeAffiliations.length === 0">
+          <dt>Établissements</dt>
+          <dd>
+            <ul *ngIf="user.schools.length > 0" class="school-list">
+              <li *ngFor="let s of user.schools">{{ s.name }}</li>
+            </ul>
+            <span *ngIf="user.schools.length === 0" class="schools-empty">
+              Aucun établissement associé à ce compte dans l’application (ex. super administrateur ou rattachement à venir).
+            </span>
           </dd>
         </div>
       </dl>
     </mat-card-content>
 
-    <mat-card-actions align="start">
+    <mat-card-actions class="profile-actions" align="start">
+      <button mat-stroked-button color="primary" type="button" (click)="openEditProfileDialog()">
+        <mat-icon>edit</mat-icon>
+        Modifier le profil
+      </button>
       <button mat-stroked-button color="primary" type="button" (click)="openChangePasswordDialog()">
         <mat-icon>lock_reset</mat-icon>
         Changer le mot de passe
