@@ -47,6 +47,8 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { ApiUnavailableComponent } from './component/api-unavailable/api-unavailable.component';
 import { RegisterSchoolComponent } from './component/register-school/register-school.component';
 import { SuperAdminDashboardComponent } from './component/super-admin-dashboard/super-admin-dashboard.component';
@@ -168,9 +170,13 @@ export function initializeAuthFactory(authService: AuthService) {
     MatBadgeModule,
     MatPaginatorModule,
     MatSlideToggleModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     SharedModule
   ],
   providers: [
+    /** Datepickers Material : affichage jj/mm/aaaa (et parsing cohérent) au lieu du format US. */
+    { provide: MAT_DATE_LOCALE, useValue: 'fr-FR' },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     {
       provide: APP_INITIALIZER,

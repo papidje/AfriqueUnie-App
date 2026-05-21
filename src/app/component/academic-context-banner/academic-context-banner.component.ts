@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { ActiveSchoolService } from '../../service/active-school.service';
-import { SchoolYearService } from '../../service/school-year.service';
 import { AuthUtilsService } from '../../service/auth-utils.service';
 import { AppRoles } from '../../core/app-roles';
 import { SchoolYearDto } from '../../models/academic.models';
@@ -37,7 +36,7 @@ export class AcademicContextBannerComponent {
         return of<AcademicBannerVm>({ visible: false, schoolId: null, year: null });
       }
 
-      return this.schoolYearService.getActiveForSchool(schoolId).pipe(
+      return this.activeSchool.activeSchoolYear$.pipe(
         map((year) => ({ visible: true, schoolId, year }))
       );
     })
@@ -45,7 +44,6 @@ export class AcademicContextBannerComponent {
 
   constructor(
     private readonly activeSchool: ActiveSchoolService,
-    private readonly schoolYearService: SchoolYearService,
     private readonly authUtils: AuthUtilsService,
     public readonly router: Router
   ) {}

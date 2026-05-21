@@ -15,7 +15,6 @@ export type FounderInviteProfile =
   | 'MEMBER_BY_SCHOOLS';
 
 export interface InviteMemberDialogResult {
-  fullname: string;
   email: string;
   role: UserRoleNameType;
   /** Ancien flux ou directeur invité par le fondateur (une école). */
@@ -47,7 +46,6 @@ export class InviteMemberDialogComponent implements OnInit, OnDestroy {
   loadingSchools = false;
 
   readonly form = this.fb.group({
-    fullname: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     /** Fondateur uniquement : type de profil invité. */
     founderProfile: ['MEMBER_BY_SCHOOLS' as FounderInviteProfile, Validators.required],
@@ -215,7 +213,6 @@ export class InviteMemberDialogComponent implements OnInit, OnDestroy {
     }
 
     const out: InviteMemberDialogResult = {
-      fullname: (v.fullname || '').trim(),
       email: (v.email || '').trim().toLowerCase(),
       role,
       schoolId,

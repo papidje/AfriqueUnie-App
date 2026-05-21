@@ -1,29 +1,35 @@
-<ng-container *ngIf="activeSchool.headerVm$ | async as vm">
+<ng-container *ngIf="headerWithYear$ | async as hy">
   <span class="header-title-group">
-    <ng-container *ngIf="vm.showPicker">
+    <ng-container *ngIf="hy.vm.showPicker">
       <button
         mat-button
         type="button"
         class="school-picker-trigger"
         [matMenuTriggerFor]="schoolSwitcherMenu"
-        [attr.aria-label]="'Changer d’établissement : ' + displayName(vm)"
+        [attr.aria-label]="'Changer d’établissement : ' + displayName(hy.vm)"
         [attr.aria-haspopup]="true"
       >
-        <span class="school-picker-label">{{ displayName(vm) }}</span>
+        <span class="school-picker-text-wrap">
+          <span class="school-picker-label">{{ displayName(hy.vm) }}</span>
+          <span *ngIf="hy.year" class="school-year-suffix">({{ hy.year.label }})</span>
+        </span>
         <mat-icon class="school-picker-swap-icon" aria-hidden="true">swap_horiz</mat-icon>
       </button>
       <mat-menu #schoolSwitcherMenu="matMenu" panelClass="school-picker-menu-panel">
         <button
           mat-menu-item
           type="button"
-          *ngFor="let s of otherSchools(vm)"
-          (click)="onSchoolSelected(s.id, vm)"
+          *ngFor="let s of otherSchools(hy.vm)"
+          (click)="onSchoolSelected(s.id, hy.vm)"
         >
           {{ s.name }}
         </button>
       </mat-menu>
     </ng-container>
 
-    <span *ngIf="!vm.showPicker" class="title static-school-title">{{ displayName(vm) }}</span>
+    <span *ngIf="!hy.vm.showPicker" class="title static-school-title school-picker-text-wrap">
+      <span class="school-picker-label">{{ displayName(hy.vm) }}</span>
+      <span *ngIf="hy.year" class="school-year-suffix">({{ hy.year.label }})</span>
+    </span>
   </span>
 </ng-container>

@@ -11,15 +11,62 @@
   min-width: 0;
 }
 
+.school-picker-text-wrap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.school-year-suffix {
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  font-weight: 400;
+  opacity: 0.88;
+  letter-spacing: 0.01em;
+}
+
 .static-school-title.title {
+  display: inline-flex;
+  align-items: baseline;
   font-size: 1.05rem;
   font-weight: 500;
   letter-spacing: 0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: min(52vw, 420px);
   color: var(--app-on-primary, #fff);
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow: hidden;
+
+  .school-picker-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 767px) {
+  .school-picker-trigger.mat-mdc-button {
+    max-width: min(72vw, 100%);
+    padding: 4px 8px 4px 10px;
+  }
+
+  .static-school-title.title {
+    max-width: min(62vw, 280px);
+  }
+
+  .school-picker-label {
+    font-size: 0.95rem;
+  }
+
+  .school-year-suffix {
+    font-size: 0.78rem;
+  }
+
+  .school-picker-trigger .mat-mdc-button-touch-target {
+    height: 40px;
+  }
 }
 
 /* Bouton « établissement actif » + menu (plusieurs écoles) */

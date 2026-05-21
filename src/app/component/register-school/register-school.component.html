@@ -22,13 +22,19 @@
       </div>
 
       <div class="form-group">
-        <label for="tenantAddress">Adresse</label>
-        <input id="tenantAddress" type="text" formControlName="tenantAddress" placeholder="Commune, quartier…" />
+        <label for="schoolAddress">Adresse</label>
+        <input id="schoolAddress" type="text" formControlName="schoolAddress" placeholder="Commune, quartier…" />
+        <small class="error" *ngIf="schoolForm.get('schoolAddress')?.invalid && schoolForm.get('schoolAddress')?.touched">
+          Ce champ est obligatoire.
+        </small>
       </div>
 
       <div class="form-group">
-        <label for="phone">Téléphone</label>
-        <input id="phone" type="text" formControlName="phone" placeholder="+224…" />
+        <label for="schoolContact">Téléphone</label>
+        <input id="schoolContact" type="text" formControlName="schoolContact" placeholder="+224…" />
+        <small class="error" *ngIf="schoolForm.get('schoolContact')?.invalid && schoolForm.get('schoolContact')?.touched">
+          Ce champ est obligatoire.
+        </small>
       </div>
 
       <button type="button" class="btn-submit" (click)="goToStep2()">Continuer</button>
@@ -36,13 +42,27 @@
 
     <form *ngIf="step === 2" [formGroup]="adminForm" class="auth-form" (ngSubmit)="submit()">
       <div class="form-group">
-        <label>Nom de l'admin</label>
-        <input type="text" formControlName="fullname" placeholder="Nom complet" />
+        <label for="adminFirstName">Prénom</label>
+        <input id="adminFirstName" type="text" formControlName="adminFirstName" placeholder="Prénom" />
+        <small class="error" *ngIf="adminForm.get('adminFirstName')?.invalid && adminForm.get('adminFirstName')?.touched">
+          Ce champ est obligatoire.
+        </small>
       </div>
 
       <div class="form-group">
-        <label>Email</label>
-        <input type="email" formControlName="email" placeholder="admin@ecole.com" />
+        <label for="adminLastName">Nom</label>
+        <input id="adminLastName" type="text" formControlName="adminLastName" placeholder="Nom" />
+        <small class="error" *ngIf="adminForm.get('adminLastName')?.invalid && adminForm.get('adminLastName')?.touched">
+          Ce champ est obligatoire.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="adminEmail">Email</label>
+        <input id="adminEmail" type="email" formControlName="email" placeholder="admin@ecole.com" />
+        <small class="error" *ngIf="adminForm.get('email')?.invalid && adminForm.get('email')?.touched">
+          E-mail invalide ou manquant.
+        </small>
       </div>
 
       <p class="info" style="margin: 0; color: rgba(0, 0, 0, 0.65);">
@@ -60,7 +80,7 @@
     </form>
 
     <div class="back-login">
-      <a routerLink="/login">Retour a la connexion</a>
+      <a routerLink="/login">← Retour à la connexion</a>
     </div>
   </div>
 </div>

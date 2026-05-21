@@ -9,6 +9,18 @@ export interface ChangePasswordPayload {
   newPassword: string;
 }
 
+/** Corps attendu par {@code PATCH /users/profile} (champs optionnels sauf nom affiché côté serveur). */
+export interface OwnProfileUpdatePayload {
+  /** Rétrocompatibilité ; ignoré si {@code lastName} est fourni. */
+  fullname?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  birthDate?: string | null;
+  gender?: 'MALE' | 'FEMALE' | null;
+  phone?: string | null;
+  biography?: string | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,14 +30,12 @@ export class UserService {
   constructor(private readonly http: HttpClient) {}
 
   inviteMember(data: {
-    nom: string;
     email: string;
     role: UserRoleNameType;
     schoolId?: number | null;
     schoolAssignments?: { schoolId: number; role: UserRoleNameType }[];
   }): Observable<any> {
     const body: Record<string, unknown> = {
-      nom: data.nom,
       email: data.email,
       role: data.role
     };
@@ -72,8 +82,8 @@ export class UserService {
     return this.http.post<void>(`${this.apiUrl}/change-password`, body);
   }
 
-  updateOwnProfile(body: { fullname: string }): Observable<any> {
-    return this.http.patch<any>(`${this.apiUrl}/profile`, body);
+  updateOwnProfile(body: OwnProfileUpdatePayload): Observable<unknown> {
+    return this.http.patch<unknown>(`${this.apiUrl}/profile`, body);
   }
 
   getAdmins(): Observable<any> {

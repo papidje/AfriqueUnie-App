@@ -1,18 +1,58 @@
 <h2 mat-dialog-title>Modifier le profil</h2>
 
-<mat-dialog-content class="dialog-body">
-  <p class="hint">Le nom affiché est utilisé dans l’application et sur les documents où votre identité apparaît.</p>
-
-  <form [formGroup]="form" (ngSubmit)="submit()" id="edit-profile-form">
+<mat-dialog-content class="edit-profile-dialog-content">
+  <form [formGroup]="form" id="edit-profile-form" (ngSubmit)="submit()">
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Nom complet</mat-label>
-      <input matInput formControlName="fullname" autocomplete="name" />
-      <mat-error *ngIf="form.get('fullname')?.hasError('required')">Le nom est requis.</mat-error>
-      <mat-error *ngIf="form.get('fullname')?.hasError('maxlength')">Nom trop long.</mat-error>
+      <mat-label>Civilité / sexe</mat-label>
+      <mat-select formControlName="gender">
+        <mat-option value="">Non renseigné</mat-option>
+        <mat-option value="MALE">Homme</mat-option>
+        <mat-option value="FEMALE">Femme</mat-option>
+      </mat-select>
     </mat-form-field>
-  </form>
 
-  <p *ngIf="serverError" class="server-error" role="alert">{{ serverError }}</p>
+    <div class="two-col">
+      <mat-form-field appearance="outline">
+        <mat-label>Prénom</mat-label>
+        <input matInput formControlName="firstName" autocomplete="given-name" />
+        <mat-error *ngIf="form.get('firstName')?.hasError('maxlength')">Trop long.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nom</mat-label>
+        <input matInput formControlName="lastName" autocomplete="family-name" required />
+        <mat-error *ngIf="form.get('lastName')?.hasError('required')">Le nom est requis.</mat-error>
+        <mat-error *ngIf="form.get('lastName')?.hasError('maxlength')">Trop long.</mat-error>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Date de naissance</mat-label>
+      <input matInput [matDatepicker]="bdPicker" formControlName="birthDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="bdPicker"></mat-datepicker-toggle>
+      <mat-datepicker #bdPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Téléphone</mat-label>
+      <input matInput formControlName="phone" type="tel" autocomplete="tel" />
+      <mat-error *ngIf="form.get('phone')?.hasError('maxlength')">Trop long.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Informations complémentaires / références</mat-label>
+      <textarea
+        matInput
+        formControlName="biography"
+        rows="4"
+        placeholder="Matières enseignées, références professionnelles…"
+      ></textarea>
+      <mat-hint align="end">{{ (form.get('biography')?.value ?? '').length }} / 12000</mat-hint>
+      <mat-error *ngIf="form.get('biography')?.hasError('maxlength')">Texte trop long.</mat-error>
+    </mat-form-field>
+
+    <p class="server-error" *ngIf="serverError">{{ serverError }}</p>
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
@@ -24,6 +64,9 @@
     form="edit-profile-form"
     [disabled]="saving || form.invalid"
   >
-    Enregistrer
+    <span class="submit-inner">
+      <mat-progress-spinner *ngIf="saving" diameter="20" mode="indeterminate"></mat-progress-spinner>
+      <span *ngIf="!saving">Enregistrer</span>
+    </span>
   </button>
 </mat-dialog-actions>

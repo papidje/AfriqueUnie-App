@@ -2,14 +2,16 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, EMPTY, Observable, Subscription, combineLatest, interval, of } from 'rxjs';
-import { catchError, distinctUntilChanged, finalize, map, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, finalize, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 import { API_BASE_URL } from '../core/api-base';
 import { AppRoles } from '../core/app-roles';
 import { ACTIVE_SCHOOL_ID_SESSION_KEY } from '../core/storage-keys';
+import { SchoolYearDto } from '../models/academic.models';
 import { School } from '../modules/admin/school/school-list/school-list.component';
 import { SchoolService } from '../modules/admin/school/school.service';
 import { AuthService } from './auth.service';
 import { AuthUtilsService } from './auth-utils.service';
+import { SchoolYearService } from './school-year.service';
 
 interface SwitchSchoolResponse {
   bearer: string;
@@ -63,6 +65,17 @@ export class ActiveSchoolService {
     distinctUntilChanged()
   );
 
+  /**
+   * Année scolaire active pour l’établissement sélectionné (partagée entre header et bandeau).
+   */
+  readonly activeSchoolYear$: Observable<SchoolYearDto | null> = this.selectedId$.pipe(
+    distinctUntilChanged(),
+    switchMap((schoolId) =>
+      schoolId == null ? of(null) : this.schoolYearService.getActiveForSchool(schoolId)
+    ),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
   readonly portalAccessBlocked$: Observable<boolean> = this.portalAccessBlockedSubject.asObservable();
 
   /**
@@ -88,6 +101,7 @@ export class ActiveSchoolService {
   constructor(
     private readonly http: HttpClient,
     private readonly schoolService: SchoolService,
+    private readonly schoolYearService: SchoolYearService,
     private readonly authUtils: AuthUtilsService,
     private readonly authService: AuthService,
     private readonly router: Router
