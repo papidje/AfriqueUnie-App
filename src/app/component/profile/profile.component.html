@@ -1,11 +1,8 @@
 <section class="profile-page">
-  <div class="profile-hero" *ngIf="!loading && user">
-    <div class="profile-avatar" aria-hidden="true">{{ user ? avatarInitials(user.fullname) : '' }}</div>
-    <div class="profile-hero-text">
-      <h1>Mon profil</h1>
-      <p class="subtitle">Informations de votre compte utilisateur.</p>
-    </div>
-  </div>
+  <header class="profile-page-heading" *ngIf="!loading && user">
+    <h1>Mon profil</h1>
+    <p class="subtitle">Vue d’ensemble de votre compte et de vos informations personnelles.</p>
+  </header>
 
   <div *ngIf="loading" class="loading-wrap">
     <mat-progress-spinner diameter="48"></mat-progress-spinner>
@@ -19,81 +16,115 @@
     (retry)="reload()"
   ></app-api-unavailable>
 
-  <mat-card *ngIf="!loading && user" class="profile-card">
-    <mat-card-header class="profile-card-header-inner">
-      <div mat-card-avatar class="card-avatar-mini">{{ avatarInitials(user.fullname) }}</div>
-      <mat-card-title>Informations du compte</mat-card-title>
-      <mat-card-subtitle>Nom, contact et accès</mat-card-subtitle>
-    </mat-card-header>
+  <div class="profile-dashboard" *ngIf="!loading && user">
+    <!-- Colonne compte (~35 %) -->
+    <aside class="profile-col profile-col-account">
+      <mat-card class="profile-card profile-account-card">
+        <mat-card-content class="account-card-inner">
+          <div class="account-avatar-large" aria-hidden="true">
+            {{ avatarInitials(user.fullname) }}
+          </div>
+          <h2 class="account-display-name">{{ user.fullname || 'Utilisateur' }}</h2>
+          <p class="account-username">{{ user.username }}</p>
 
-    <mat-card-content>
-      <dl class="profile-dl">
-        <div class="row">
-          <dt>Nom complet</dt>
-          <dd>{{ user.fullname }}</dd>
-        </div>
-        <div class="row">
-          <dt>Nom d’utilisateur</dt>
-          <dd>{{ user.username }}</dd>
-        </div>
-        <div class="row">
-          <dt>E-mail</dt>
-          <dd>{{ user.email || '—' }}</dd>
-        </div>
-        <div class="row">
-          <dt>Dernière connexion</dt>
-          <dd>{{ user.lastLoginAt | displayDate:'at' }}</dd>
-        </div>
-        <div class="row">
-          <dt>Statut</dt>
-          <dd>
-            <span [ngClass]="user.isActive ? 'active' : 'inactive'">
-              {{ user.isActive ? 'Actif' : 'Inactif' }}
-            </span>
-          </dd>
-        </div>
-        <div class="row">
-          <dt>Rôle effectif</dt>
-          <dd>
-            {{ formatRoles(user.roles) }}
-            <span class="field-hint"> Selon l’établissement sélectionné dans la barre supérieure.</span>
-          </dd>
-        </div>
-        <div class="row" *ngIf="user.activeAffiliations.length > 0">
-          <dt>Rattachements</dt>
-          <dd>
-            <div class="affiliation-badges">
-              <span class="affiliation-chip" *ngFor="let a of user.activeAffiliations">
-                <span class="aff-school">{{ a.schoolName }}</span>
-                <span class="aff-sep">·</span>
-                <span class="aff-role">{{ formatRoleLabel(a.role) }}</span>
-              </span>
+          <mat-divider class="account-divider"></mat-divider>
+
+          <dl class="account-dl">
+            <div class="account-row">
+              <dt>Dernière connexion</dt>
+              <dd>{{ user.lastLoginAt | displayDate:'at' }}</dd>
             </div>
-          </dd>
-        </div>
-        <div class="row row-schools" *ngIf="user.activeAffiliations.length === 0">
-          <dt>Établissements</dt>
-          <dd>
-            <ul *ngIf="user.schools.length > 0" class="school-list">
-              <li *ngFor="let s of user.schools">{{ s.name }}</li>
-            </ul>
-            <span *ngIf="user.schools.length === 0" class="schools-empty">
-              Aucun établissement associé à ce compte dans l’application (ex. super administrateur ou rattachement à venir).
-            </span>
-          </dd>
-        </div>
-      </dl>
-    </mat-card-content>
+            <div class="account-row">
+              <dt>Statut</dt>
+              <dd>
+                <span class="status-badge" [class.status-badge--active]="user.isActive" [class.status-badge--inactive]="!user.isActive">
+                  {{ user.isActive ? 'Actif' : 'Inactif' }}
+                </span>
+              </dd>
+            </div>
+            <div class="account-row">
+              <dt>Rôle effectif</dt>
+              <dd>
+                {{ formatRoles(user.roles) }}
+                <span class="field-hint">Selon l’établissement sélectionné dans la barre supérieure.</span>
+              </dd>
+            </div>
+            <div class="account-row account-row-establishments">
+              <dt>Établissements</dt>
+              <dd>
+                <ul *ngIf="establishmentLabels().length > 0" class="establishment-list">
+                  <li *ngFor="let name of establishmentLabels()">{{ name }}</li>
+                </ul>
+                <span *ngIf="establishmentLabels().length === 0" class="schools-empty">
+                  Aucun établissement associé à ce compte (ex. super administrateur ou rattachement à venir).
+                </span>
+              </dd>
+            </div>
+          </dl>
 
-    <mat-card-actions class="profile-actions" align="start">
-      <button mat-stroked-button color="primary" type="button" (click)="openEditProfileDialog()">
-        <mat-icon>edit</mat-icon>
-        Modifier le profil
-      </button>
-      <button mat-stroked-button color="primary" type="button" (click)="openChangePasswordDialog()">
-        <mat-icon>lock_reset</mat-icon>
-        Changer le mot de passe
-      </button>
-    </mat-card-actions>
-  </mat-card>
+          <div class="account-actions">
+            <button mat-stroked-button color="primary" type="button" (click)="openChangePasswordDialog()" class="full-width-btn">
+              <mat-icon>lock_reset</mat-icon>
+              Changer le mot de passe
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </aside>
+
+    <!-- Colonne informations personnelles (~65 %) -->
+    <main class="profile-col profile-col-personal">
+      <mat-card class="profile-card profile-personal-card">
+        <mat-card-header class="personal-card-header">
+          <div class="personal-card-title-block">
+            <mat-card-title>Informations personnelles</mat-card-title>
+            <mat-card-subtitle>Données affichées en lecture seule — modifiez-les via le bouton ci-contre.</mat-card-subtitle>
+          </div>
+          <button mat-stroked-button color="primary" type="button" class="edit-profile-btn" (click)="openEditProfileDialog()">
+            <mat-icon>edit</mat-icon>
+            Modifier le profil
+          </button>
+        </mat-card-header>
+
+        <mat-card-content>
+          <dl class="personal-dl">
+            <div class="personal-row">
+              <dt>Prénom</dt>
+              <dd>{{ user.firstName?.trim() || '—' }}</dd>
+            </div>
+            <div class="personal-row">
+              <dt>Nom</dt>
+              <dd>{{ user.lastName?.trim() || '—' }}</dd>
+            </div>
+            <div class="personal-row">
+              <dt>Civilité / sexe</dt>
+              <dd>{{ genderLabel() }}</dd>
+            </div>
+            <div class="personal-row">
+              <dt>Date de naissance</dt>
+              <dd>
+                <span class="birth-value">{{ user.birthDate | displayDate }}</span>
+                <span class="age-inline" *ngIf="readonlyAgeYears() !== null">
+                  <span class="age-sep">·</span>
+                  {{ readonlyAgeYears() }} ans
+                </span>
+              </dd>
+            </div>
+            <div class="personal-row">
+              <dt>Téléphone</dt>
+              <dd>{{ user.phone?.trim() || '—' }}</dd>
+            </div>
+            <div class="personal-row">
+              <dt>E-mail</dt>
+              <dd>{{ user.email || '—' }}</dd>
+            </div>
+            <div class="personal-row personal-row-bio">
+              <dt>Informations complémentaires / références</dt>
+              <dd class="bio-text">{{ user.biography?.trim() || '—' }}</dd>
+            </div>
+          </dl>
+        </mat-card-content>
+      </mat-card>
+    </main>
+  </div>
 </section>

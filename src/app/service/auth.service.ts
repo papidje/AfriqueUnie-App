@@ -206,11 +206,12 @@ export class AuthService {
 
   registerSchoolAdmin(data: {
     username: string;
-    fullname: string;
+    adminFirstName: string;
+    adminLastName: string;
     email: string;
     tenantName: string;
     schoolName: string;
-    tenantAddress: string;
+    schoolAddress: string;
     tenantLogo: string;
     schoolContact: string;
   }): Observable<any> {

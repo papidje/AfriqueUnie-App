@@ -98,7 +98,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       }
       this.userService
         .inviteMember({
-          nom: result.fullname,
           email: result.email,
           role: result.role,
           schoolId: result.schoolId ?? undefined,

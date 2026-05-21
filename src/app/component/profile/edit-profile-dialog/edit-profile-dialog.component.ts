@@ -6,9 +6,10 @@ import { Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../service/auth.service';
 import { UserService } from '../../../service/user.service';
+import { UserProfile } from '../profile.models';
 
 export interface EditProfileDialogData {
-  fullname: string;
+  user: UserProfile;
 }
 
 @Component({
@@ -23,7 +24,12 @@ export class EditProfileDialogComponent implements OnInit, OnDestroy {
   serverError: string | null = null;
 
   readonly form = this.fb.group({
-    fullname: ['', [Validators.required, Validators.maxLength(255)]]
+    gender: [''],
+    firstName: ['', [Validators.maxLength(255)]],
+    lastName: ['', [Validators.required, Validators.maxLength(255)]],
+    birthDate: [null as Date | null],
+    phone: ['', [Validators.maxLength(100)]],
+    biography: ['', [Validators.maxLength(12000)]]
   });
 
   constructor(
@@ -36,8 +42,18 @@ export class EditProfileDialogComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const initial = (this.data?.fullname ?? '').trim();
-    this.form.patchValue({ fullname: initial });
+    const p = this.data?.user;
+    if (p) {
+      const genderUi = p.gender === 'MALE' || p.gender === 'FEMALE' ? p.gender : '';
+      this.form.patchValue({
+        gender: genderUi,
+        firstName: p.firstName ?? '',
+        lastName: (p.lastName ?? '').trim() || (p.fullname ?? '').trim(),
+        birthDate: this.parseIsoDateToLocalDate(p.birthDate),
+        phone: p.phone ?? '',
+        biography: p.biography ?? ''
+      });
+    }
     this.form.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.serverError = null;
     });
@@ -58,15 +74,32 @@ export class EditProfileDialogComponent implements OnInit, OnDestroy {
     if (this.form.invalid) {
       return;
     }
-    const fullname = (this.form.get('fullname')?.value as string)?.trim() ?? '';
+    const rawGender = (this.form.get('gender')?.value as string) ?? '';
+    const gender =
+      rawGender === 'MALE' || rawGender === 'FEMALE' ? (rawGender as 'MALE' | 'FEMALE') : null;
+
+    const lastName = ((this.form.get('lastName')?.value as string) ?? '').trim();
+    const firstNameRaw = ((this.form.get('firstName')?.value as string) ?? '').trim();
+    const phoneRaw = ((this.form.get('phone')?.value as string) ?? '').trim();
+    const biographyRaw = ((this.form.get('biography')?.value as string) ?? '').trim();
+    const birth = this.form.get('birthDate')?.value as Date | null;
+
     this.saving = true;
     this.userService
-      .updateOwnProfile({ fullname })
+      .updateOwnProfile({
+        fullname: null,
+        firstName: firstNameRaw.length ? firstNameRaw : null,
+        lastName: lastName.length ? lastName : null,
+        birthDate: birth ? this.formatLocalDateForApi(birth) : null,
+        gender,
+        phone: phoneRaw.length ? phoneRaw : null,
+        biography: biographyRaw.length ? biographyRaw : null
+      })
       .pipe(switchMap(() => this.authService.refreshToken()))
       .subscribe({
         next: () => {
           this.saving = false;
-          this.snackBar.open('Profil mis à jour.', 'Fermer', { duration: 3500 });
+          this.snackBar.open('Profil enregistré.', 'Fermer', { duration: 3500 });
           this.dialogRef.close(true);
         },
         error: (err) => {
@@ -80,5 +113,26 @@ export class EditProfileDialogComponent implements OnInit, OnDestroy {
           this.serverError = typeof msg === 'string' ? msg : 'Impossible de mettre à jour le profil.';
         }
       });
+  }
+
+  private parseIsoDateToLocalDate(iso: string | null): Date | null {
+    if (!iso) {
+      return null;
+    }
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim());
+    if (!m) {
+      return null;
+    }
+    const y = +m[1];
+    const mo = +m[2] - 1;
+    const d = +m[3];
+    return new Date(y, mo, d);
+  }
+
+  private formatLocalDateForApi(d: Date): string {
+    const y = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${mo}-${day}`;
   }
 }

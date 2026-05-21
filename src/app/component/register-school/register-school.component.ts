@@ -23,12 +23,13 @@ export class RegisterSchoolComponent {
     this.schoolForm = this.fb.group({
       schoolName: ['', Validators.required],
       tenantName: [''],
-      tenantAddress: ['', Validators.required],
-      phone: ['', Validators.required]
+      schoolAddress: ['', Validators.required],
+      schoolContact: ['', Validators.required]
     });
 
     this.adminForm = this.fb.group({
-      fullname: ['', Validators.required],
+      adminFirstName: ['', Validators.required],
+      adminLastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]]
     });
   }
@@ -64,24 +65,30 @@ export class RegisterSchoolComponent {
     const establishmentName = (schoolValues.schoolName ?? '').trim();
     const tenantLabel = (schoolValues.tenantName ?? '').trim() || establishmentName;
 
-    this.authService.registerSchoolAdmin({
-      username: adminValues.email,
-      fullname: adminValues.fullname,
-      email: adminValues.email,
-      tenantName: tenantLabel,
-      schoolName: establishmentName,
-      tenantAddress: (schoolValues.tenantAddress ?? '').trim(),
-      tenantLogo: '',
-      schoolContact: (schoolValues.phone ?? '').trim()
-    }).subscribe({
-      next: () => {
-        this.loading = false;
-        this.router.navigate(['/login']);
-      },
-      error: () => {
-        this.loading = false;
-        this.errorMessage = 'Inscription impossible pour le moment.';
-      }
-    });
+    const adminFirstName = (adminValues.adminFirstName ?? '').trim();
+    const adminLastName = (adminValues.adminLastName ?? '').trim();
+
+    this.authService
+      .registerSchoolAdmin({
+        username: adminValues.email,
+        adminFirstName,
+        adminLastName,
+        email: adminValues.email,
+        tenantName: tenantLabel,
+        schoolName: establishmentName,
+        schoolAddress: (schoolValues.schoolAddress ?? '').trim(),
+        tenantLogo: '',
+        schoolContact: (schoolValues.schoolContact ?? '').trim()
+      })
+      .subscribe({
+        next: () => {
+          this.loading = false;
+          this.router.navigate(['/login']);
+        },
+        error: () => {
+          this.loading = false;
+          this.errorMessage = 'Inscription impossible pour le moment.';
+        }
+      });
   }
 }

@@ -1,21 +1,33 @@
-.dialog-body {
+.edit-profile-dialog-content {
+  min-width: min(100%, 480px);
   padding-top: 8px;
-  min-width: min(100%, 360px);
-}
-
-.hint {
-  margin: 0 0 16px;
-  font-size: 13px;
-  color: #6b7280;
-  line-height: 1.45;
 }
 
 .full-width {
   width: 100%;
 }
 
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+}
+
+@media (max-width: 520px) {
+  .two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
 .server-error {
-  margin: 8px 0 0;
-  font-size: 13px;
+  margin: 0 0 8px;
   color: #c62828;
+  font-size: 14px;
+}
+
+.submit-inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
 }

@@ -1,27 +1,21 @@
 <ng-container *ngIf="vm$ | async as vm">
-  <div class="academic-banner" *ngIf="vm.visible" role="status">
-    <mat-icon class="banner-icon" aria-hidden="true">event</mat-icon>
+  <!-- Bandeau uniquement si aucune année active : libère la hauteur quand le contexte est prêt -->
+  <div class="academic-banner academic-banner--cta" *ngIf="vm.visible && !vm.year" role="status">
+    <mat-icon class="banner-icon" aria-hidden="true">event_busy</mat-icon>
     <span class="banner-text">
-      <span class="banner-label">Année scolaire active</span>
-      <ng-container *ngIf="vm.year as y">
-        <span class="banner-sep">·</span>
-        <strong class="banner-value">{{ y.label }}</strong>
-        <span class="banner-dates muted">({{ y.startDate | displayDate }} → {{ y.endDate | displayDate }})</span>
-      </ng-container>
-      <ng-container *ngIf="!vm.year">
-        <span class="banner-sep">·</span>
-        <span class="banner-warn">Aucune année active.</span>
-        <button
-          mat-stroked-button
-          type="button"
-          color="primary"
-          class="banner-action"
-          [routerLink]="['/annee-scolaire/nouvelle']"
-          [queryParams]="{ schoolId: vm.schoolId, returnUrl: router.url }"
-        >
-          Créer une année scolaire
-        </button>
-      </ng-container>
+      <span class="banner-label">Année scolaire</span>
+      <span class="banner-sep">·</span>
+      <span class="banner-warn">Aucune année active.</span>
+      <button
+        mat-stroked-button
+        type="button"
+        color="primary"
+        class="banner-action"
+        [routerLink]="['/annee-scolaire/nouvelle']"
+        [queryParams]="{ schoolId: vm.schoolId, returnUrl: router.url }"
+      >
+        Créer une année scolaire
+      </button>
     </span>
   </div>
 </ng-container>

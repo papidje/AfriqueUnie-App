@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
+import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ActiveSchoolHeaderVm, ActiveSchoolService } from '../../../service/active-school.service';
 import { AuthService } from '../../../service/auth.service';
+import { SchoolYearDto } from '../../../models/academic.models';
 import { School } from '../../../modules/admin/school/school-list/school-list.component';
 
 @Component({
@@ -11,6 +14,14 @@ import { School } from '../../../modules/admin/school/school-list/school-list.co
   styleUrls: ['./school-picker.component.scss']
 })
 export class SchoolPickerComponent {
+  /** Header + année active (affichage discret à côté du nom d’établissement). */
+  readonly headerWithYear$ = combineLatest([
+    this.activeSchool.headerVm$,
+    this.activeSchool.activeSchoolYear$
+  ]).pipe(
+    map(([vm, year]: [ActiveSchoolHeaderVm, SchoolYearDto | null]) => ({ vm, year }))
+  );
+
   constructor(
     readonly activeSchool: ActiveSchoolService,
     private readonly authService: AuthService,
