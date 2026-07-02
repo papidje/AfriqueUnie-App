@@ -103,6 +103,7 @@ export interface PaymentReceiptViewDto {
   paymentDate: string;
   lines: PaymentReceiptLineDto[];
   totalCollected: number;
+  balanceRemaining?: number | null;
   duplicate: boolean;
 }
 

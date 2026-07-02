@@ -33,6 +33,14 @@
 
           <div class="grid">
             <mat-form-field appearance="outline">
+              <mat-label>Civilité</mat-label>
+              <mat-select formControlName="civility">
+                <mat-option value="MONSIEUR">Garçon</mat-option>
+                <mat-option value="MADAME">Fille</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
               <mat-label>Nom</mat-label>
               <input matInput formControlName="lastName" />
               <mat-error *ngIf="stepStudent.controls.lastName.hasError('required')">Requis</mat-error>
@@ -51,11 +59,30 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Sexe</mat-label>
-              <mat-select formControlName="civility">
-                <mat-option value="MONSIEUR">Garçon</mat-option>
-                <mat-option value="MADAME">Fille</mat-option>
-              </mat-select>
+              <mat-label>Lieu de naissance</mat-label>
+              <input matInput formControlName="birthPlace" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nationalité</mat-label>
+              <input matInput formControlName="nationality" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Adresse</mat-label>
+              <input matInput formControlName="address" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Téléphone communication</mat-label>
+              <input matInput formControlName="communicationPhone" />
+              <mat-error *ngIf="phoneControlError(stepStudent.controls.communicationPhone) as err">{{ err }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email communication</mat-label>
+              <input matInput type="email" formControlName="communicationEmail" />
+              <mat-error *ngIf="emailControlError(stepStudent.controls.communicationEmail) as err">{{ err }}</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full">
@@ -67,6 +94,49 @@
               </mat-select>
               <mat-error *ngIf="stepStudent.controls.classId.hasError('required')">Requis</mat-error>
             </mat-form-field>
+          </div>
+
+          <div class="photo-block">
+            <img *ngIf="photoPreviewUrl; else noRegPhoto" [src]="photoPreviewUrl" class="student-photo" alt="Aperçu photo" />
+            <ng-template #noRegPhoto>
+              <div class="photo-placeholder">Pas de photo</div>
+            </ng-template>
+            <div class="photo-actions">
+              <input
+                #galleryInput
+                type="file"
+                accept="image/*"
+                (change)="onPhotoSelected($event)"
+                [disabled]="submitting"
+                hidden
+              />
+              <input
+                #cameraInput
+                type="file"
+                accept="image/*"
+                capture="environment"
+                (change)="onPhotoSelected($event)"
+                [disabled]="submitting"
+                hidden
+              />
+              <button mat-stroked-button type="button" (click)="galleryInput.click()" [disabled]="submitting">
+                <mat-icon>photo_library</mat-icon>
+                Galerie
+              </button>
+              <button mat-stroked-button type="button" (click)="cameraInput.click()" [disabled]="submitting">
+                <mat-icon>photo_camera</mat-icon>
+                Appareil photo
+              </button>
+              <button
+                mat-button
+                type="button"
+                *ngIf="pendingPhotoFile"
+                (click)="clearPendingPhoto()"
+                [disabled]="submitting"
+              >
+                Retirer la photo
+              </button>
+            </div>
           </div>
 
           <div class="actions">
@@ -86,7 +156,7 @@
                 <mat-form-field appearance="outline">
                   <mat-label>Téléphone</mat-label>
                   <input matInput formControlName="fatherPhone" (blur)="lookupFather()" />
-                  <mat-error *ngIf="stepParents.controls.fatherPhone.hasError('required')">Requis</mat-error>
+                  <mat-error *ngIf="phoneControlError(stepParents.controls.fatherPhone, true) as err">{{ err }}</mat-error>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                   <mat-label>Nom</mat-label>
@@ -99,6 +169,7 @@
                 <mat-form-field appearance="outline">
                   <mat-label>Email</mat-label>
                   <input matInput formControlName="fatherEmail" />
+                  <mat-error *ngIf="emailControlError(stepParents.controls.fatherEmail) as err">{{ err }}</mat-error>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                   <mat-label>Profession</mat-label>
@@ -117,7 +188,7 @@
                 <mat-form-field appearance="outline">
                   <mat-label>Téléphone</mat-label>
                   <input matInput formControlName="motherPhone" (blur)="lookupMother()" />
-                  <mat-error *ngIf="stepParents.controls.motherPhone.hasError('required')">Requis</mat-error>
+                  <mat-error *ngIf="phoneControlError(stepParents.controls.motherPhone, true) as err">{{ err }}</mat-error>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                   <mat-label>Nom</mat-label>
@@ -130,6 +201,7 @@
                 <mat-form-field appearance="outline">
                   <mat-label>Email</mat-label>
                   <input matInput formControlName="motherEmail" />
+                  <mat-error *ngIf="emailControlError(stepParents.controls.motherEmail) as err">{{ err }}</mat-error>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
                   <mat-label>Profession</mat-label>
@@ -163,12 +235,21 @@
             <mat-form-field appearance="outline" class="full">
               <mat-label>Contact d'urgence</mat-label>
               <input matInput formControlName="emergencyContactName" />
-              <mat-error *ngIf="stepEmergency.controls.emergencyContactName.hasError('required')">Requis</mat-error>
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Téléphone d'urgence</mat-label>
               <input matInput formControlName="emergencyContactPhone" />
-              <mat-error *ngIf="stepEmergency.controls.emergencyContactPhone.hasError('required')">Requis</mat-error>
+              <mat-error *ngIf="phoneControlError(stepEmergency.controls.emergencyContactPhone) as err">{{ err }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Groupe sanguin</mat-label>
+              <input matInput formControlName="bloodGroup" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Allergies</mat-label>
+              <textarea matInput rows="2" formControlName="allergies"></textarea>
             </mat-form-field>
           </div>
 

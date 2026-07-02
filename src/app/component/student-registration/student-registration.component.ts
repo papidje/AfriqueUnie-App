@@ -1,16 +1,25 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
+import { catchError, map, switchMap, takeUntil } from 'rxjs/operators';
 import { ActiveSchoolService } from '../../service/active-school.service';
 import { SchoolYearService } from '../../service/school-year.service';
 import { SchoolClassService } from '../../service/school-class.service';
 import { ParentApiService } from '../../service/parent-api.service';
 import { StudentRegistrationService } from '../../service/student-registration.service';
+import { StudentApiService } from '../../service/student-api.service';
 import { SchoolClassDto, SchoolYearDto } from '../../models/academic.models';
 import { StudentRegistrationResponse } from '../../models/student-registration.models';
+import { prepareStudentPhotoFile } from '../../util/student-photo-upload.util';
+import {
+  compactGuineaPhone,
+  emailControlError,
+  guineaPhoneValidator,
+  optionalEmailValidator,
+  phoneControlError
+} from '../../util/guinea-contact.validators';
 
 type Civility = 'MONSIEUR' | 'MADAME';
 
@@ -20,6 +29,9 @@ type Civility = 'MONSIEUR' | 'MADAME';
   styleUrls: ['./student-registration.component.scss']
 })
 export class StudentRegistrationComponent implements OnInit, OnDestroy {
+  @ViewChild('galleryInput', { read: ElementRef }) private readonly galleryInputRef?: ElementRef<HTMLInputElement>;
+  @ViewChild('cameraInput', { read: ElementRef }) private readonly cameraInputRef?: ElementRef<HTMLInputElement>;
+
   loading = false;
   submitting = false;
   private readonly destroy$ = new Subject<void>();
@@ -34,34 +46,47 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
   registeredStudentId: number | null = null;
   registeredStudentSummary = '';
 
+  pendingPhotoFile: File | null = null;
+  photoPreviewUrl: string | null = null;
+
   readonly stepStudent = this.fb.group({
+    civility: ['MONSIEUR' as Civility, Validators.required],
     lastName: ['', Validators.required],
     firstName: ['', Validators.required],
     birthDate: ['', Validators.required],
-    civility: ['MONSIEUR' as Civility, Validators.required],
+    birthPlace: [''],
+    nationality: [''],
+    address: [''],
+    communicationPhone: ['', guineaPhoneValidator()],
+    communicationEmail: ['', optionalEmailValidator()],
     classId: [null as number | null, Validators.required]
   });
 
   readonly stepParents = this.fb.group({
     fatherLastName: ['', Validators.required],
     fatherFirstName: ['', Validators.required],
-    fatherPhone: ['', Validators.required],
-    fatherEmail: [''],
+    fatherPhone: ['', [Validators.required, guineaPhoneValidator()]],
+    fatherEmail: ['', optionalEmailValidator()],
     fatherProfession: [''],
     fatherAddress: [''],
 
     motherLastName: ['', Validators.required],
     motherFirstName: ['', Validators.required],
-    motherPhone: ['', Validators.required],
-    motherEmail: [''],
+    motherPhone: ['', [Validators.required, guineaPhoneValidator()]],
+    motherEmail: ['', optionalEmailValidator()],
     motherProfession: [''],
     motherAddress: ['']
   });
 
   readonly stepEmergency = this.fb.group({
-    emergencyContactName: ['', Validators.required],
-    emergencyContactPhone: ['', Validators.required]
+    emergencyContactName: [''],
+    emergencyContactPhone: ['', guineaPhoneValidator()],
+    bloodGroup: [''],
+    allergies: ['']
   });
+
+  readonly phoneControlError = phoneControlError;
+  readonly emailControlError = emailControlError;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -70,6 +95,7 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     private readonly schoolClassService: SchoolClassService,
     private readonly parentApi: ParentApiService,
     private readonly registrationService: StudentRegistrationService,
+    private readonly studentApi: StudentApiService,
     private readonly snackBar: MatSnackBar,
     private readonly router: Router
   ) {}
@@ -91,6 +117,7 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.revokePhotoPreview();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -104,7 +131,10 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
   }
 
   lookupFather(): void {
-    const phone = this.stepParents.controls.fatherPhone.value || '';
+    const phone = compactGuineaPhone(this.stepParents.controls.fatherPhone.value || '');
+    if (!phone) {
+      return;
+    }
     this.parentApi.findByPhone(phone).subscribe({
       next: (p) => {
         if (!p) {
@@ -122,7 +152,10 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
   }
 
   lookupMother(): void {
-    const phone = this.stepParents.controls.motherPhone.value || '';
+    const phone = compactGuineaPhone(this.stepParents.controls.motherPhone.value || '');
+    if (!phone) {
+      return;
+    }
     this.parentApi.findByPhone(phone).subscribe({
       next: (p) => {
         if (!p) {
@@ -137,6 +170,32 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  onPhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+    void (async () => {
+      let prepared: File;
+      try {
+        prepared = await prepareStudentPhotoFile(file);
+      } catch {
+        prepared = file;
+      }
+      this.revokePhotoPreview();
+      this.pendingPhotoFile = prepared;
+      this.photoPreviewUrl = URL.createObjectURL(prepared);
+    })();
+    this.clearPhotoInputs();
+  }
+
+  clearPendingPhoto(): void {
+    this.revokePhotoPreview();
+    this.pendingPhotoFile = null;
+    this.clearPhotoInputs();
   }
 
   submit(): void {
@@ -159,6 +218,11 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
       : '—';
     const studentName = `${(s.firstName || '').trim()} ${(s.lastName || '').trim()}`.trim();
 
+    const trimOrNull = (v: string | null | undefined): string | null => {
+      const t = (v || '').trim();
+      return t ? t : null;
+    };
+
     this.submitting = true;
     this.registrationService
       .registerStudent({
@@ -169,13 +233,22 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
           firstName: (s.firstName || '').trim(),
           lastName: (s.lastName || '').trim(),
           birthDate: s.birthDate!,
-          emergencyContactName: (e.emergencyContactName || '').trim(),
-          emergencyContactPhone: (e.emergencyContactPhone || '').trim()
+          birthPlace: trimOrNull(s.birthPlace),
+          nationality: trimOrNull(s.nationality),
+          address: trimOrNull(s.address),
+          communicationPhone: trimOrNull(s.communicationPhone) ? compactGuineaPhone(s.communicationPhone!) : null,
+          communicationEmail: trimOrNull(s.communicationEmail),
+          emergencyContactName: trimOrNull(e.emergencyContactName),
+          emergencyContactPhone: trimOrNull(e.emergencyContactPhone)
+            ? compactGuineaPhone(e.emergencyContactPhone!)
+            : null,
+          bloodGroup: trimOrNull(e.bloodGroup),
+          allergies: trimOrNull(e.allergies)
         },
         father: {
           lastName: (p.fatherLastName || '').trim(),
           firstName: (p.fatherFirstName || '').trim(),
-          phone: (p.fatherPhone || '').trim(),
+          phone: compactGuineaPhone(p.fatherPhone || ''),
           email: (p.fatherEmail || '').trim() || null,
           profession: (p.fatherProfession || '').trim() || null,
           address: (p.fatherAddress || '').trim() || null
@@ -183,12 +256,31 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
         mother: {
           lastName: (p.motherLastName || '').trim(),
           firstName: (p.motherFirstName || '').trim(),
-          phone: (p.motherPhone || '').trim(),
+          phone: compactGuineaPhone(p.motherPhone || ''),
           email: (p.motherEmail || '').trim() || null,
           profession: (p.motherProfession || '').trim() || null,
           address: (p.motherAddress || '').trim() || null
         }
       })
+      .pipe(
+        switchMap((resp: StudentRegistrationResponse) => {
+          const id = resp?.id;
+          if (id == null || !Number.isFinite(Number(id)) || !this.pendingPhotoFile) {
+            return of(resp);
+          }
+          return this.studentApi.uploadPhoto(Number(id), this.pendingPhotoFile).pipe(
+            map(() => resp),
+            catchError(() => {
+              this.snackBar.open(
+                'Inscription enregistrée mais la photo n’a pas pu être envoyée.',
+                'Fermer',
+                { duration: 6000 }
+              );
+              return of(resp);
+            })
+          );
+        })
+      )
       .subscribe({
         next: (resp: StudentRegistrationResponse) => {
           this.submitting = false;
@@ -200,6 +292,7 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
           this.registeredStudentId = Number(id);
           this.registeredStudentSummary = `${studentName || 'Élève'} — ${classLabel}`;
           this.registrationComplete = true;
+          this.clearPendingPhoto();
           this.snackBar.open('Inscription validée.', 'Fermer', { duration: 3500 });
         },
         error: (err) => {
@@ -221,11 +314,17 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     this.registrationComplete = false;
     this.registeredStudentId = null;
     this.registeredStudentSummary = '';
+    this.clearPendingPhoto();
     this.stepStudent.reset({
+      civility: 'MONSIEUR',
       lastName: '',
       firstName: '',
       birthDate: '',
-      civility: 'MONSIEUR',
+      birthPlace: '',
+      nationality: '',
+      address: '',
+      communicationPhone: '',
+      communicationEmail: '',
       classId: null
     });
     this.stepParents.reset({
@@ -244,7 +343,9 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     });
     this.stepEmergency.reset({
       emergencyContactName: '',
-      emergencyContactPhone: ''
+      emergencyContactPhone: '',
+      bloodGroup: '',
+      allergies: ''
     });
   }
 
@@ -277,5 +378,23 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
         this.snackBar.open("Impossible de charger l'année active.", 'Fermer', { duration: 5000 });
       }
     });
+  }
+
+  private revokePhotoPreview(): void {
+    if (this.photoPreviewUrl) {
+      URL.revokeObjectURL(this.photoPreviewUrl);
+      this.photoPreviewUrl = null;
+    }
+  }
+
+  private clearPhotoInputs(): void {
+    const gallery = this.galleryInputRef?.nativeElement;
+    const camera = this.cameraInputRef?.nativeElement;
+    if (gallery) {
+      gallery.value = '';
+    }
+    if (camera) {
+      camera.value = '';
+    }
   }
 }

@@ -75,6 +75,44 @@
   grid-column: 1 / -1;
 }
 
+.photo-block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.photo-actions button mat-icon {
+  margin-right: 4px;
+}
+
+.student-photo,
+.photo-placeholder {
+  width: 96px;
+  height: 96px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+}
+
+.photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #607d8b;
+  font-size: 13px;
+}
+
 .parents-wrap {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

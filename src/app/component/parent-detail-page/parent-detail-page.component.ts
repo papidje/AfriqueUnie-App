@@ -6,6 +6,13 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ParentApiService } from '../../service/parent-api.service';
 import { BackNavigationService } from '../../core/back-navigation.service';
+import {
+  compactGuineaPhone,
+  emailControlError,
+  guineaPhoneValidator,
+  optionalEmailValidator,
+  phoneControlError
+} from '../../util/guinea-contact.validators';
 
 @Component({
   selector: 'app-parent-detail-page',
@@ -22,11 +29,14 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
   readonly form = this.fb.nonNullable.group({
     lastName: ['', Validators.required],
     firstName: ['', Validators.required],
-    phone: ['', Validators.required],
-    email: [''],
+    phone: ['', [Validators.required, guineaPhoneValidator()]],
+    email: ['', optionalEmailValidator()],
     profession: [''],
     address: ['']
   });
+
+  readonly phoneControlError = phoneControlError;
+  readonly emailControlError = emailControlError;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -80,6 +90,7 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
 
   save(): void {
     if (this.form.invalid || this.parentId == null) {
+      this.form.markAllAsTouched();
       return;
     }
     const v = this.form.getRawValue();
@@ -88,7 +99,7 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
       .update(this.parentId, {
         lastName: v.lastName.trim(),
         firstName: v.firstName.trim(),
-        phone: v.phone.trim(),
+        phone: compactGuineaPhone(v.phone),
         email: v.email.trim() ? v.email.trim() : null,
         profession: v.profession.trim() ? v.profession.trim() : null,
         address: v.address.trim() ? v.address.trim() : null
