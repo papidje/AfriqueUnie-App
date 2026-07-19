@@ -84,7 +84,7 @@ export class PaymentReceiptPrintDialogComponent {
     }
     this.loadingPdf = true;
     this.financeApi
-      .getReceiptPdfBlob(this.data.studentId, ref)
+      .getReceiptPdfBlob(this.data.studentId, ref, this.data.duplicate === true)
       .pipe(finalize(() => (this.loadingPdf = false)))
       .subscribe({
         next: (blob) => {

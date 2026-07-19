@@ -12,8 +12,15 @@ export interface StudentRegistrationDto {
   firstName: string;
   lastName: string;
   birthDate: string; // yyyy-mm-dd
-  emergencyContactName: string;
-  emergencyContactPhone: string;
+  birthPlace?: string | null;
+  nationality?: string | null;
+  address?: string | null;
+  communicationPhone?: string | null;
+  communicationEmail?: string | null;
+  emergencyContactName?: string | null;
+  emergencyContactPhone?: string | null;
+  bloodGroup?: string | null;
+  allergies?: string | null;
 }
 
 /** Valeurs `PaymentMode` côté API (inscription / encaissement). */

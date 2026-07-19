@@ -30,7 +30,7 @@ export class ParentApiService {
 
   /** Retourne le parent si trouvé, sinon `null` (404). */
   findByPhone(phone: string): Observable<ParentDetailDto | null> {
-    const params = new HttpParams().set('phone', phone.trim());
+    const params = new HttpParams().set('phone', phone.trim().replace(/\s+/g, ''));
     return this.http.get<ParentDetailDto>(`${this.base}/by-phone`, { params }).pipe(
       catchError((err: HttpErrorResponse) => {
         if (err.status === 404) {
