@@ -72,53 +72,6 @@
           [class.sidenav-collapsed]="!sidebarExpanded"
         >
             <mat-nav-list>
-              <ng-container *ngIf="showAdministrationNav()">
-                <a
-                  mat-list-item
-                  *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
-                  routerLink="/admin"
-                  routerLinkActive="sidenav-link-active"
-                  [routerLinkActiveOptions]="{ exact: false }"
-                  matTooltip="Gestion du staff"
-                  [matTooltipDisabled]="sidebarExpanded"
-                  matTooltipPosition="right"
-                >
-                  <div class="nav-item-stack">
-                    <mat-icon>settings</mat-icon>
-                    <span *ngIf="sidebarExpanded">Gestion du staff</span>
-                  </div>
-                </a>
-                <a
-                  mat-list-item
-                  *ngIf="hasRole(AppRoles.DIRECTOR)"
-                  routerLink="/admin/staff"
-                  routerLinkActive="sidenav-link-active"
-                  [routerLinkActiveOptions]="{ exact: true }"
-                  matTooltip="Mon Staff"
-                  [matTooltipDisabled]="sidebarExpanded"
-                  matTooltipPosition="right"
-                >
-                  <div class="nav-item-stack">
-                    <mat-icon>groups</mat-icon>
-                    <span *ngIf="sidebarExpanded">Mon Staff</span>
-                  </div>
-                </a>
-              </ng-container>
-              <a
-                mat-list-item
-                *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
-                routerLink="/mes-etablissements"
-                routerLinkActive="sidenav-link-active"
-                [routerLinkActiveOptions]="{ exact: true }"
-                matTooltip="Mes établissements"
-                [matTooltipDisabled]="sidebarExpanded"
-                matTooltipPosition="right"
-              >
-                <div class="nav-item-stack">
-                  <mat-icon>apartment</mat-icon>
-                  <span *ngIf="sidebarExpanded">Mes établissements</span>
-                </div>
-              </a>
               <a
                 mat-list-item
                 *ngIf="hasDashboardAccess()"
@@ -136,6 +89,21 @@
               </a>
               <a
                 mat-list-item
+                *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
+                routerLink="/mes-etablissements"
+                routerLinkActive="sidenav-link-active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                matTooltip="Mes établissements"
+                [matTooltipDisabled]="sidebarExpanded"
+                matTooltipPosition="right"
+              >
+                <div class="nav-item-stack">
+                  <mat-icon>apartment</mat-icon>
+                  <span *ngIf="sidebarExpanded">Mes établissements</span>
+                </div>
+              </a>
+              <a
+                mat-list-item
                 *ngIf="hasAnyRole(navClassesRoles)"
                 routerLink="/classes"
                 routerLinkActive="sidenav-link-active"
@@ -147,6 +115,21 @@
                 <div class="nav-item-stack">
                   <mat-icon>class</mat-icon>
                   <span *ngIf="sidebarExpanded">Classes</span>
+                </div>
+              </a>
+              <a
+                mat-list-item
+                *ngIf="showFinanceNav()"
+                routerLink="/finance"
+                routerLinkActive="sidenav-link-active"
+                [routerLinkActiveOptions]="{ exact: false }"
+                matTooltip="Finance"
+                [matTooltipDisabled]="sidebarExpanded"
+                matTooltipPosition="right"
+              >
+                <div class="nav-item-stack">
+                  <mat-icon>account_balance_wallet</mat-icon>
+                  <span *ngIf="sidebarExpanded">Finance</span>
                 </div>
               </a>
               <a
@@ -226,21 +209,6 @@
               </a>
               <a
                 mat-list-item
-                *ngIf="showFinanceNav()"
-                routerLink="/finance"
-                routerLinkActive="sidenav-link-active"
-                [routerLinkActiveOptions]="{ exact: false }"
-                matTooltip="Finance"
-                [matTooltipDisabled]="sidebarExpanded"
-                matTooltipPosition="right"
-              >
-                <div class="nav-item-stack">
-                  <mat-icon>account_balance_wallet</mat-icon>
-                  <span *ngIf="sidebarExpanded">Finance</span>
-                </div>
-              </a>
-              <a
-                mat-list-item
                 *ngIf="hasAnyRole(navCommunicationRoles)"
                 routerLink="/communication"
                 routerLinkActive="sidenav-link-active"
@@ -252,6 +220,21 @@
                 <div class="nav-item-stack">
                   <mat-icon>campaign</mat-icon>
                   <span *ngIf="sidebarExpanded">Communication</span>
+                </div>
+              </a>
+              <a
+                mat-list-item
+                *ngIf="hasAnyRole(navParentsRoles)"
+                routerLink="/parents"
+                routerLinkActive="sidenav-link-active"
+                [routerLinkActiveOptions]="{ exact: false }"
+                matTooltip="Parents"
+                [matTooltipDisabled]="sidebarExpanded"
+                matTooltipPosition="right"
+              >
+                <div class="nav-item-stack">
+                  <mat-icon>family_restroom</mat-icon>
+                  <span *ngIf="sidebarExpanded">Parents</span>
                 </div>
               </a>
               <a
@@ -284,21 +267,38 @@
                   <span *ngIf="sidebarExpanded">Tenants / écoles</span>
                 </div>
               </a>
-              <a
-                mat-list-item
-                *ngIf="hasAnyRole(navParentsRoles)"
-                routerLink="/parents"
-                routerLinkActive="sidenav-link-active"
-                [routerLinkActiveOptions]="{ exact: false }"
-                matTooltip="Parents"
-                [matTooltipDisabled]="sidebarExpanded"
-                matTooltipPosition="right"
-              >
-                <div class="nav-item-stack">
-                  <mat-icon>family_restroom</mat-icon>
-                  <span *ngIf="sidebarExpanded">Parents</span>
-                </div>
-              </a>
+              <ng-container *ngIf="showAdministrationNav()">
+                <a
+                  mat-list-item
+                  *ngIf="hasRole(AppRoles.ADMIN_ECOLE)"
+                  routerLink="/admin"
+                  routerLinkActive="sidenav-link-active"
+                  [routerLinkActiveOptions]="{ exact: false }"
+                  matTooltip="Gestion du staff"
+                  [matTooltipDisabled]="sidebarExpanded"
+                  matTooltipPosition="right"
+                >
+                  <div class="nav-item-stack">
+                    <mat-icon>settings</mat-icon>
+                    <span *ngIf="sidebarExpanded">Gestion du staff</span>
+                  </div>
+                </a>
+                <a
+                  mat-list-item
+                  *ngIf="hasRole(AppRoles.DIRECTOR)"
+                  routerLink="/admin/staff"
+                  routerLinkActive="sidenav-link-active"
+                  [routerLinkActiveOptions]="{ exact: true }"
+                  matTooltip="Mon Staff"
+                  [matTooltipDisabled]="sidebarExpanded"
+                  matTooltipPosition="right"
+                >
+                  <div class="nav-item-stack">
+                    <mat-icon>groups</mat-icon>
+                    <span *ngIf="sidebarExpanded">Mon Staff</span>
+                  </div>
+                </a>
+              </ng-container>
             </mat-nav-list>
           </mat-sidenav>
 

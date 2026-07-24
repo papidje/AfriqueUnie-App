@@ -1,36 +1,50 @@
 .period-notes-page {
-  padding: 16px;
+  padding: var(--sp-4) var(--sp-6) var(--sp-8);
+  max-width: 1600px;
+  margin-inline: auto;
+  box-sizing: border-box;
 }
 
-.head {
+.page-head {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-5);
 }
 
-.head h1 {
+.page-head__text {
+  min-width: 0;
+}
+
+.page-head h1 {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.page-head .intro {
   margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
+  color: var(--app-text-muted);
+  font-size: var(--fs-body);
 }
 
-.head p {
-  margin: 6px 0 0;
-  color: #607d8b;
-  font-size: 14px;
+.list-card.mat-mdc-card {
+  padding: var(--sp-5) var(--sp-6);
+  border: 1px solid var(--app-border);
 }
 
 .loading {
   padding: 12px 0;
-  color: #607d8b;
+  color: var(--app-text-muted);
   font-size: 14px;
 }
 
 .empty {
   padding: 12px 0;
-  color: #607d8b;
+  color: var(--app-text-muted);
   font-size: 14px;
   margin: 0;
 }
@@ -72,7 +86,7 @@
   flex: 1 1 200px;
   margin: 0;
   font-size: 13px;
-  color: #607d8b;
+  color: var(--app-text-muted);
   line-height: 1.4;
 }
 
@@ -94,11 +108,11 @@
   gap: 10px;
   padding: 10px 12px;
   margin: 0 0 12px;
-  background: #e3f2fd;
-  border: 1px solid #90caf9;
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
   border-radius: 8px;
   font-size: 13px;
-  color: #1565c0;
+  color: var(--info-fg);
   line-height: 1.4;
 }
 
@@ -166,7 +180,7 @@
 
 .student-names .fn {
   font-size: 13px;
-  color: #607d8b;
+  color: var(--app-text-muted);
   line-height: 1.2;
 }
 
@@ -184,13 +198,13 @@ td.num {
   display: block;
   font-weight: 700;
   font-size: 12px;
-  color: var(--app-primary-dark, #1565c0);
+  color: var(--app-primary-dark, var(--info-fg));
 }
 
 .col-head-name {
   display: block;
   font-size: 12px;
-  color: #607d8b;
+  color: var(--app-text-muted);
   max-width: 7rem;
   line-height: 1.2;
   white-space: normal;
@@ -198,7 +212,7 @@ td.num {
 
 .coef {
   font-size: 10px;
-  color: #90a4ae;
+  color: var(--app-text-muted);
 }
 
 // Badges moyenne générale
@@ -212,28 +226,28 @@ td.num {
 }
 
 .moy-badge--na {
-  background: #eceff1;
-  color: #78909c;
+  background: var(--app-surface-2);
+  color: var(--app-text-muted);
 }
 
 .moy-badge--high {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--success-bg);
+  color: var(--success-fg);
 }
 
 .moy-badge--ok {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: var(--info-bg);
+  color: var(--info-fg);
 }
 
 .moy-badge--mid {
-  background: #fff3e0;
-  color: #e65100;
+  background: var(--warning-bg);
+  color: var(--warning-fg);
 }
 
 .moy-badge--low {
-  background: #ffebee;
-  color: #c62828;
+  background: var(--danger-bg);
+  color: var(--danger-fg);
 }
 
 .notes-empty-state {
@@ -263,7 +277,7 @@ td.num {
   margin: 0 0 20px;
   font-size: 14px;
   line-height: 1.5;
-  color: #607d8b;
+  color: var(--app-text-muted);
 }
 
 .notes-empty-state .mat-mdc-raised-button {

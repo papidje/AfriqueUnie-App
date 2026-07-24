@@ -54,13 +54,9 @@
 
 .grid-form {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
   margin-top: 8px;
-
-  @media (max-width: 720px) {
-    grid-template-columns: 1fr;
-  }
 }
 
 .full-row {
@@ -132,7 +128,7 @@
   padding: 10px 8px;
   border: 2px solid rgba(0, 0, 0, 0.12);
   border-radius: 10px;
-  background: #fff;
+  background: var(--app-surface);
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
 

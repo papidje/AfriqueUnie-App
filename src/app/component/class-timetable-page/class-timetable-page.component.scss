@@ -79,9 +79,9 @@ h2 {
   margin-top: 16px;
   min-height: 56px;
   padding: 8px 12px;
-  border: 2px dashed #c62828;
+  border: 2px dashed var(--danger-fg);
   border-radius: 8px;
-  color: #c62828;
+  color: var(--danger-fg);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -116,7 +116,7 @@ h2 {
     font-weight: 600;
     padding: 8px 6px;
     background: color-mix(in srgb, var(--app-primary) 10%, #ffffff);
-    border-color: color-mix(in srgb, var(--app-primary) 22%, #e0e0e0);
+    border-color: color-mix(in srgb, var(--app-primary) 22%, var(--app-border));
   }
 
   .time {
@@ -131,7 +131,7 @@ h2 {
   .slot-cell {
     min-width: 120px;
     min-height: 88px;
-    background: #fafafa;
+    background: var(--app-surface-2);
   }
 
   /** Créneau touchant une évaluation (bordeaux pastel) */

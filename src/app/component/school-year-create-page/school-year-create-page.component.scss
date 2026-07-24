@@ -42,7 +42,7 @@ h1 {
 }
 
 .form-error {
-  color: #b71c1c;
+  color: var(--danger-fg);
   font-size: 13px;
   margin: 0;
 }

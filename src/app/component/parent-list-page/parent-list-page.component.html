@@ -1,9 +1,13 @@
 <section class="parent-list-page">
-  <h1>Parents</h1>
-  <p class="intro">
-    Parents ayant au moins un enfant inscrit dans une classe de l’<strong>année scolaire active</strong> de
-    l’établissement sélectionné.
-  </p>
+  <div class="page-head">
+    <div class="page-head__text">
+      <h1>Parents</h1>
+      <p class="intro">
+        Parents ayant au moins un enfant inscrit dans une classe de l’<strong>année scolaire active</strong> de
+        l’établissement sélectionné.
+      </p>
+    </div>
+  </div>
 
   <mat-card *ngIf="schoolId == null" class="hint-card">
     <p>Sélectionnez un établissement dans l’en-tête pour afficher la liste.</p>
@@ -20,7 +24,7 @@
 
     <mat-card *ngIf="loading" class="shell">Chargement…</mat-card>
 
-    <mat-card *ngIf="!loading" class="shell">
+    <mat-card *ngIf="!loading" class="shell list-card">
       <p class="empty" *ngIf="!allRows.length">Aucun parent pour cette école et cette année active.</p>
 
       <div class="table-wrap" *ngIf="allRows.length">

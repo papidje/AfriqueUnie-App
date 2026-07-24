@@ -1,12 +1,24 @@
 <section class="class-hub-shell-page">
-  <mat-card>
-    <div class="head">
-      <div>
-        <h1>{{ hubTitle }}</h1>
-        <p>{{ hubSubtitle }}</p>
-      </div>
+  <div class="page-head">
+    <div class="page-head__text">
+      <h1>{{ hubTitle }}</h1>
+      <p class="intro">{{ hubSubtitle }}</p>
     </div>
+    <button
+      *ngIf="headerAction$ | async as action"
+      mat-raised-button
+      color="primary"
+      type="button"
+      class="hub-action-btn"
+      [disabled]="!!action.disabled"
+      (click)="action.run()"
+    >
+      <mat-icon *ngIf="action.icon">{{ action.icon }}</mat-icon>
+      {{ action.label }}
+    </button>
+  </div>
 
+  <mat-card class="list-card">
     <div class="loading" *ngIf="loadingClasses">Chargement des classes…</div>
 
     <div *ngIf="!loadingClasses && sortedClasses.length" class="class-tabs">

@@ -136,9 +136,6 @@ export class AuthService {
         if (primary === AppRoles.SUPER_ADMIN) {
           return ['/super-admin/dashboard'];
         }
-        if (primary === AppRoles.ADMIN_ECOLE) {
-          return ['/admin'];
-        }
         return ['/dashboard'];
       } catch {
         /* fallback below */
@@ -147,9 +144,6 @@ export class AuthService {
     const role = localStorage.getItem(this.ROLE_KEY);
     if (role === AppRoles.SUPER_ADMIN) {
       return ['/super-admin/dashboard'];
-    }
-    if (role === AppRoles.ADMIN_ECOLE) {
-      return ['/admin'];
     }
     return ['/dashboard'];
   }

@@ -8,6 +8,7 @@ import { AppRoles } from '../../core/app-roles';
 import { EVALUATION_TYPE_OPTIONS, EvaluationResponse } from '../../models/evaluation.models';
 import { AuthUtilsService } from '../../service/auth-utils.service';
 import { EvaluationApiService } from '../../service/evaluation-api.service';
+import { HubHeaderActionService } from '../../service/hub-header-action.service';
 import { resolveSchoolClassId } from '../../util/class-route.util';
 import { NewEvaluationDialogComponent } from './new-evaluation-dialog.component';
 
@@ -37,7 +38,8 @@ export class ClassEvaluationsPageComponent implements OnInit, OnDestroy {
     private readonly dialog: MatDialog,
     private readonly evalApi: EvaluationApiService,
     private readonly authUtils: AuthUtilsService,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly hubHeaderAction: HubHeaderActionService
   ) {}
 
   get canWrite(): boolean {
@@ -56,6 +58,7 @@ export class ClassEvaluationsPageComponent implements OnInit, OnDestroy {
       this.workspaceChild && this.route.parent != null ? this.route.parent.paramMap : this.route.paramMap;
     param$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.classId = resolveSchoolClassId(this.route);
+      this.publishHubAction();
       if (this.classId == null) {
         this.loading = false;
         return;
@@ -65,8 +68,32 @@ export class ClassEvaluationsPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.hubEmbedded) {
+      this.hubHeaderAction.clear();
+    }
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /**
+   * Dans le hub, le bouton « Nouvelle évaluation » est affiché dans l'en-tête
+   * partagé (parent). Publication différée pour éviter ExpressionChanged en dev.
+   */
+  private publishHubAction(): void {
+    if (!this.hubEmbedded) {
+      return;
+    }
+    if (!this.canWrite || this.classId == null) {
+      this.hubHeaderAction.clear();
+      return;
+    }
+    Promise.resolve().then(() =>
+      this.hubHeaderAction.set({
+        label: 'Nouvelle évaluation',
+        icon: 'add',
+        run: () => this.openNewDialog()
+      })
+    );
   }
 
   openNewDialog(): void {

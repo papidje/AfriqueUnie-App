@@ -73,7 +73,7 @@ a.mat-mdc-list-item.sidenav-link-active {
 }
 
 .content {
-  background: #f5f5f5;
+  background: var(--app-bg);
 }
 
 // Liens & accents qui utilisaient le bleu Material
@@ -91,6 +91,120 @@ button.mat-mdc-raised-button.mat-primary {
 // Progress / accent secondaires (optionnel)
 .mat-mdc-progress-bar .mdc-linear-progress__bar-inner {
   border-color: var(--app-primary) !important;
+}
+
+// ————————————————————————————————————————————————
+// Raffinements Material globaux — sobriété SaaS (cards, tables, boutons,
+// dialogues, form-fields). Portée globale, additive : aucun template modifié.
+// ————————————————————————————————————————————————
+
+// Cartes : rayon, bordure fine, ombre discrète, cohérence de surface
+.mat-mdc-card {
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--app-border);
+  box-shadow: var(--shadow-sm) !important;
+  background: var(--app-surface);
+  color: var(--app-text);
+}
+
+// Boutons : rayon homogène, hauteur cohérente, graisse lisible
+.mat-mdc-button,
+.mat-mdc-outlined-button,
+.mat-mdc-raised-button,
+.mat-mdc-unelevated-button {
+  --mdc-outlined-button-container-shape: var(--radius-sm);
+  --mdc-filled-button-container-shape: var(--radius-sm);
+  --mdc-protected-button-container-shape: var(--radius-sm);
+  --mdc-text-button-container-shape: var(--radius-sm);
+  --mdc-outlined-button-container-height: var(--control-height);
+  --mdc-filled-button-container-height: var(--control-height);
+  --mdc-protected-button-container-height: var(--control-height);
+  --mdc-text-button-container-height: var(--control-height);
+  letter-spacing: 0.01em;
+  font-weight: 500;
+}
+
+// Icônes dans les boutons : taille alignée sur le token
+.mat-mdc-button .mat-icon,
+.mat-mdc-outlined-button .mat-icon,
+.mat-mdc-raised-button .mat-icon,
+.mat-mdc-unelevated-button .mat-icon {
+  font-size: var(--icon-md);
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.mat-mdc-raised-button:not(:disabled) {
+  box-shadow: var(--shadow-xs) !important;
+}
+.mat-mdc-outlined-button:not([color]):not(.active) {
+  border-color: var(--app-border-strong);
+}
+
+// Tableaux : en-têtes lisibles, lignes aérées, survol discret
+.mat-mdc-table {
+  background: transparent;
+
+  .mat-mdc-header-row {
+    background: var(--app-surface-2);
+  }
+
+  .mat-mdc-header-cell {
+    color: var(--app-text-secondary);
+    font-weight: 600;
+    font-size: var(--fs-sm);
+    letter-spacing: 0.02em;
+    border-bottom-color: var(--app-border);
+  }
+
+  .mat-mdc-cell {
+    color: var(--app-text);
+    border-bottom-color: var(--app-border);
+  }
+
+  .mat-mdc-row {
+    transition: background-color 0.12s ease;
+  }
+  .mat-mdc-row:hover {
+    background: color-mix(in srgb, var(--app-primary) 5%, #ffffff);
+  }
+}
+
+// Dialogues : rayon doux, titre et actions mieux espacés
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: var(--radius-lg);
+
+  .mat-mdc-dialog-title {
+    color: var(--app-text-strong);
+    letter-spacing: -0.01em;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: var(--sp-3) var(--sp-6) var(--sp-5);
+    gap: var(--sp-2);
+  }
+}
+
+// Champs de formulaire : bordures cohérentes avec le système neutre
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-outline-color: var(--app-border-strong);
+  --mdc-outlined-text-field-hover-outline-color: var(--app-text-muted);
+  --mdc-outlined-text-field-focus-outline-color: var(--app-primary);
+}
+
+// Onglets pastilles (élèves, finance, notes…) : rythme homogène
+.class-tabs {
+  gap: var(--sp-2) !important;
+}
+
+// Menus : rayon homogène
+.mat-mdc-menu-panel {
+  border-radius: var(--radius) !important;
+}
+
+// Chips
+.mat-mdc-chip {
+  border-radius: var(--radius-pill) !important;
 }
 
 // Page Notes : squelette (hors budget du style du composant)

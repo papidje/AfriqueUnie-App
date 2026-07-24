@@ -1,22 +1,24 @@
 <section class="student-list-page">
-  <mat-card>
-    <div class="head">
-      <div>
-        <h1>Élèves</h1>
-        <p>Liste des élèves par classe (année active).</p>
-      </div>
-
-      <button
-        *ngIf="canRegisterStudent()"
-        mat-stroked-button
-        color="primary"
-        type="button"
-        (click)="goToRegistration()"
-      >
-        Inscrire un élève
-      </button>
+  <div class="page-head">
+    <div class="page-head__text">
+      <h1>Élèves</h1>
+      <p class="intro">Liste des élèves par classe (année active).</p>
     </div>
 
+    <button
+      *ngIf="canRegisterStudent()"
+      mat-raised-button
+      color="primary"
+      type="button"
+      class="register-btn"
+      (click)="goToRegistration()"
+    >
+      <mat-icon>person_add</mat-icon>
+      Inscrire un élève
+    </button>
+  </div>
+
+  <mat-card class="list-card">
     <div class="loading" *ngIf="loadingClasses">Chargement des classes…</div>
 
     <div *ngIf="!loadingClasses && sortedClasses.length" class="class-tabs">
@@ -40,7 +42,7 @@
         </div>
 
         <div class="table-wrap" *ngIf="!isLoading(activeClass.id) && getStudentsForClass(activeClass.id).length > 0">
-          <table mat-table class="mat-elevation-z1" [dataSource]="getStudentsForClass(activeClass.id)">
+          <table mat-table [dataSource]="getStudentsForClass(activeClass.id)">
             <ng-container matColumnDef="lastName">
               <th mat-header-cell *matHeaderCellDef>Nom</th>
               <td mat-cell *matCellDef="let row">{{ row.lastName }}</td>

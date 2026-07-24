@@ -19,7 +19,7 @@
 
 .success-lead {
   margin: 0 0 24px;
-  color: #4b5563;
+  color: var(--app-text-secondary);
   font-size: 15px;
   line-height: 1.5;
   text-align: left;
@@ -35,29 +35,35 @@
 .step-final-hint {
   margin: 0 0 16px;
   padding: 12px 14px;
-  background: #eff6ff;
+  background: var(--info-bg);
   border-radius: 8px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--info-border);
   font-size: 14px;
-  color: #1e3a5f;
+  color: var(--info-fg);
   line-height: 1.45;
 }
 
 .student-registration-page {
-  padding: 16px;
+  padding: var(--sp-2);
+  max-width: 1120px;
+  margin-inline: auto;
+  box-sizing: border-box;
 }
 
 .head h1 {
   margin: 0;
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .muted {
-  color: #607d8b;
+  color: var(--app-text-muted);
 }
 
 .loading {
-  padding: 16px 0;
-  color: #607d8b;
+  padding: var(--sp-4) 0;
+  color: var(--app-text-secondary);
 }
 
 .stepper {
@@ -82,7 +88,7 @@
   gap: 12px;
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--app-border);
 }
 
 .photo-actions {
@@ -102,14 +108,14 @@
   height: 96px;
   border-radius: 8px;
   object-fit: cover;
-  border: 1px solid #ddd;
+  border: 1px solid var(--app-border);
 }
 
 .photo-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #607d8b;
+  color: var(--app-text-muted);
   font-size: 13px;
 }
 
@@ -133,7 +139,7 @@
 
 .notice {
   margin-top: 12px;
-  background: #fff8e1;
+  background: var(--warning-bg);
 }
 
 .payment-row {
@@ -150,7 +156,7 @@
 }
 
 .expected .label {
-  color: #607d8b;
+  color: var(--app-text-muted);
   font-size: 13px;
 }
 
@@ -162,23 +168,23 @@
 .sub-expected {
   margin-top: 8px;
   font-size: 13px;
-  color: #607d8b;
+  color: var(--app-text-muted);
   line-height: 1.35;
 }
 
 .allocation-preview {
   margin-top: 20px;
   padding: 12px 14px;
-  background: #f5f9ff;
+  background: var(--info-bg);
   border-radius: 8px;
-  border: 1px solid #e3eefc;
+  border: 1px solid var(--app-border);
 }
 
 .alloc-title {
   margin: 0 0 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #37474f;
+  color: var(--app-text-strong);
 }
 
 .alloc-table {
@@ -189,7 +195,7 @@
 
 .alloc-table td {
   padding: 6px 4px;
-  border-bottom: 1px dashed #cfd8dc;
+  border-bottom: 1px dashed var(--app-border);
 }
 
 .alloc-table td.num {
@@ -204,7 +210,8 @@
   font-weight: 600;
 }
 
-@media (max-width: 900px) {
+/* Material Small et moins (tablette portrait / smartphone) : une seule colonne */
+@media (max-width: 959.98px) {
   .grid {
     grid-template-columns: 1fr;
   }

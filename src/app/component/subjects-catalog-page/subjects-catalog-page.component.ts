@@ -1,11 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject as RxSubject, EMPTY, of } from 'rxjs';
 import { catchError, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { SchoolSubject } from '../../models/subject.models';
 import { SubjectService } from '../../service/subject.service';
 import { ActiveSchoolService } from '../../service/active-school.service';
+import { SubjectFormDialogComponent, SubjectFormDialogData } from '../subject-form-dialog/subject-form-dialog.component';
 
 @Component({
   selector: 'app-subjects-catalog-page',
@@ -15,29 +16,50 @@ import { ActiveSchoolService } from '../../service/active-school.service';
 export class SubjectsCatalogPageComponent implements OnInit, OnDestroy {
   subjects: SchoolSubject[] = [];
   loading = true;
-  saving = false;
-  editing: SchoolSubject | null = null;
   /** Établissement pour lequel le référentiel est chargé (API). */
   schoolId: number | null = null;
 
   private readonly destroy$ = new RxSubject<void>();
 
-  readonly createForm = this.fb.group({
-    code: ['', [Validators.required, Validators.maxLength(50)]],
-    name: ['', [Validators.required, Validators.maxLength(200)]]
-  });
-
-  readonly editForm = this.fb.group({
-    code: ['', [Validators.required, Validators.maxLength(50)]],
-    name: ['', [Validators.required, Validators.maxLength(200)]]
-  });
-
   constructor(
-    private readonly fb: FormBuilder,
     private readonly subjectService: SubjectService,
     private readonly snackBar: MatSnackBar,
-    private readonly activeSchool: ActiveSchoolService
+    private readonly activeSchool: ActiveSchoolService,
+    private readonly dialog: MatDialog
   ) {}
+
+  /** Ouvre la modale de création ; recharge si une matière est créée. */
+  openCreate(): void {
+    if (this.schoolId == null) {
+      return;
+    }
+    this.openDialog({ mode: 'add', schoolId: this.schoolId });
+  }
+
+  /** Ouvre la modale d'édition ; recharge si la matière est modifiée. */
+  openEdit(s: SchoolSubject): void {
+    if (this.schoolId == null || this.isSharedReferential(s)) {
+      return;
+    }
+    this.openDialog({ mode: 'edit', schoolId: this.schoolId, subject: s });
+  }
+
+  private openDialog(data: SubjectFormDialogData): void {
+    this.dialog
+      .open(SubjectFormDialogComponent, {
+        data,
+        width: '520px',
+        maxWidth: '95vw',
+        autoFocus: false,
+        restoreFocus: true
+      })
+      .afterClosed()
+      .subscribe((changed) => {
+        if (changed) {
+          this.refreshList();
+        }
+      });
+  }
 
   ngOnInit(): void {
     this.activeSchool.activeSchoolId$
@@ -93,69 +115,6 @@ export class SubjectsCatalogPageComponent implements OnInit, OnDestroy {
   /** Matière du référentiel commun (lecture seule, non modifiable / supprimable ici). */
   isSharedReferential(s: SchoolSubject | null | undefined): boolean {
     return s == null || s.schoolId == null;
-  }
-
-  startEdit(s: SchoolSubject): void {
-    if (this.isSharedReferential(s)) {
-      return;
-    }
-    this.editing = s;
-    this.editForm.reset({ code: s.code, name: s.name });
-  }
-
-  cancelEdit(): void {
-    this.editing = null;
-  }
-
-  submitCreate(): void {
-    if (this.schoolId == null) {
-      return;
-    }
-    if (this.createForm.invalid) {
-      this.createForm.markAllAsTouched();
-      return;
-    }
-    this.saving = true;
-    const v = this.createForm.getRawValue();
-    this.subjectService.create(this.schoolId, { code: v.code!.trim(), name: v.name!.trim() }).subscribe({
-      next: () => {
-        this.saving = false;
-        this.snackBar.open('Matière créée.', 'Fermer', { duration: 3000 });
-        this.createForm.reset();
-        this.refreshList();
-      },
-      error: () => {
-        this.saving = false;
-        this.snackBar.open('Création impossible (code déjà utilisé ?).', 'Fermer', { duration: 5000 });
-      }
-    });
-  }
-
-  submitEdit(): void {
-    if (this.schoolId == null || this.editing == null || this.isSharedReferential(this.editing)) {
-      this.editing = null;
-      return;
-    }
-    if (this.editForm.invalid) {
-      this.editForm.markAllAsTouched();
-      return;
-    }
-    this.saving = true;
-    const v = this.editForm.getRawValue();
-    this.subjectService
-      .update(this.schoolId, this.editing.id, { code: v.code!.trim(), name: v.name!.trim() })
-      .subscribe({
-        next: () => {
-          this.saving = false;
-          this.snackBar.open('Matière mise à jour.', 'Fermer', { duration: 3000 });
-          this.editing = null;
-          this.refreshList();
-        },
-        error: () => {
-          this.saving = false;
-          this.snackBar.open('Mise à jour impossible.', 'Fermer', { duration: 5000 });
-        }
-      });
   }
 
   delete(s: SchoolSubject): void {

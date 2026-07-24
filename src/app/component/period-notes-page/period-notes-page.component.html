@@ -1,12 +1,12 @@
 <section class="period-notes-page">
-  <mat-card>
-    <div class="head">
-      <div>
-        <h1>Notes</h1>
-        <p>Moyennes par matière et moyenne générale de période (année scolaire active).</p>
-      </div>
+  <div class="page-head">
+    <div class="page-head__text">
+      <h1>Notes</h1>
+      <p class="intro">Moyennes par matière et moyenne générale de période (année scolaire active).</p>
     </div>
+  </div>
 
+  <mat-card class="list-card">
     <div class="loading" *ngIf="loadingClasses">Chargement des classes…</div>
 
     <div *ngIf="!loadingClasses && sortedClasses.length" class="class-tabs">

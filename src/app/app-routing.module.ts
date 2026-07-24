@@ -70,11 +70,11 @@ const routes: Routes = [
     component: MainLayoutComponent,
     canActivateChild: [AuthGuard, PortalSchoolAccessGuard],
     children: [
-      {
-        path: 'acces-indisponible',
+      { path: 'acces-indisponible',
         component: AccesIndisponiblePageComponent,
         canActivate: [AccesIndisponibleGuard]
       },
+      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
       { path: 'home', pathMatch: 'full', redirectTo: 'dashboard' },
       { path: 'profile', component: ProfileComponent },
       {

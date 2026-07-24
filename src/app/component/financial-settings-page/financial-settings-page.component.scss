@@ -15,7 +15,7 @@
 
 .head p {
   margin: 6px 0 0;
-  color: #607d8b;
+  color: var(--app-text-muted);
 }
 
 .table-wrap {
@@ -29,5 +29,5 @@ table {
 .empty-state,
 .loading {
   padding: 18px 0;
-  color: #607d8b;
+  color: var(--app-text-muted);
 }

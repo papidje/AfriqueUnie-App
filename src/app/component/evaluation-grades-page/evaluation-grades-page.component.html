@@ -6,10 +6,21 @@
   </ng-container>
 
   <div class="head-row">
-    <button mat-stroked-button type="button" (click)="backToList()">
+    <button mat-stroked-button type="button" class="back-btn" (click)="backToList()">
       <mat-icon>arrow_back</mat-icon> Évaluations
     </button>
     <h1>{{ titleLine }}</h1>
+    <button
+      *ngIf="!loading && sheet && canWrite"
+      mat-raised-button
+      color="primary"
+      type="button"
+      class="save-btn"
+      (click)="saveAll()"
+      [disabled]="saveDisabled"
+    >
+      <mat-icon>save</mat-icon> Sauvegarder tout
+    </button>
   </div>
 
   <p class="sub" *ngIf="sheet as s">
@@ -21,18 +32,9 @@
 
   <div *ngIf="!loading && !sheet" class="muted">Évaluation introuvable.</div>
 
-  <div class="save-row top" *ngIf="!loading && sheet && canWrite">
-    <p class="warn" *ngIf="hasInvalidNote">Corrigez les notes au-dessus du maximum ({{ maxScore }}) avant d’enregistrer.</p>
-    <button
-      mat-raised-button
-      color="primary"
-      type="button"
-      (click)="saveAll()"
-      [disabled]="saveDisabled"
-    >
-      <mat-icon>save</mat-icon> Sauvegarder tout
-    </button>
-  </div>
+  <p class="warn" *ngIf="!loading && sheet && canWrite && hasInvalidNote">
+    Corrigez les notes au-dessus du maximum ({{ maxScore }}) avant d’enregistrer.
+  </p>
 
   <div *ngIf="!loading && sheet" class="table-wrap mat-elevation-z1">
     <table class="grade-table">
@@ -80,18 +82,5 @@
         </tr>
       </tbody>
     </table>
-  </div>
-
-  <div class="save-row bottom" *ngIf="!loading && sheet && canWrite">
-    <p class="warn" *ngIf="hasInvalidNote">Corrigez les notes au-dessus du maximum ({{ maxScore }}) avant d’enregistrer.</p>
-    <button
-      mat-raised-button
-      color="primary"
-      type="button"
-      (click)="saveAll()"
-      [disabled]="saveDisabled"
-    >
-      <mat-icon>save</mat-icon> Sauvegarder tout
-    </button>
   </div>
 </div>

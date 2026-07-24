@@ -1,0 +1,56 @@
+<h2 mat-dialog-title>Ouvrir une classe</h2>
+
+<mat-dialog-content>
+  <p class="dialog-sub">Année active : {{ data.activeYear.label }}</p>
+
+  <form [formGroup]="form" class="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Niveau (référentiel)</mat-label>
+      <mat-select formControlName="levelId" panelClass="school-class-level-select-panel">
+        <mat-optgroup *ngFor="let g of levelGroups" [label]="g.groupLabel">
+          <mat-option *ngFor="let lv of g.levels" [value]="lv.id">
+            {{ lv.name }}
+          </mat-option>
+        </mat-optgroup>
+      </mat-select>
+      <mat-error *ngIf="form.controls.levelId.hasError('required')">Choisissez un niveau.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Nom de la classe</mat-label>
+      <input matInput formControlName="name" placeholder="ex. 7ème A" autocomplete="off" />
+      <mat-hint>Libellé affiché dans l’établissement (ex. 7ème A, Terminale S2).</mat-hint>
+      <mat-error *ngIf="form.controls.name.hasError('required')">Nom requis.</mat-error>
+      <mat-error *ngIf="form.controls.name.hasError('maxlength')">50 caractères maximum.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Capacité (places)</mat-label>
+      <input matInput type="number" formControlName="capacity" min="1" max="200" />
+      <mat-hint>Effectif maximum pour l’affichage inscription / capacité.</mat-hint>
+      <mat-error>Entre 1 et 200.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Périodes de notation</mat-label>
+      <mat-select formControlName="periodType">
+        <mat-option value="TRIMESTER">3 trimestres (sur l’année active)</mat-option>
+        <mat-option value="SEMESTER">2 semestres (sur l’année active)</mat-option>
+      </mat-select>
+      <mat-hint>Répartition automatique des dates selon l’année scolaire.</mat-hint>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="saving">Annuler</button>
+  <button
+    mat-raised-button
+    color="primary"
+    type="button"
+    (click)="submit()"
+    [disabled]="saving || form.invalid"
+  >
+    {{ saving ? 'Création…' : 'Créer la classe' }}
+  </button>
+</mat-dialog-actions>

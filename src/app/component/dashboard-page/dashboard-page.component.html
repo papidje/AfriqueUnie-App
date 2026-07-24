@@ -19,60 +19,77 @@
   </app-api-unavailable>
 
   <ng-container *ngIf="!loading && summary as data">
-    <div class="kpi-grid">
-      <mat-card class="kpi-card">
-        <div class="kpi-icon students">
-          <mat-icon>groups</mat-icon>
-        </div>
-        <div>
-          <p class="kpi-label">Élèves inscrits / capacité totale</p>
-          <h2>{{ data.studentsEnrolled }} <span class="kpi-sep">/</span> {{ data.totalCapacity }}</h2>
-          <p class="kpi-hint">Année active — somme des places renseignées sur les classes.</p>
-        </div>
-      </mat-card>
+    <section class="kpi-section">
+      <h3 class="kpi-section__title">Effectifs</h3>
+      <div class="kpi-grid">
+        <mat-card class="kpi-card kpi-card--wide">
+          <div class="kpi-icon students">
+            <mat-icon>groups</mat-icon>
+          </div>
+          <div class="kpi-body">
+            <p class="kpi-label">Élèves inscrits / capacité totale</p>
+            <h2>{{ data.studentsEnrolled }} <span class="kpi-sep">/</span> {{ data.totalCapacity }}</h2>
+            <div class="kpi-progress" *ngIf="data.totalCapacity">
+              <span class="kpi-progress__track">
+                <span
+                  class="kpi-progress__fill"
+                  [style.width.%]="data.studentsEnrolled * 100 / data.totalCapacity"></span>
+              </span>
+              <span class="kpi-progress__pct">
+                {{ data.studentsEnrolled * 100 / data.totalCapacity | number: '1.0-0' }} %
+              </span>
+            </div>
+            <p class="kpi-hint" *ngIf="!data.totalCapacity">Capacité non renseignée sur les classes.</p>
+          </div>
+        </mat-card>
 
-      <mat-card class="kpi-card">
-        <div class="kpi-icon classes">
-          <mat-icon>class</mat-icon>
-        </div>
-        <div>
-          <p class="kpi-label">Nombre de classes</p>
-          <h2>{{ data.classesCount }}</h2>
-        </div>
-      </mat-card>
+        <mat-card class="kpi-card">
+          <div class="kpi-icon classes">
+            <mat-icon>class</mat-icon>
+          </div>
+          <div class="kpi-body">
+            <p class="kpi-label">Nombre de classes</p>
+            <h2>{{ data.classesCount }}</h2>
+          </div>
+        </mat-card>
 
-      <mat-card class="kpi-card">
-        <div class="kpi-icon subjects">
-          <mat-icon>menu_book</mat-icon>
-        </div>
-        <div>
-          <p class="kpi-label">Matières enseignées</p>
-          <h2>{{ data.taughtSubjectsCount }}</h2>
-          <p class="kpi-hint">Affectations matière–classe (année active).</p>
-        </div>
-      </mat-card>
+        <mat-card class="kpi-card">
+          <div class="kpi-icon subjects">
+            <mat-icon>menu_book</mat-icon>
+          </div>
+          <div class="kpi-body">
+            <p class="kpi-label">Matières enseignées</p>
+            <h2>{{ data.taughtSubjectsCount }}</h2>
+          </div>
+        </mat-card>
+      </div>
+    </section>
 
-      <mat-card class="kpi-card">
-        <div class="kpi-icon revenue">
-          <mat-icon>payments</mat-icon>
-        </div>
-        <div>
-          <p class="kpi-label">Frais perçus — mois en cours</p>
-          <h2>{{ formatGnf(data.monthlyTuitionCollected) }}</h2>
-        </div>
-      </mat-card>
+    <section class="kpi-section">
+      <h3 class="kpi-section__title">Finances</h3>
+      <div class="kpi-grid">
+        <mat-card class="kpi-card">
+          <div class="kpi-icon revenue">
+            <mat-icon>payments</mat-icon>
+          </div>
+          <div class="kpi-body">
+            <p class="kpi-label">Frais perçus — mois en cours</p>
+            <h2>{{ formatGnf(data.monthlyTuitionCollected) }}</h2>
+          </div>
+        </mat-card>
 
-      <mat-card class="kpi-card">
-        <div class="kpi-icon revenue-year">
-          <mat-icon>account_balance_wallet</mat-icon>
-        </div>
-        <div>
-          <p class="kpi-label">Frais perçus — année scolaire</p>
-          <h2>{{ formatGnf(data.schoolYearTuitionCollected) }}</h2>
-          <p class="kpi-hint">Paiements liés aux comptes de l’année active.</p>
-        </div>
-      </mat-card>
-    </div>
+        <mat-card class="kpi-card">
+          <div class="kpi-icon revenue-year">
+            <mat-icon>account_balance_wallet</mat-icon>
+          </div>
+          <div class="kpi-body">
+            <p class="kpi-label">Frais perçus — année scolaire</p>
+            <h2>{{ formatGnf(data.schoolYearTuitionCollected) }}</h2>
+            <p class="kpi-hint">Paiements liés aux comptes de l’année active.</p>
+          </div>
+        </mat-card>
+      </div>
+    </section>
 
     <mat-card class="recent-card">
       <div class="recent-header">

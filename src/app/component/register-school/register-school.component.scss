@@ -5,10 +5,10 @@
   justify-content: space-between;
   margin-bottom: 1rem;
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--app-text-muted);
 
   .active {
-    color: #1d4ed8;
+    color: var(--app-primary);
     font-weight: 600;
   }
 }
@@ -21,16 +21,16 @@
 .btn-outline {
   margin-top: 0.5rem;
   padding: 0.7rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
   background: white;
-  color: #374151;
+  color: var(--app-text-secondary);
   cursor: pointer;
   font-weight: 600;
 }
 
 .error {
-  color: #dc2626;
+  color: var(--danger-fg);
   font-size: 0.85rem;
   margin: 0.25rem 0 0;
   display: block;

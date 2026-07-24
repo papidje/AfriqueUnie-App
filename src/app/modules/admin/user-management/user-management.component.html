@@ -1,17 +1,18 @@
 <section class="user-mgmt-page">
-  <mat-card>
-    <div class="head">
-      <div>
-        <h2 *ngIf="!isDirectorStaff">Gestion des utilisateurs</h2>
-        <h2 *ngIf="isDirectorStaff">Mon Staff</h2>
-        <p *ngIf="!isDirectorStaff">Administrez les membres et leurs rattachements par établissement.</p>
-        <p *ngIf="isDirectorStaff">Invitez des enseignants ou du personnel administratif rattachés à votre établissement.</p>
-      </div>
-      <button mat-raised-button color="primary" (click)="openInviteDialog()">
-        Inviter un membre
-      </button>
+  <div class="page-head">
+    <div class="page-head__text">
+      <h2 *ngIf="!isDirectorStaff">Gestion des utilisateurs</h2>
+      <h2 *ngIf="isDirectorStaff">Mon Staff</h2>
+      <p class="intro" *ngIf="!isDirectorStaff">Administrez les membres et leurs rattachements par établissement.</p>
+      <p class="intro" *ngIf="isDirectorStaff">Invitez des enseignants ou du personnel administratif rattachés à votre établissement.</p>
     </div>
+    <button mat-raised-button color="primary" class="invite-btn" (click)="openInviteDialog()">
+      <mat-icon>person_add</mat-icon>
+      Inviter un membre
+    </button>
+  </div>
 
+  <mat-card class="list-card">
     <div class="quick-filters" *ngIf="!isDirectorStaff">
       <button mat-stroked-button [class.active]="quickFilter === 'ALL'" (click)="setQuickFilter('ALL')">Tous</button>
       <button mat-stroked-button [class.active]="quickFilter === 'TEACHER'" (click)="setQuickFilter('TEACHER')">Enseignants</button>

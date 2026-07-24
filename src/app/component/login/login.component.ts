@@ -40,14 +40,18 @@ export class LoginComponent implements OnInit {
     if (!refresh) {
       return;
     }
+    // Renouvellement silencieux : ne pas rediriger (conserve l’URL courante au rechargement).
     this.authService.refreshToken().subscribe({
-      next: () => this.router.navigate(this.authService.getPostLoginCommands()),
       error: () => this.authService.clearTokens()
     });
   }
 
   onSubmit() {
     if (this.loginForm.valid) {
+      if (this.authService.isAccessTokenValid()) {
+        this.router.navigate(this.authService.getPostLoginCommands());
+        return;
+      }
       this.loginErrorMessage = null;
       this.authService.login(this.loginForm.value).subscribe({
         next: (res) => {

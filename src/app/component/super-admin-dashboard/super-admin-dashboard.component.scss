@@ -10,7 +10,7 @@ h1 {
 }
 
 .subtitle {
-  color: #64748b;
+  color: var(--app-text-muted);
   margin: 0 0 1.25rem;
   font-size: 0.95rem;
 }
@@ -18,11 +18,11 @@ h1 {
 .state {
   padding: 2rem;
   text-align: center;
-  color: #64748b;
+  color: var(--app-text-muted);
 }
 
 .state.error {
-  color: #b91c1c;
+  color: var(--danger-fg);
 }
 
 .table-wrap {
@@ -31,11 +31,11 @@ h1 {
 
 .tenants-table {
   width: 100%;
-  background: #fff;
+  background: var(--app-surface);
 }
 
 .empty {
   margin-top: 1rem;
-  color: #64748b;
+  color: var(--app-text-muted);
   font-size: 0.9rem;
 }
