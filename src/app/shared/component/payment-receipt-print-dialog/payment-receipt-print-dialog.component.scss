@@ -14,19 +14,19 @@
 
 code {
   font-size: 13px;
-  background: #f3f4f6;
+  background: var(--app-surface-2);
   padding: 2px 6px;
   border-radius: 4px;
 }
 
 .dup-hint {
-  color: #b71c1c;
+  color: var(--danger-fg);
   font-size: 13px;
 }
 
 .hint {
   margin-top: 12px;
-  color: #6b7280;
+  color: var(--app-text-muted);
   font-size: 13px;
 }
 
@@ -39,7 +39,7 @@ code {
 
 .mini-lines th,
 .mini-lines td {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--app-border);
   padding: 6px 4px;
   text-align: left;
 }

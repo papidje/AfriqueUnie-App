@@ -1,23 +1,47 @@
 .user-mgmt-page {
-  display: grid;
-  gap: 1rem;
+  padding: var(--sp-4) var(--sp-6) var(--sp-8);
+  max-width: 1600px;
+  margin-inline: auto;
+  box-sizing: border-box;
 }
 
-.head {
+.page-head {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-5);
 
   h2 {
-    margin: 0 0 4px 0;
+    margin: 0 0 var(--sp-2);
+    font-size: var(--fs-h1);
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
-  p {
+  .intro {
     margin: 0;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--app-text-muted);
+    font-size: var(--fs-body);
   }
+}
+
+.page-head__text {
+  min-width: 0;
+}
+
+.invite-btn {
+  flex: 0 0 auto;
+
+  mat-icon {
+    margin-right: var(--sp-1);
+  }
+}
+
+.list-card.mat-mdc-card {
+  padding: var(--sp-5) var(--sp-6);
+  border: 1px solid var(--app-border);
 }
 
 .quick-filters {
@@ -54,8 +78,8 @@ table {
   font-size: 11px;
   padding: 4px 10px;
   font-weight: 600;
-  background: #eceff1;
-  color: #37474f;
+  background: var(--app-surface-2);
+  color: var(--app-text-strong);
   line-height: 1.3;
 
   .aff-school {
@@ -77,7 +101,7 @@ table {
   }
 
   .aff-suspended {
-    color: #c62828;
+    color: var(--danger-fg);
   }
 }
 
@@ -118,13 +142,13 @@ table {
 }
 
 .status-active {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--success-bg);
+  color: var(--success-fg);
 }
 
 .status-pending {
-  background: #fff8e1;
-  color: #f57f17;
+  background: var(--warning-bg);
+  color: var(--warning-fg);
 }
 
 .loading,

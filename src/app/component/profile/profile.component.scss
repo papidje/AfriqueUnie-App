@@ -1,33 +1,33 @@
 .profile-page {
-  max-width: 1120px;
+  max-width: var(--container-lg);
   margin: 0 auto;
-  padding: 24px 20px 48px;
+  padding: var(--sp-6) var(--sp-5) var(--sp-12);
 }
 
 .profile-page-heading {
-  margin-bottom: 28px;
+  margin-bottom: var(--sp-6);
 
   h1 {
-    margin: 0 0 8px;
-    font-size: 1.75rem;
-    font-weight: 600;
+    margin: 0 0 var(--sp-2);
+    font-size: 1.6rem;
+    font-weight: 700;
     letter-spacing: -0.02em;
   }
 }
 
 .subtitle {
   margin: 0;
-  color: #6b7280;
-  font-size: 14px;
+  color: var(--app-text-muted);
+  font-size: var(--fs-body);
   line-height: 1.45;
 }
 
 .loading-wrap {
   display: flex;
   align-items: center;
-  gap: 16px;
-  color: #4b5563;
-  padding: 24px 0;
+  gap: var(--sp-4);
+  color: var(--app-text-secondary);
+  padding: var(--sp-6) 0;
 }
 
 .profile-dashboard {
@@ -46,8 +46,8 @@
 }
 
 .profile-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(17, 24, 39, 0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
@@ -80,7 +80,7 @@
   margin: 0 0 4px;
   font-size: 1.35rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--app-text-strong);
   line-height: 1.25;
   word-break: break-word;
 }
@@ -88,7 +88,7 @@
 .account-username {
   margin: 0;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--app-text-muted);
   word-break: break-all;
 }
 
@@ -105,7 +105,7 @@
 
 .account-row {
   padding: 12px 0;
-  border-bottom: 1px solid #eef2f7;
+  border-bottom: 1px solid var(--app-border);
   font-size: 14px;
 
   &:last-of-type {
@@ -119,12 +119,12 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #9ca3af;
+  color: var(--app-text-muted);
 }
 
 .account-row dd {
   margin: 0;
-  color: #111827;
+  color: var(--app-text-strong);
   line-height: 1.45;
   word-break: break-word;
 }
@@ -140,15 +140,15 @@
 }
 
 .status-badge--active {
-  background: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #a5d6a7;
+  background: var(--success-bg);
+  color: var(--success-fg);
+  border: 1px solid var(--success-border);
 }
 
 .status-badge--inactive {
-  background: #ffebee;
-  color: #c62828;
-  border: 1px solid #ffcdd2;
+  background: var(--danger-bg);
+  color: var(--danger-fg);
+  border: 1px solid var(--danger-border);
 }
 
 .field-hint {
@@ -156,7 +156,7 @@
   margin-top: 8px;
   font-size: 12px;
   font-weight: 400;
-  color: #6b7280;
+  color: var(--app-text-muted);
   line-height: 1.4;
 }
 
@@ -176,7 +176,7 @@
 }
 
 .schools-empty {
-  color: #6b7280;
+  color: var(--app-text-muted);
   font-size: 13px;
   line-height: 1.45;
 }
@@ -218,7 +218,7 @@
 
 .personal-card-header mat-card-subtitle {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--app-text-muted);
   margin-bottom: 0;
 }
 
@@ -237,7 +237,7 @@
   grid-template-columns: minmax(140px, 220px) 1fr;
   gap: 12px 24px;
   padding: 14px 0;
-  border-bottom: 1px solid #eef2f7;
+  border-bottom: 1px solid var(--app-border);
   font-size: 14px;
 
   &:last-child {
@@ -247,13 +247,13 @@
 
 .personal-row dt {
   margin: 0;
-  color: #6b7280;
+  color: var(--app-text-muted);
   font-weight: 600;
 }
 
 .personal-row dd {
   margin: 0;
-  color: #111827;
+  color: var(--app-text-strong);
   word-break: break-word;
 }
 
@@ -262,7 +262,7 @@
 }
 
 .age-inline {
-  color: #4b5563;
+  color: var(--app-text-secondary);
   font-weight: 500;
 }
 
@@ -280,7 +280,8 @@
   line-height: 1.5;
 }
 
-@media (max-width: 900px) {
+/* Material Small et moins (tablette portrait / smartphone) : colonne unique */
+@media (max-width: 959.98px) {
   .profile-dashboard {
     grid-template-columns: 1fr;
   }
@@ -295,7 +296,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 599.98px) {
   .personal-row {
     grid-template-columns: 1fr;
     gap: 6px;

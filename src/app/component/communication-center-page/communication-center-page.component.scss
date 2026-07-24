@@ -109,13 +109,13 @@ h1 {
 }
 
 .chip-success {
-  background: #e8f5e9;
-  color: #1b5e20;
+  background: var(--success-bg);
+  color: var(--success-fg);
 }
 
 .chip-failure {
-  background: #ffebee;
-  color: #b71c1c;
+  background: var(--danger-bg);
+  color: var(--danger-fg);
 }
 
 .table-wrap {

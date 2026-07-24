@@ -1,0 +1,245 @@
+// ============================================================================
+//  Design System — couche d'auteur SCSS
+// ----------------------------------------------------------------------------
+//  Source de vérité runtime = variables CSS (voir themes.scss), indispensables
+//  au white-label (thèmes commutés par classe sur <body>).
+//  Cette couche expose des ALIAS SCSS + des MIXINS pour factoriser les styles
+//  communs et éviter la duplication de valeurs codées en dur.
+//
+//  Usage dans un composant :
+//    @use 'design-system' as ds;
+//    .page { @include ds.page(); }
+//    .sub  { @include ds.subtitle; }
+//    .box  { color: ds.$text-muted; }
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+//  Points de rupture (alignés Angular Material : XSmall / Small / Medium / Large)
+// ----------------------------------------------------------------------------
+$bp-xsmall: 599.98px; // smartphone (hors cible)
+$bp-small: 959.98px; // tablette portrait
+$bp-medium: 1279.98px; // tablette paysage / laptop
+$bp-large: 1919.98px; // desktop
+
+@mixin lt($bp) {
+  @media (max-width: $bp) {
+    @content;
+  }
+}
+
+@mixin gte($bp) {
+  @media (min-width: $bp + 0.02px) {
+    @content;
+  }
+}
+
+// ----------------------------------------------------------------------------
+//  Alias SCSS des tokens (référencent les variables CSS runtime)
+// ----------------------------------------------------------------------------
+// Espacements
+$sp-1: var(--sp-1);
+$sp-2: var(--sp-2);
+$sp-3: var(--sp-3);
+$sp-4: var(--sp-4);
+$sp-5: var(--sp-5);
+$sp-6: var(--sp-6);
+$sp-8: var(--sp-8);
+$sp-10: var(--sp-10);
+$sp-12: var(--sp-12);
+
+// Rayons
+$radius-sm: var(--radius-sm);
+$radius: var(--radius);
+$radius-lg: var(--radius-lg);
+$radius-pill: var(--radius-pill);
+
+// Ombres
+$shadow-xs: var(--shadow-xs);
+$shadow-sm: var(--shadow-sm);
+$shadow-md: var(--shadow-md);
+$shadow-lg: var(--shadow-lg);
+
+// Surfaces / neutres
+$bg: var(--app-bg);
+$surface: var(--app-surface);
+$surface-2: var(--app-surface-2);
+$border: var(--app-border);
+$border-strong: var(--app-border-strong);
+
+// Texte
+$text: var(--app-text);
+$text-strong: var(--app-text-strong);
+$text-secondary: var(--app-text-secondary);
+$text-muted: var(--app-text-muted);
+
+// Marque
+$primary: var(--app-primary);
+$primary-dark: var(--app-primary-dark);
+$primary-light: var(--app-primary-light);
+$on-primary: var(--app-on-primary);
+$primary-tint: var(--app-primary-tint);
+$primary-tint-strong: var(--app-primary-tint-strong);
+
+// Typographie
+$fs-h1: var(--fs-h1);
+$fs-h2: var(--fs-h2);
+$fs-h3: var(--fs-h3);
+$fs-body: var(--fs-body);
+$fs-sm: var(--fs-sm);
+$fs-xs: var(--fs-xs);
+$lh-tight: var(--lh-tight);
+$lh-normal: var(--lh-normal);
+
+// Contrôles / icônes / conteneurs
+$control-height: var(--control-height);
+$field-height: var(--field-height);
+$icon-sm: var(--icon-sm);
+$icon-md: var(--icon-md);
+$icon-lg: var(--icon-lg);
+$container-sm: var(--container-sm);
+$container-md: var(--container-md);
+$container-lg: var(--container-lg);
+$container-xl: var(--container-xl);
+$page-pad: var(--page-pad);
+
+// Statuts (fg / bg / border)
+$success-fg: var(--success-fg);
+$success-bg: var(--success-bg);
+$success-border: var(--success-border);
+$warning-fg: var(--warning-fg);
+$warning-bg: var(--warning-bg);
+$warning-border: var(--warning-border);
+$danger-fg: var(--danger-fg);
+$danger-bg: var(--danger-bg);
+$danger-border: var(--danger-border);
+$info-fg: var(--info-fg);
+$info-bg: var(--info-bg);
+$info-border: var(--info-border);
+
+// ----------------------------------------------------------------------------
+//  Mixins de composition (factorisation des motifs récurrents)
+// ----------------------------------------------------------------------------
+
+// Conteneur de page : padding standard, largeur bornée, centrage.
+@mixin page($max: $container-xl) {
+  padding: $page-pad;
+  max-width: $max;
+  margin-inline: auto;
+  width: 100%;
+  box-sizing: border-box;
+
+  @include lt($bp-small) {
+    padding: var(--sp-4);
+  }
+}
+
+// En-tête de page : titre à gauche, action(s) à droite, passe à la ligne.
+@mixin page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $sp-4;
+  margin-bottom: $sp-5;
+}
+
+@mixin page-title {
+  margin: 0;
+  font-size: $fs-h1;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: $text-strong;
+  line-height: $lh-tight;
+}
+
+@mixin subtitle {
+  margin: $sp-1 0 0;
+  color: $text-muted;
+  font-size: $fs-body;
+  line-height: $lh-normal;
+}
+
+@mixin muted {
+  color: $text-muted;
+}
+
+// Carte de contenu générique (hors mat-card, qui est déjà stylée globalement).
+@mixin card($pad: $sp-4) {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  padding: $pad;
+}
+
+// Conteneur de tableau : scroll horizontal maîtrisé, jamais de débordement page.
+@mixin table-wrap {
+  overflow-x: auto;
+  border: 1px solid $border;
+  border-radius: $radius;
+
+  table {
+    width: 100%;
+  }
+}
+
+// États transverses (chargement / vide).
+@mixin state-loading {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+  padding: $sp-6 $sp-4;
+  color: $text-secondary;
+  font-size: $fs-body;
+}
+
+@mixin state-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: $sp-2;
+  padding: $sp-8 $sp-4;
+  color: $text-muted;
+  font-size: $fs-body;
+}
+
+// Alerte / message contextuel (couleurs sémantiques).
+@mixin alert($fg, $bg, $border) {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-2;
+  padding: $sp-3 $sp-4;
+  border: 1px solid $border;
+  border-radius: $radius;
+  background: $bg;
+  color: $fg;
+  font-size: $fs-body;
+  line-height: $lh-normal;
+}
+
+// Badge / pastille de statut.
+@mixin badge($fg, $bg) {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-1;
+  padding: 2px $sp-2;
+  border-radius: $radius-pill;
+  background: $bg;
+  color: $fg;
+  font-size: $fs-xs;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+// Grille de formulaire fluide (auto-fit, pas de largeur fixe).
+@mixin form-grid($min: 240px, $gap: $sp-3) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax($min, 1fr));
+  gap: $gap;
+
+  .full {
+    grid-column: 1 / -1;
+  }
+}

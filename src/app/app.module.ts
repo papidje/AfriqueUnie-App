@@ -56,8 +56,10 @@ import { MyEstablishmentsComponent } from './component/my-establishments/my-esta
 import { CreateSchoolDialogComponent } from './component/my-establishments/create-school-dialog/create-school-dialog.component';
 import { AcademicContextBannerComponent } from './component/academic-context-banner/academic-context-banner.component';
 import { SchoolClassesPageComponent } from './component/school-classes-page/school-classes-page.component';
+import { ClassFormDialogComponent } from './component/class-form-dialog/class-form-dialog.component';
 import { SchoolYearCreatePageComponent } from './component/school-year-create-page/school-year-create-page.component';
 import { SubjectsCatalogPageComponent } from './component/subjects-catalog-page/subjects-catalog-page.component';
+import { SubjectFormDialogComponent } from './component/subject-form-dialog/subject-form-dialog.component';
 import { ClassSubjectsPageComponent } from './component/class-subjects-page/class-subjects-page.component';
 import { ClassSubjectFormDialogComponent } from './component/class-subject-form-dialog/class-subject-form-dialog.component';
 import { ClassPlanningPageComponent } from './component/class-planning-page/class-planning-page.component';
@@ -111,8 +113,10 @@ export function initializeAuthFactory(authService: AuthService) {
     CreateSchoolDialogComponent,
     AcademicContextBannerComponent,
     SchoolClassesPageComponent,
+    ClassFormDialogComponent,
     SchoolYearCreatePageComponent,
     SubjectsCatalogPageComponent,
+    SubjectFormDialogComponent,
     ClassSubjectsPageComponent,
     ClassSubjectFormDialogComponent,
     ClassPlanningPageComponent,

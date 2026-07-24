@@ -1,0 +1,21 @@
+.dialog-sub {
+  margin: 0 0 var(--sp-4);
+  color: var(--app-text-muted);
+  font-size: var(--fs-body);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: min(420px, 78vw);
+}
+
+.full {
+  width: 100%;
+}
+
+/* Panneau du select de niveaux : hauteur suffisante dans l'overlay. */
+::ng-deep .school-class-level-select-panel.mat-mdc-select-panel {
+  max-height: min(75vh, 560px) !important;
+}

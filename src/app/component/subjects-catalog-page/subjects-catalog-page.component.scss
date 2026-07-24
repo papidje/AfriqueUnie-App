@@ -1,38 +1,50 @@
 .page {
-  padding: 16px 24px 32px;
-  max-width: 900px;
+  padding: var(--sp-4) var(--sp-6) var(--sp-8);
+  max-width: var(--container-xl);
   margin: 0 auto;
 }
 
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-5);
+}
+
+.page-head__text {
+  min-width: 0;
+}
+
 h1 {
-  margin: 0 0 8px;
-  font-size: 1.5rem;
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .intro {
-  margin: 0 0 16px;
-  color: rgba(0, 0, 0, 0.65);
-  font-size: 14px;
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: var(--fs-body);
 }
 
-.card {
-  margin-bottom: 20px;
+.create-btn {
+  flex: 0 0 auto;
+
+  mat-icon {
+    margin-right: var(--sp-1);
+  }
 }
 
-.row-form {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
+.list-card.mat-mdc-card {
+  padding: var(--sp-5) var(--sp-6);
+  border: 1px solid var(--app-border);
 }
 
-.grow {
-  flex: 1 1 220px;
-  min-width: 200px;
-}
-
-.edit-inline {
-  padding: 8px 0;
+.table-wrap {
+  overflow-x: auto;
 }
 
 .tbl {

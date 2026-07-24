@@ -1,6 +1,105 @@
 // White label — variables par thème (classe sur <body> : .theme-xxx)
 // Primary = sidebar / header / actions principales ; Secondary = accents / bordures
 
+// ————————————————————————————————————————————————
+// Design tokens globaux (indépendants du thème de couleur)
+// Échelle inspirée des SaaS sobres (Linear / Notion / Workspace).
+// Additifs : aucune règle existante n'est supprimée.
+// ————————————————————————————————————————————————
+:root {
+  // Neutres / surfaces
+  --app-bg: #f6f7f9;
+  --app-surface: #ffffff;
+  --app-surface-2: #f9fafb;
+  --app-border: #e6e8eb;
+  --app-border-strong: #d5d8dd;
+
+  // Texte (contrastes conformes AA pour le texte courant)
+  --app-text: #1f2430;
+  --app-text-strong: #111827;
+  --app-text-secondary: #4b5563;
+  --app-text-muted: #667085;
+
+  // Espacements (base 4px)
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  // Rayons
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  // Élévations sobres
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.10);
+  --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08);
+  --shadow-lg: 0 12px 28px rgba(16, 24, 40, 0.12);
+
+  // Typographie
+  --fs-h1: 1.5rem;
+  --fs-h2: 1.25rem;
+  --fs-h3: 1.0625rem;
+  --fs-body: 0.9375rem;
+  --fs-sm: 0.8125rem;
+  --fs-xs: 0.75rem;
+  --lh-tight: 1.25;
+  --lh-normal: 1.5;
+
+  // Hauteurs de contrôle (boutons, champs) — homogénéité verticale
+  --control-height: 40px;
+  --field-height: 44px;
+
+  // Icônes
+  --icon-sm: 18px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+
+  // Largeurs de conteneur (pages) — évite les largeurs fixes dispersées
+  --container-sm: 640px;
+  --container-md: 960px;
+  --container-lg: 1120px;
+  --container-xl: 1600px;
+
+  // Padding de page standard
+  --page-pad: var(--sp-6);
+
+  // Teinte primaire dérivée pour fonds discrets
+  --app-primary-tint: color-mix(in srgb, var(--app-primary, #1e3a8a) 10%, #ffffff);
+  --app-primary-tint-strong: color-mix(in srgb, var(--app-primary, #1e3a8a) 16%, #ffffff);
+
+  // ————————————————————————————————————————————————
+  // Couleurs sémantiques (statuts / messages / alertes / badges)
+  // Chaque statut : texte (fg), fond doux (bg), bordure. Source unique.
+  // ————————————————————————————————————————————————
+  --success-fg: #1b7f3b;
+  --success-bg: #e8f5e9;
+  --success-border: #a5d6a7;
+
+  --warning-fg: #b45309;
+  --warning-bg: #fff7e6;
+  --warning-border: #ffdf9e;
+
+  --danger-fg: #c62828;
+  --danger-bg: #ffebee;
+  --danger-border: #ffcdd2;
+
+  --info-fg: #1565c0;
+  --info-bg: #e8f1fd;
+  --info-border: #bcd7f7;
+
+  --neutral-fg: var(--app-text-secondary);
+  --neutral-bg: var(--app-surface-2);
+  --neutral-border: var(--app-border);
+}
+
 :root,
 body.theme-classique {
   --app-primary: #1e3a8a;

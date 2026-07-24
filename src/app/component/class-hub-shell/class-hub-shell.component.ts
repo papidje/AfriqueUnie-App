@@ -6,6 +6,7 @@ import { catchError, distinctUntilChanged, filter, switchMap, takeUntil, tap } f
 import { ActiveSchoolService } from '../../service/active-school.service';
 import { SchoolClassService } from '../../service/school-class.service';
 import { SchoolClassDto } from '../../models/academic.models';
+import { HubHeaderActionService } from '../../service/hub-header-action.service';
 
 @Component({
   selector: 'app-class-hub-shell',
@@ -24,12 +25,16 @@ export class ClassHubShellComponent implements OnInit, OnDestroy {
   loadingClasses = true;
   selectedClassId: number | null = null;
 
+  /** Action publiée par la page enfant (ex. « Nouvelle évaluation »). */
+  readonly headerAction$ = this.hubHeaderAction.action$;
+
   constructor(
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly activeSchool: ActiveSchoolService,
     private readonly schoolClassService: SchoolClassService,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly hubHeaderAction: HubHeaderActionService
   ) {}
 
   ngOnInit(): void {
@@ -79,6 +84,7 @@ export class ClassHubShellComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.hubHeaderAction.clear();
     this.destroy$.next();
     this.destroy$.complete();
   }

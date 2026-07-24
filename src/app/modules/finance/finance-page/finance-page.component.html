@@ -1,21 +1,23 @@
 <section class="finance-page">
-  <mat-card>
-    <div class="head">
-      <div>
-        <h1>Finance</h1>
-        <p>Tableau de suivi des paiements par classe.</p>
-      </div>
-      <button
-        *ngIf="canAccessFeeSettings()"
-        mat-stroked-button
-        color="primary"
-        type="button"
-        (click)="goToSettings()"
-      >
-        Paramètres tarifs
-      </button>
+  <div class="page-head">
+    <div class="page-head__text">
+      <h1>Finance</h1>
+      <p class="intro">Tableau de suivi des paiements par classe.</p>
     </div>
+    <button
+      *ngIf="canAccessFeeSettings()"
+      mat-raised-button
+      color="primary"
+      type="button"
+      class="settings-btn"
+      (click)="goToSettings()"
+    >
+      <mat-icon>tune</mat-icon>
+      Paramètres tarifs
+    </button>
+  </div>
 
+  <mat-card class="list-card">
     <div class="loading" *ngIf="loadingClasses">Chargement des classes…</div>
 
     <div *ngIf="!loadingClasses && sortedClasses.length" class="class-tabs">

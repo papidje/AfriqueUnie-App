@@ -1,7 +1,165 @@
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  color: var(--app-text);
+  background: var(--app-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ————————————————————————————————————————————————
+   Base typographique sobre — n'affecte que les éléments
+   qui ne sont pas déjà stylés par un composant (portée globale).
+   ———————————————————————————————————————————————— */
+h1, h2, h3, h4 {
+  color: var(--app-text-strong);
+  line-height: var(--lh-tight);
+}
+
+p { line-height: var(--lh-normal); }
+
+a {
+  color: var(--app-primary, #1e3a8a);
+  text-underline-offset: 2px;
+}
+
+/* Accessibilité : focus visible cohérent au clavier */
+:where(a, button, [tabindex], .mat-mdc-list-item):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--app-primary, #1e3a8a) 60%, transparent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Barres de défilement discrètes (WebKit) — sensation produit moderne */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c7ccd4 transparent;
+}
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb {
+  background: #c7ccd4;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: #aeb4be; background-clip: content-box; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* ————————————————————————————————————————————————
+   Utilitaires partagés (design system) — utilisables dans tous les templates.
+   Réutilisables sans dupliquer de couleurs / espacements codés en dur.
+   ———————————————————————————————————————————————— */
+
+/* Structure de page */
+.app-page {
+  padding: var(--page-pad);
+  max-width: var(--container-xl);
+  margin-inline: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+.app-page--md { max-width: var(--container-md); }
+.app-page--lg { max-width: var(--container-lg); }
+
+.app-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-5);
+}
+
+.app-page-title {
+  margin: 0;
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--app-text-strong);
+  line-height: var(--lh-tight);
+}
+
+.app-page-subtitle,
+.app-muted {
+  color: var(--app-text-muted);
+}
+.app-page-subtitle {
+  margin: var(--sp-1) 0 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-normal);
+}
+
+/* États transverses (chargement / vide) */
+.app-state {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-6) var(--sp-4);
+  color: var(--app-text-secondary);
+  font-size: var(--fs-body);
+}
+
+.app-state--empty {
+  flex-direction: column;
+  text-align: center;
+  gap: var(--sp-2);
+  color: var(--app-text-muted);
+}
+
+/* Conteneur de tableau : scroll horizontal maîtrisé */
+.app-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius);
+}
+.app-table-wrap table { width: 100%; }
+
+/* Alertes / messages contextuels — couleurs sémantiques uniques */
+.app-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius);
+  background: var(--app-surface-2);
+  color: var(--app-text);
+  font-size: var(--fs-body);
+  line-height: var(--lh-normal);
+}
+.app-alert--success { background: var(--success-bg); border-color: var(--success-border); color: var(--success-fg); }
+.app-alert--warning { background: var(--warning-bg); border-color: var(--warning-border); color: var(--warning-fg); }
+.app-alert--danger  { background: var(--danger-bg);  border-color: var(--danger-border);  color: var(--danger-fg); }
+.app-alert--info    { background: var(--info-bg);    border-color: var(--info-border);    color: var(--info-fg); }
+
+/* Badges / pastilles de statut */
+.app-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 2px var(--sp-2);
+  border-radius: var(--radius-pill);
+  background: var(--app-surface-2);
+  color: var(--app-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.app-badge--success { background: var(--success-bg); color: var(--success-fg); }
+.app-badge--warning { background: var(--warning-bg); color: var(--warning-fg); }
+.app-badge--danger  { background: var(--danger-bg);  color: var(--danger-fg); }
+.app-badge--info    { background: var(--info-bg);    color: var(--info-fg); }
+
+/* Texte de statut inline */
+.app-text-success { color: var(--success-fg); }
+.app-text-warning { color: var(--warning-fg); }
+.app-text-danger  { color: var(--danger-fg); }
+.app-text-info    { color: var(--info-fg); }
 
 /* Panneau porté par CDK overlay (hors :host du composant) — liste des niveaux pour « Ouvrir une classe » */
 .school-class-level-select-panel.mat-mdc-select-panel {

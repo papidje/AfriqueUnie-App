@@ -41,11 +41,11 @@
   gap: 10px;
   padding: 10px 12px;
   margin-bottom: 12px;
-  background: #e3f2fd;
-  border: 1px solid #90caf9;
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
   border-radius: 8px;
   font-size: 13px;
-  color: #1565c0;
+  color: var(--info-fg);
   line-height: 1.4;
 }
 .snapshot-disclaimer mat-icon {
@@ -60,8 +60,8 @@
   gap: 12px 20px;
   padding: 12px 14px;
   margin-bottom: 16px;
-  background: #fafafa;
-  border: 1px solid #e8e8e8;
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
   border-radius: 8px;
 }
 .schooling-banner__item { min-width: 120px; }
@@ -70,12 +70,12 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #78909c;
+  color: var(--app-text-muted);
   margin-bottom: 2px;
 }
-.schooling-banner__value { font-weight: 500; color: #263238; }
+.schooling-banner__value { font-weight: 500; color: var(--app-text-strong); }
 .schooling-form { margin-top: 8px; }
-.schooling-hint { color: #607d8b; font-size: 14px; margin: 8px 0; }
+.schooling-hint { color: var(--app-text-muted); font-size: 14px; margin: 8px 0; }
 .grades-dashboard {
   margin-top: 20px;
   width: 100%;
@@ -96,15 +96,15 @@
 .grades-spinner { margin: 12px auto; }
 .kpi-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
   margin-bottom: 10px;
 }
 .kpi-card { padding: 12px 14px; }
-.kpi-label { font-size: 12px; color: #78909c; text-transform: uppercase; letter-spacing: 0.03em; }
+.kpi-label { font-size: 12px; color: var(--app-text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
 .kpi-value { font-size: 1.25rem; font-weight: 600; margin-top: 4px; }
-.kpi-suffix { font-size: 0.85em; font-weight: 500; color: #78909c; }
-.compo-hint { font-size: 12px; color: #78909c; margin: 0 0 8px; }
+.kpi-suffix { font-size: 0.85em; font-weight: 500; color: var(--app-text-muted); }
+.compo-hint { font-size: 12px; color: var(--app-text-muted); margin: 0 0 8px; }
 /* Tableau des notes : pleine largeur de la carte / onglet ; scroll horizontal seulement si besoin. */
 .grades-table-wrap {
   display: block;
@@ -129,17 +129,16 @@
   box-sizing: border-box;
 }
 .subj-code { font-weight: 500; }
-.subj-name { color: #607d8b; font-size: 0.9em; }
-@media (max-width: 800px) { .kpi-row { grid-template-columns: 1fr; } }
+.subj-name { color: var(--app-text-muted); font-size: 0.9em; }
 .head h1 { margin: 0; }
-.sub { margin: 6px 0 12px; color: #607d8b; }
+.sub { margin: 6px 0 12px; color: var(--app-text-muted); }
 .tab-head { display:flex; align-items:center; justify-content:space-between; margin: 12px 0; }
-.grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+.grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 16px; }
 .grid .full { grid-column: 1 / -1; }
 .actions { margin: 12px 0; display:flex; justify-content:flex-end; }
-.parents-block { background:#fafafa; border:1px solid #eee; border-radius:8px; padding:12px; }
-.finance-cards { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
-.finance-cards .card { border:1px solid #e0e0e0; border-radius:8px; padding:12px; }
+.parents-block { background:var(--app-surface-2); border:1px solid var(--app-border); border-radius:8px; padding:12px; }
+.finance-cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 12px 0; }
+.finance-cards .card { border:1px solid var(--app-border); border-radius:8px; padding:12px; }
 .pie { width:72px; height:72px; border-radius:50%; margin:8px 0; }
 .table-wrap { overflow-x:auto; margin-top:12px; }
 .payments-table { width:100%; }
@@ -148,7 +147,6 @@
 .photo-block { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:12px; }
 .photo-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
 .photo-actions button mat-icon { margin-right:4px; }
-.student-photo, .photo-placeholder { width:96px; border-radius:8px; object-fit:cover; border:1px solid #ddd; display:flex; align-items:center; justify-content:center; color:#607d8b; }
+.student-photo, .photo-placeholder { width:96px; border-radius:8px; object-fit:cover; border:1px solid var(--app-border); display:flex; align-items:center; justify-content:center; color:var(--app-text-muted); }
 .doc-actions { margin-bottom: 12px; }
 .doc-actions button mat-icon { margin-right: 6px; }
-@media (max-width: 900px) { .grid, .finance-cards { grid-template-columns: 1fr; } }

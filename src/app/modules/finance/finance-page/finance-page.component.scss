@@ -1,22 +1,47 @@
 .finance-page {
-  padding: 16px;
+  padding: var(--sp-4) var(--sp-6) var(--sp-8);
+  max-width: 1600px;
+  margin-inline: auto;
+  box-sizing: border-box;
 }
 
-.head {
+.page-head {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-5);
 }
 
-.head h1 {
+.page-head__text {
+  min-width: 0;
+}
+
+.page-head h1 {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.page-head .intro {
   margin: 0;
+  color: var(--app-text-muted);
+  font-size: var(--fs-body);
 }
 
-.head p {
-  margin: 2px 0 0;
-  color: #666;
+.settings-btn {
+  flex: 0 0 auto;
+
+  mat-icon {
+    margin-right: var(--sp-1);
+  }
+}
+
+.list-card.mat-mdc-card {
+  padding: var(--sp-5) var(--sp-6);
+  border: 1px solid var(--app-border);
 }
 
 .student-name-link {
@@ -30,11 +55,13 @@
 }
 
 .tab-content {
-  padding: 12px 4px 4px;
+  padding: var(--sp-3) var(--sp-1) var(--sp-1);
 }
 
 .table-wrap {
   overflow-x: auto;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius);
 }
 
 table {
@@ -55,16 +82,16 @@ table {
 
 .loading,
 .empty {
-  padding: 12px 0;
-  color: #666;
+  padding: var(--sp-4) 0;
+  color: var(--app-text-muted);
 }
 
 .rame-ok {
-  color: #2e7d32;
+  color: var(--success-fg);
 }
 
 .rame-ko {
-  color: #c62828;
+  color: var(--danger-fg);
 }
 
 .ins-reins-cell {
@@ -89,11 +116,11 @@ table {
 }
 
 .ins-reins-pie .pie-bg {
-  stroke: #e5e7eb;
+  stroke: var(--app-border);
 }
 
 .ins-reins-pie .pie-paid {
-  stroke: #2e7d32;
+  stroke: var(--success-fg);
   stroke-linecap: round;
 }
 
@@ -101,7 +128,7 @@ table {
   position: absolute;
   font-size: 10px;
   font-weight: 700;
-  color: #374151;
+  color: var(--app-text-secondary);
 }
 
 .month-cell {
@@ -156,7 +183,7 @@ table {
 }
 
 .months-progress-fill.progress-good {
-  background: linear-gradient(90deg, #66bb6a 0%, #2e7d32 100%);
+  background: linear-gradient(90deg, #66bb6a 0%, var(--success-fg) 100%);
 }
 
 .months-progress-fill.progress-warn {
@@ -164,7 +191,7 @@ table {
 }
 
 .months-progress-fill.progress-late {
-  background: linear-gradient(90deg, #ef5350 0%, #c62828 100%);
+  background: linear-gradient(90deg, #ef5350 0%, var(--danger-fg) 100%);
 }
 
 .actions-cell {

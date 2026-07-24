@@ -1,7 +1,8 @@
 <div class="auth-container">
   <div class="auth-card">
     <h2 class="title">Connexion</h2>
-    <p *ngIf="activationSuccessMessage" style="color:#2e7d32; margin-bottom: 12px;">
+    <p class="subtitle">Accédez à votre espace de gestion scolaire.</p>
+    <p *ngIf="activationSuccessMessage" class="auth-success" role="status">
       {{ activationSuccessMessage }}
     </p>
 

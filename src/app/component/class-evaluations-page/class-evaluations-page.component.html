@@ -6,10 +6,9 @@
     <h1>Évaluations</h1>
   </ng-container>
 
-  <p class="intro" *ngIf="classId != null">Contrôles, devoirs et compositions pour cette classe.</p>
-
-  <div class="actions" *ngIf="classId != null && canWrite">
-    <button mat-raised-button color="primary" type="button" (click)="openNewDialog()">
+  <div class="eval-head" *ngIf="classId != null && canWrite && !hubEmbedded">
+    <button mat-raised-button color="primary" type="button" class="new-eval-btn" (click)="openNewDialog()">
+      <mat-icon>add</mat-icon>
       Nouvelle évaluation
     </button>
   </div>
@@ -18,7 +17,7 @@
 
   <div *ngIf="!loading && classId == null" class="muted">Classe inconnue.</div>
 
-  <div *ngIf="!loading && classId != null" class="table-wrap mat-elevation-z1">
+  <div *ngIf="!loading && classId != null" class="table-wrap">
     <table mat-table [dataSource]="evaluations" class="eval-table">
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef>Titre</th>

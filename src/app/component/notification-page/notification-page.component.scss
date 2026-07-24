@@ -17,7 +17,7 @@
     }
 
     &.restriction-banner--warn {
-      border-left: 4px solid #f44336;
+      border-left: 4px solid var(--danger-fg);
     }
   }
 

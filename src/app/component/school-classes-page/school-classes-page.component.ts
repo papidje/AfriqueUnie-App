@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Subject, of } from 'rxjs';
@@ -9,6 +9,7 @@ import { ClassLevelService } from '../../service/class-level.service';
 import { SchoolClassService } from '../../service/school-class.service';
 import { SchoolYearService } from '../../service/school-year.service';
 import { ClassLevel, SchoolClassDto, SchoolYearDto } from '../../models/academic.models';
+import { ClassFormDialogComponent, ClassFormDialogData } from '../class-form-dialog/class-form-dialog.component';
 
 export interface ClassLevelGroupOption {
   groupCode: string;
@@ -37,26 +38,44 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
   schoolId: number | null = null;
   loadingLevels = true;
   loadingClasses = false;
-  saving = false;
-
-  readonly form = this.fb.group({
-    levelId: [null as number | null, Validators.required],
-    name: ['', [Validators.required, Validators.maxLength(50)]],
-    capacity: [40, [Validators.required, Validators.min(1), Validators.max(200)]],
-    periodType: ['TRIMESTER' as 'TRIMESTER' | 'SEMESTER', Validators.required]
-  });
 
   readonly overviewColumns = ['name', 'level', 'periods', 'enrollment', 'subjectCount', 'actions'];
 
   constructor(
-    private readonly fb: FormBuilder,
     private readonly activeSchool: ActiveSchoolService,
     private readonly classLevelService: ClassLevelService,
     private readonly schoolYearService: SchoolYearService,
     private readonly schoolClassService: SchoolClassService,
     private readonly snackBar: MatSnackBar,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly dialog: MatDialog
   ) {}
+
+  /** Ouvre la modale de création de classe ; recharge la liste si une classe est créée. */
+  openCreateDialog(): void {
+    if (this.schoolId == null || !this.activeYear || this.loadingLevels) {
+      return;
+    }
+    const data: ClassFormDialogData = {
+      schoolId: this.schoolId,
+      activeYear: this.activeYear,
+      levelGroups: this.levelGroups
+    };
+    this.dialog
+      .open(ClassFormDialogComponent, {
+        data,
+        width: '520px',
+        maxWidth: '95vw',
+        autoFocus: false,
+        restoreFocus: true
+      })
+      .afterClosed()
+      .subscribe((created) => {
+        if (created) {
+          this.refreshList();
+        }
+      });
+  }
 
   ngOnInit(): void {
     this.classLevelService.getAll().subscribe({
@@ -185,66 +204,6 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
         this.classes = this.sortClasses(list);
         this.loadingClasses = false;
       });
-  }
-
-  submitOpenClass(): void {
-    if (this.form.invalid || this.schoolId == null) {
-      this.form.markAllAsTouched();
-      return;
-    }
-    const name = (this.form.value.name ?? '').trim();
-    const levelId = this.form.value.levelId;
-    const capacity = Number(this.form.value.capacity);
-    if (!name || levelId == null) {
-      return;
-    }
-
-    this.saving = true;
-    this.schoolYearService.getActiveForSchool(this.schoolId).subscribe({
-      next: (year) => {
-        if (!year) {
-          this.saving = false;
-          this.snackBar.open('Aucune année active — configuration requise.', 'Fermer', { duration: 4000 });
-          if (this.schoolId != null) {
-            void this.router.navigate(['/annee-scolaire/nouvelle'], {
-              queryParams: { schoolId: this.schoolId, returnUrl: '/classes' }
-            });
-          }
-          return;
-        }
-        const periodType = this.form.value.periodType ?? 'TRIMESTER';
-        this.schoolClassService
-          .create({
-            name,
-            year: { id: year.id },
-            level: { id: levelId },
-            capacity: Number.isFinite(capacity) && capacity > 0 ? capacity : 40,
-            periodType: periodType === 'SEMESTER' ? 'SEMESTER' : 'TRIMESTER'
-          })
-          .subscribe({
-            next: () => {
-              this.saving = false;
-              this.snackBar.open('Classe ouverte avec succès.', 'Fermer', { duration: 3500 });
-              this.form.patchValue({ name: '', periodType: 'TRIMESTER' });
-              this.refreshList();
-            },
-            error: () => {
-              this.saving = false;
-              this.snackBar.open('Création impossible (nom ou niveau déjà utilisé ?).', 'Fermer', {
-                duration: 5000
-              });
-            }
-          });
-      },
-      error: () => {
-        this.saving = false;
-        this.snackBar.open('Erreur lors de la lecture de l’année active.', 'Fermer', { duration: 5000 });
-      }
-    });
-  }
-
-  canUseForm(): boolean {
-    return this.schoolId != null && this.activeYear != null && !this.loadingLevels;
   }
 
   /** Libellé pour la colonne « périodes » (données overview). */
