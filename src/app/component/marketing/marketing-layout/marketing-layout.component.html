@@ -1,15 +1,11 @@
 <div class="mk">
   <header class="mk-header">
     <div class="mk-header__inner">
-      <a routerLink="/" class="mk-brand" (click)="closeMenu()" aria-label="Karanso — accueil">
-        <span class="mk-logo" aria-hidden="true">
-          <svg viewBox="0 0 40 40" width="36" height="36" fill="none">
-            <rect width="40" height="40" rx="10" fill="currentColor" class="mk-logo__bg"/>
-            <path d="M12 28V12h4.2l6.4 10.2V12H27v16h-4.1L16.4 17.6V28H12z" fill="#F3EDE2"/>
-          </svg>
-        </span>
-        <span class="mk-brand__name">Karanso</span>
-      </a>
+      <app-karanso-brand
+        class="mk-brand"
+        variant="marketing"
+        (click)="closeMenu()"
+      ></app-karanso-brand>
 
       <nav class="mk-nav" [class.mk-nav--open]="menuOpen" aria-label="Navigation principale">
         <a routerLink="/" fragment="produit" (click)="closeMenu()">Produit</a>
@@ -38,7 +34,7 @@
   <footer class="mk-footer">
     <div class="mk-footer__inner">
       <div class="mk-footer__brand">
-        <strong>Karanso</strong>
+        <app-karanso-brand variant="marketing"></app-karanso-brand>
         <p>La gestion scolaire simple pour les établissements guinéens.</p>
       </div>
       <div class="mk-footer__cols">

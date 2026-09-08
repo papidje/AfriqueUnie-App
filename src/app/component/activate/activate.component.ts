@@ -1,21 +1,27 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from "@angular/forms";
-import {AuthService} from "../../service/auth.service";
-import {Router} from "@angular/router";
+import { AuthService } from "../../service/auth.service";
+import { ActivatedRoute, Router } from "@angular/router";
+import { of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-activate',
   templateUrl: './activate.component.html',
   styleUrls: ['./activate.component.scss']
 })
-export class ActivateComponent {
+export class ActivateComponent implements OnInit {
   activateForm: FormGroup;
   submitError: string | null = null;
+  submitting = false;
+  /** Affiché après inscription école : invite à consulter la boîte mail. */
+  showMailDisclaimer = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.activateForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -24,6 +30,16 @@ export class ActivateComponent {
       confirmPassword: ['', [Validators.required]]
     }, {
       validators: [this.passwordsMatchValidator]
+    });
+  }
+
+  ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      this.showMailDisclaimer = params.get('registered') === '1';
+      const email = (params.get('email') ?? '').trim();
+      if (email) {
+        this.activateForm.patchValue({ email });
+      }
     });
   }
 
@@ -43,15 +59,28 @@ export class ActivateComponent {
       return;
     }
     const { email, activationCode, newPassword } = this.activateForm.getRawValue();
-    this.authService.activate({ email, activationCode, newPassword }).subscribe({
-      next: () => {
-        this.router.navigate(['/login'], {
-          queryParams: { activated: 'success' }
-        });
-      },
-      error: () => {
-        this.submitError = "Activation impossible. Vérifiez l'email, le code et le mot de passe.";
-      }
-    });
+    this.submitting = true;
+    this.authService
+      .activate({ email, activationCode, newPassword })
+      .pipe(
+        switchMap((res) => {
+          if (res?.bearer && res?.refresh) {
+            return of(res);
+          }
+          // Compatibilité si un ancien backend renvoie encore un corps vide.
+          return this.authService.login({ userName: email, password: newPassword });
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          this.authService.saveTokens(res.bearer, res.refresh);
+          this.submitting = false;
+          void this.router.navigate(this.authService.getPostLoginCommands());
+        },
+        error: () => {
+          this.submitting = false;
+          this.submitError = "Activation impossible. Vérifiez l'email, le code et le mot de passe.";
+        }
+      });
   }
 }

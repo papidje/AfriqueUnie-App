@@ -21,7 +21,7 @@
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--app-border);
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   animation: fadeIn 0.35s ease;
   margin-bottom: 2rem; /* ajoute un peu d'air en bas */
 }
@@ -141,6 +141,18 @@ span {
   margin-bottom: 0.9rem;
   font-size: var(--fs-sm);
   text-align: center;
+}
+
+.auth-notice {
+  color: var(--app-text-secondary, #3d4f45);
+  background: color-mix(in srgb, var(--app-primary, #0f3d2e) 8%, #fff);
+  border: 1px solid color-mix(in srgb, var(--app-primary, #0f3d2e) 22%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.85rem;
+  margin-bottom: 1rem;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  text-align: left;
 }
 
 /* 💡 Adaptation mobile */

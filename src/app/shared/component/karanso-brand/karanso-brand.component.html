@@ -1,0 +1,14 @@
+<a
+  routerLink="/"
+  class="kb"
+  [ngClass]="'kb--' + variant"
+  aria-label="Karanso — accueil"
+>
+  <img
+    src="assets/branding/karanso-logo.png"
+    alt="Karanso"
+    decoding="async"
+    [attr.width]="variant === 'hero' ? 500 : variant === 'header' ? 156 : 320"
+    [attr.height]="variant === 'hero' ? 128 : variant === 'header' ? 40 : 82"
+  />
+</a>

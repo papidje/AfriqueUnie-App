@@ -1,0 +1,82 @@
+:host {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.kb {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    opacity: 0.92;
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+  }
+}
+
+.kb--header {
+  margin-right: 0.5rem;
+
+  img {
+    height: 40px;
+    width: auto;
+    max-width: min(200px, 48vw);
+  }
+}
+
+.kb--auth {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  max-width: 100%;
+
+  img {
+    height: clamp(64px, 15vw, 92px);
+    width: auto;
+    max-width: min(360px, 100%);
+  }
+}
+
+.kb--marketing {
+  img {
+    height: 48px;
+    width: auto;
+    max-width: min(240px, 58vw);
+  }
+}
+
+.kb--hero {
+  display: block;
+  margin: 0 0 0.5rem;
+  animation: kb-rise 0.75s 0.18s ease-out both;
+
+  img {
+    height: clamp(84px, 18vw, 128px);
+    width: auto;
+    max-width: min(520px, 94vw);
+    filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.35));
+  }
+}
+
+@keyframes kb-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

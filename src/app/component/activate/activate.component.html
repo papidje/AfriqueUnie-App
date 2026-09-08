@@ -1,6 +1,14 @@
 <div class="auth-container">
   <div class="auth-card">
+    <app-karanso-brand variant="auth"></app-karanso-brand>
     <h2 class="title">Activation du compte</h2>
+    <p class="subtitle">Finalisez la création de votre espace.</p>
+
+    <p *ngIf="showMailDisclaimer" class="auth-notice" role="status">
+      Votre établissement a bien été enregistré. Consultez votre boîte mail
+      (et le dossier indésirables) : vous y trouverez le code d’activation
+      à saisir ci-dessous pour activer votre compte et définir votre mot de passe.
+    </p>
 
     <form [formGroup]="activateForm" (ngSubmit)="onSubmit()" class="activate-form">
       <div class="form-group">
@@ -54,8 +62,8 @@
         {{ submitError }}
       </p>
 
-      <button type="submit" class="btn-submit" [disabled]="activateForm.invalid">
-        Activer
+      <button type="submit" class="btn-submit" [disabled]="activateForm.invalid || submitting">
+        {{ submitting ? 'Activation…' : 'Activer' }}
       </button>
 
       <div class="back-login">

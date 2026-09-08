@@ -166,12 +166,16 @@ export class AuthService {
       .pipe(tap((response) => this.saveTokens(response.bearer, response.refresh)));
   }
 
-  login(credentials: {userName: string, password: string}): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/login`, credentials);
+  login(credentials: {userName: string, password: string}): Observable<{ bearer: string; refresh: string }> {
+    return this.http.post<{ bearer: string; refresh: string }>(`${this.apiUrl}/auth/login`, credentials);
   }
 
-  activate(data: {email: string, activationCode: string, newPassword: string}): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/activate`, data);
+  activate(data: {
+    email: string;
+    activationCode: string;
+    newPassword: string;
+  }): Observable<{ bearer: string; refresh: string }> {
+    return this.http.post<{ bearer: string; refresh: string }>(`${this.apiUrl}/auth/activate`, data);
   }
 
   /**

@@ -83,7 +83,12 @@ export class RegisterSchoolComponent {
       .subscribe({
         next: () => {
           this.loading = false;
-          this.router.navigate(['/login']);
+          void this.router.navigate(['/activate'], {
+            queryParams: {
+              email: adminValues.email,
+              registered: '1'
+            }
+          });
         },
         error: () => {
           this.loading = false;

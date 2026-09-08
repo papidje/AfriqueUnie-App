@@ -41,21 +41,7 @@
 .mk-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
-  text-decoration: none;
-  color: var(--mk-forest-deep);
-}
-
-.mk-logo {
-  color: var(--mk-forest);
-  display: inline-flex;
-}
-
-.mk-brand__name {
-  font-family: var(--mk-display);
-  font-weight: 600;
-  font-size: 1.35rem;
-  letter-spacing: -0.02em;
+  flex-shrink: 0;
 }
 
 .mk-nav {

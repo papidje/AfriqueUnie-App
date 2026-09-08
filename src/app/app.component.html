@@ -11,12 +11,8 @@
         >
           <mat-icon>menu</mat-icon>
         </button>
-        <ng-container *ngIf="vm.fullChrome; else brandTitle">
-          <app-school-picker class="header-school-picker"></app-school-picker>
-        </ng-container>
-        <ng-template #brandTitle>
-          <span class="header-app-brand">SchoolApp</span>
-        </ng-template>
+        <app-karanso-brand variant="header"></app-karanso-brand>
+        <app-school-picker *ngIf="vm.fullChrome" class="header-school-picker"></app-school-picker>
         <span class="spacer"></span>
         <button
           mat-button
