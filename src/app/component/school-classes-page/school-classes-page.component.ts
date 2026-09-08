@@ -9,7 +9,11 @@ import { ClassLevelService } from '../../service/class-level.service';
 import { SchoolClassService } from '../../service/school-class.service';
 import { SchoolYearService } from '../../service/school-year.service';
 import { ClassLevel, SchoolClassDto, SchoolYearDto } from '../../models/academic.models';
+import { classLevelGroupSortKey } from '../../core/class-level-group-order';
 import { ClassFormDialogComponent, ClassFormDialogData } from '../class-form-dialog/class-form-dialog.component';
+import { ConfirmDialogComponent } from '../../shared/component/confirm-dialog/confirm-dialog.component';
+import { AuthUtilsService } from '../../service/auth-utils.service';
+import { AppRoles } from '../../core/app-roles';
 
 export interface ClassLevelGroupOption {
   groupCode: string;
@@ -48,8 +52,45 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
     private readonly schoolClassService: SchoolClassService,
     private readonly snackBar: MatSnackBar,
     private readonly router: Router,
-    private readonly dialog: MatDialog
+    private readonly dialog: MatDialog,
+    private readonly authUtils: AuthUtilsService
   ) {}
+
+  canManageClassDelete(): boolean {
+    return this.authUtils.hasAnyRole([AppRoles.ADMIN_ECOLE, AppRoles.DIRECTOR, AppRoles.STAFF]);
+  }
+
+  canDeleteClass(row: SchoolClassDto): boolean {
+    return this.canManageClassDelete() && (row.enrolledStudentCount ?? 0) === 0;
+  }
+
+  deleteClass(row: SchoolClassDto): void {
+    if (!this.canDeleteClass(row)) {
+      return;
+    }
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Supprimer la classe',
+        message: `Supprimer définitivement la classe « ${row.name} » ? Les matières, l’emploi du temps et les périodes associées seront effacés.`
+      }
+    });
+    ref.afterClosed().subscribe((ok) => {
+      if (!ok) {
+        return;
+      }
+      this.schoolClassService.deleteIfEmpty(row.id).subscribe({
+        next: () => {
+          this.snackBar.open('Classe supprimée.', 'Fermer', { duration: 3000 });
+          this.refreshList();
+        },
+        error: (err) => {
+          const msg = err?.error?.message || err?.error?.detail || 'Suppression impossible.';
+          this.snackBar.open(msg, 'Fermer', { duration: 6000 });
+        }
+      });
+    });
+  }
 
   /** Ouvre la modale de création de classe ; recharge la liste si une classe est créée. */
   openCreateDialog(): void {
@@ -154,14 +195,7 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
       byCode.get(code)!.levels.push(level);
     }
 
-    // Ordre métier attendu : Maternelle → Primaire → Collège → Lycée
-    const orderByGroupCode: Record<string, number> = {
-      MAT: 1,
-      PRI: 2,
-      COL: 3,
-      LYC: 4
-    };
-
+    // Ordre métier : Pré scolaire → Maternelle → Primaire → Collège → Lycée
     return Array.from(byCode.entries())
       .map(([groupCode, value]) => ({
         groupCode,
@@ -169,8 +203,8 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
         levels: value.levels.slice().sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
       }))
       .sort((a, b) => {
-        const ao = orderByGroupCode[a.groupCode] ?? Number.MAX_SAFE_INTEGER;
-        const bo = orderByGroupCode[b.groupCode] ?? Number.MAX_SAFE_INTEGER;
+        const ao = classLevelGroupSortKey(a.groupCode);
+        const bo = classLevelGroupSortKey(b.groupCode);
         if (ao !== bo) return ao - bo;
         return a.groupLabel.localeCompare(b.groupLabel, 'fr');
       });

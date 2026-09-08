@@ -73,6 +73,7 @@ import { GradeNoteEnterNextDirective } from './directives/grade-note-enter-next.
 import { StudentRegistrationComponent } from './component/student-registration/student-registration.component';
 import { StudentListComponent } from './component/student-list/student-list.component';
 import { StudentDetailPageComponent } from './component/student-detail-page/student-detail-page.component';
+import { TransferStudentDialogComponent } from './component/transfer-student-dialog/transfer-student-dialog.component';
 import { ParentDetailPageComponent } from './component/parent-detail-page/parent-detail-page.component';
 import { ParentListPageComponent } from './component/parent-list-page/parent-list-page.component';
 import { PeriodNotesPageComponent } from './component/period-notes-page/period-notes-page.component';
@@ -131,6 +132,7 @@ export function initializeAuthFactory(authService: AuthService) {
     StudentRegistrationComponent,
     StudentListComponent,
     StudentDetailPageComponent,
+    TransferStudentDialogComponent,
     ParentDetailPageComponent,
     ParentListPageComponent,
     PeriodNotesPageComponent,

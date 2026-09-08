@@ -60,4 +60,35 @@ export class StudentApiService {
       catchError((err: HttpErrorResponse) => throwError(() => err))
     );
   }
+
+  getUnassignedBySchool(schoolId: number): Observable<StudentListRow[]> {
+    return this.http
+      .get<StudentListRow[]>(`${this.base}/school/${schoolId}/unassigned`)
+      .pipe(catchError((err: HttpErrorResponse) => throwError(() => err)));
+  }
+
+  transferToClass(studentId: number, classId: number): Observable<StudentDetailDto> {
+    return this.http
+      .post<StudentDetailDto>(`${this.base}/${studentId}/transfer`, { classId })
+      .pipe(catchError((err: HttpErrorResponse) => throwError(() => err)));
+  }
+
+  unassignFromClass(studentId: number): Observable<StudentDetailDto> {
+    return this.http
+      .post<StudentDetailDto>(`${this.base}/${studentId}/unassign`, {})
+      .pipe(catchError((err: HttpErrorResponse) => throwError(() => err)));
+  }
+
+  unenroll(studentId: number): Observable<StudentDetailDto> {
+    return this.http
+      .post<StudentDetailDto>(`${this.base}/${studentId}/unenroll`, {})
+      .pipe(catchError((err: HttpErrorResponse) => throwError(() => err)));
+  }
+
+  deleteStudent(studentId: number): Observable<void> {
+    return this.http.delete(`${this.base}/${studentId}`, { observe: 'response' }).pipe(
+      map(() => undefined),
+      catchError((err: HttpErrorResponse) => throwError(() => err))
+    );
+  }
 }

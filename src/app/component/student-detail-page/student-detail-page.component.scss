@@ -54,6 +54,21 @@
   width: 20px;
   height: 20px;
 }
+.lifecycle-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 12px;
+}
+
+.lifecycle-actions button mat-icon {
+  margin-right: 0.25rem;
+  vertical-align: middle;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
 .schooling-banner {
   display: flex;
   flex-wrap: wrap;

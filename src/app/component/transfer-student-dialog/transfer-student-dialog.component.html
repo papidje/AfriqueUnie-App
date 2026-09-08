@@ -1,0 +1,24 @@
+<h2 mat-dialog-title>Changer de classe</h2>
+<mat-dialog-content>
+  <p>Affecter <strong>{{ data.studentLabel }}</strong> à une autre classe de l’année active.</p>
+  <p *ngIf="loading">Chargement…</p>
+  <p *ngIf="errorMessage" class="err">{{ errorMessage }}</p>
+  <mat-form-field appearance="outline" *ngIf="!loading && classes.length" class="full">
+    <mat-label>Classe cible</mat-label>
+    <mat-select [(ngModel)]="selectedClassId">
+      <mat-option *ngFor="let c of classes" [value]="c.id">{{ c.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Annuler</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    [disabled]="selectedClassId == null"
+    (click)="confirm()"
+  >
+    Transférer
+  </button>
+</mat-dialog-actions>

@@ -45,4 +45,8 @@ export class SchoolClassService {
   ): Observable<void> {
     return this.http.put<void>(`${this.base}/${classId}/grading-periods/schedule`, { periods });
   }
+
+  deleteIfEmpty(classId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${classId}`);
+  }
 }

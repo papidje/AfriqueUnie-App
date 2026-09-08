@@ -80,6 +80,30 @@
             <button mat-stroked-button *ngIf="canWriteStudent" (click)="startEdit('schooling')">Modifier</button>
           </div>
 
+          <div class="lifecycle-actions" *ngIf="canWriteStudent || canLifecycleAdmin">
+            <button mat-stroked-button type="button" *ngIf="canWriteStudent" (click)="openTransferDialog()">
+              <mat-icon>swap_horiz</mat-icon>
+              Changer de classe
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              *ngIf="canWriteStudent && s.schoolClassId"
+              (click)="unassignFromClass()"
+            >
+              <mat-icon>person_off</mat-icon>
+              Désaffecter
+            </button>
+            <button mat-stroked-button type="button" color="warn" *ngIf="canLifecycleAdmin" (click)="unenrollStudent()">
+              <mat-icon>logout</mat-icon>
+              Désinscrire
+            </button>
+            <button mat-stroked-button type="button" color="warn" *ngIf="canLifecycleAdmin" (click)="deleteStudent()">
+              <mat-icon>delete_forever</mat-icon>
+              Supprimer
+            </button>
+          </div>
+
           <div class="schooling-banner">
             <div class="schooling-banner__item">
               <span class="schooling-banner__label">Statut</span>
@@ -100,6 +124,8 @@
               <mat-label>Statut (édition)</mat-label>
               <mat-select formControlName="enrollmentStatus">
                 <mat-option value="INSCRIT">Inscrit</mat-option>
+                <mat-option value="SANS_CLASSE">Sans classe</mat-option>
+                <mat-option value="DESINSCRIT">Désinscrit</mat-option>
                 <mat-option value="TRANSFERE">Transféré</mat-option>
               </mat-select>
             </mat-form-field>

@@ -5,6 +5,7 @@ export interface StudentListRow {
   lastName: string;
   birthDate: string;
   matricule: string;
+  enrollmentStatus?: string | null;
 }
 
 export interface ParentDetailDto {
@@ -44,6 +45,7 @@ export interface StudentDetailDto {
   /** Présent si l’élève est affecté à une classe (périodes de notation, bulletin). */
   schoolClassId?: number | null;
   schoolClassName?: string | null;
+  schoolId?: number | null;
   schoolYearLabel?: string | null;
   father: ParentDetailDto | null;
   mother: ParentDetailDto | null;

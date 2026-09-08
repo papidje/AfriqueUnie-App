@@ -16,7 +16,9 @@ import { PaymentReceiptViewDto, StudentPaymentInfoDto, StudentPaymentLedgerRow }
 import { AuthUtilsService } from '../../service/auth-utils.service';
 import { AppRoles, ROLES_STUDENT_WRITE } from '../../core/app-roles';
 import { ConfirmDialogComponent } from '../../shared/component/confirm-dialog/confirm-dialog.component';
+import { TransferStudentDialogComponent } from '../transfer-student-dialog/transfer-student-dialog.component';
 import { PaymentReceiptPrintDialogComponent } from '../../shared/component/payment-receipt-print-dialog/payment-receipt-print-dialog.component';
+import { ActiveSchoolService } from '../../service/active-school.service';
 import { PaymentReceiptPrintData } from '../../shared/component/payment-receipt-print-dialog/payment-receipt-print-dialog.models';
 import { API_BASE_URL } from '../../core/api-base';
 import { prepareStudentPhotoFile } from '../../util/student-photo-upload.util';
@@ -67,6 +69,7 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
   editHealth = false;
 
   readonly canWriteStudent = this.authUtils.hasAnyRole([...ROLES_STUDENT_WRITE]);
+  readonly canLifecycleAdmin = this.authUtils.hasAnyRole([AppRoles.ADMIN_ECOLE, AppRoles.DIRECTOR]);
   readonly canPrintReceiptDuplicate = this.authUtils.hasAnyRole([
     AppRoles.ADMIN_ECOLE,
     AppRoles.DIRECTOR,
@@ -121,7 +124,8 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     private readonly snackBar: MatSnackBar,
     private readonly fb: FormBuilder,
     private readonly authUtils: AuthUtilsService,
-    private readonly dialog: MatDialog
+    private readonly dialog: MatDialog,
+    private readonly activeSchool: ActiveSchoolService
   ) {}
 
   ngOnInit(): void {
@@ -292,7 +296,12 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
 
   enrollmentStatusLabel(status: string | null | undefined): string {
     if (!status) return '—';
-    const labels: Record<string, string> = { INSCRIT: 'Inscrit', TRANSFERE: 'Transféré' };
+    const labels: Record<string, string> = {
+      INSCRIT: 'Inscrit',
+      SANS_CLASSE: 'Sans classe',
+      DESINSCRIT: 'Désinscrit',
+      TRANSFERE: 'Transféré'
+    };
     return labels[status] ?? status;
   }
 
@@ -302,6 +311,129 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
       return this.enrollmentStatusLabel(v);
     }
     return this.enrollmentStatusLabel(this.student?.enrollmentStatus);
+  }
+
+  openTransferDialog(): void {
+    if (!this.canWriteStudent || !this.student || this.studentId == null) {
+      return;
+    }
+    const schoolId = this.student.schoolId ?? this.activeSchool.getActiveSchoolId();
+    if (schoolId == null) {
+      this.snackBar.open('Établissement actif introuvable.', 'Fermer', { duration: 4000 });
+      return;
+    }
+    const ref = this.dialog.open(TransferStudentDialogComponent, {
+      width: '420px',
+      data: {
+        schoolId,
+        currentClassId: this.student.schoolClassId ?? null,
+        studentLabel: `${this.student.lastName} ${this.student.firstName}`
+      }
+    });
+    ref.afterClosed().subscribe((classId: number | undefined) => {
+      if (classId == null || this.studentId == null) {
+        return;
+      }
+      this.studentApi.transferToClass(this.studentId, classId).subscribe({
+        next: (s) => {
+          this.applyStudent(s);
+          this.snackBar.open('Élève affecté à la nouvelle classe.', 'Fermer', { duration: 3500 });
+        },
+        error: (err) => {
+          this.snackBar.open(err?.error?.message || err?.error?.detail || 'Transfert impossible.', 'Fermer', {
+            duration: 6000
+          });
+        }
+      });
+    });
+  }
+
+  unassignFromClass(): void {
+    if (!this.canWriteStudent || this.studentId == null || !this.student?.schoolClassId) {
+      return;
+    }
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Désaffecter de la classe',
+        message:
+          'Retirer cet élève de sa classe actuelle ? Il apparaîtra dans « Sans classe » en attendant une réaffectation.'
+      }
+    });
+    ref.afterClosed().subscribe((ok) => {
+      if (!ok || this.studentId == null) {
+        return;
+      }
+      this.studentApi.unassignFromClass(this.studentId).subscribe({
+        next: (s) => {
+          this.applyStudent(s);
+          this.snackBar.open('Élève désaffecté.', 'Fermer', { duration: 3500 });
+        },
+        error: (err) => {
+          this.snackBar.open(err?.error?.message || 'Désaffectation impossible.', 'Fermer', { duration: 6000 });
+        }
+      });
+    });
+  }
+
+  unenrollStudent(): void {
+    if (!this.canLifecycleAdmin || this.studentId == null) {
+      return;
+    }
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Désinscrire l’élève',
+        message:
+          'Marquer cet élève comme ayant quitté l’établissement ? La fiche et les paiements sont conservés.'
+      }
+    });
+    ref.afterClosed().subscribe((ok) => {
+      if (!ok || this.studentId == null) {
+        return;
+      }
+      this.studentApi.unenroll(this.studentId).subscribe({
+        next: (s) => {
+          this.applyStudent(s);
+          this.snackBar.open('Élève désinscrit.', 'Fermer', { duration: 3500 });
+        },
+        error: (err) => {
+          this.snackBar.open(err?.error?.message || 'Désinscription impossible.', 'Fermer', { duration: 6000 });
+        }
+      });
+    });
+  }
+
+  deleteStudent(): void {
+    if (!this.canLifecycleAdmin || this.studentId == null) {
+      return;
+    }
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: 'Supprimer définitivement',
+        message:
+          'Suppression irréversible. Possible uniquement sans paiements ni notes. Sinon, utilisez la désinscription.'
+      }
+    });
+    ref.afterClosed().subscribe((ok) => {
+      if (!ok || this.studentId == null) {
+        return;
+      }
+      this.studentApi.deleteStudent(this.studentId).subscribe({
+        next: () => {
+          this.snackBar.open('Élève supprimé.', 'Fermer', { duration: 3500 });
+          void this.router.navigate(['/students']);
+        },
+        error: (err) => {
+          this.snackBar.open(
+            err?.error?.message || err?.error?.detail || 'Suppression refusée.',
+            'Fermer',
+            { duration: 7000 }
+          );
+        }
+      });
+    });
   }
 
   private loadGradingPeriodsForClass(schoolClassId: number | null | undefined): void {

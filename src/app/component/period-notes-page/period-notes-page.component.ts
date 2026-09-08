@@ -10,6 +10,7 @@ import { SchoolClassService } from '../../service/school-class.service';
 import { GradingPeriodSummary } from '../../models/evaluation.models';
 import { PeriodNotesGridResponse } from '../../models/grading.models';
 import { SchoolClassDto } from '../../models/academic.models';
+import { classLevelGroupSortKey } from '../../core/class-level-group-order';
 import { AuthUtilsService } from '../../service/auth-utils.service';
 import { AppRoles } from '../../core/app-roles';
 import { formatDisplayDateTimeAt } from '../../shared/util/display-date.util';
@@ -335,14 +336,11 @@ export class PeriodNotesPageComponent implements OnInit, OnDestroy {
   }
 
   private sortClasses(list: SchoolClassDto[]): SchoolClassDto[] {
-    const orderByGroupCode: Record<string, number> = { MAT: 1, PRI: 2, COL: 3, LYC: 4 };
     return (list ?? [])
       .slice()
       .sort((a, b) => {
-        const ag = a.level?.group?.code ?? '_';
-        const bg = b.level?.group?.code ?? '_';
-        const ao = orderByGroupCode[ag] ?? Number.MAX_SAFE_INTEGER;
-        const bo = orderByGroupCode[bg] ?? Number.MAX_SAFE_INTEGER;
+        const ao = classLevelGroupSortKey(a.level?.group?.code);
+        const bo = classLevelGroupSortKey(b.level?.group?.code);
         if (ao !== bo) {
           return ao - bo;
         }

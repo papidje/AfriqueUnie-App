@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ClassLevel } from '../../models/academic.models';
+import { classLevelGroupSortKey } from '../../core/class-level-group-order';
 import { FeeStructureDto, FeeStructureWritePayload } from '../../models/fee-structure.models';
 import { ClassLevelService } from '../../service/class-level.service';
 import { ActiveSchoolService } from '../../service/active-school.service';
@@ -151,20 +152,11 @@ export class FinancialSettingsPageComponent implements OnInit {
   }
 
   private sortLevels(levels: ClassLevel[]): ClassLevel[] {
-    const orderByGroupCode: Record<string, number> = {
-      MAT: 1,
-      PRI: 2,
-      COL: 3,
-      LYC: 4
-    };
-
     return (levels ?? [])
       .slice()
       .sort((a, b) => {
-        const ag = a.group?.code ?? '_';
-        const bg = b.group?.code ?? '_';
-        const ao = orderByGroupCode[ag] ?? Number.MAX_SAFE_INTEGER;
-        const bo = orderByGroupCode[bg] ?? Number.MAX_SAFE_INTEGER;
+        const ao = classLevelGroupSortKey(a.group?.code);
+        const bo = classLevelGroupSortKey(b.group?.code);
         if (ao !== bo) return ao - bo;
 
         const al = a.id ?? 0;

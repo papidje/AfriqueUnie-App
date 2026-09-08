@@ -98,6 +98,17 @@
                 >
                   <mat-icon>settings</mat-icon>
                 </a>
+                <button
+                  *ngIf="canDeleteClass(row)"
+                  mat-icon-button
+                  type="button"
+                  color="warn"
+                  matTooltip="Supprimer (classe vide)"
+                  aria-label="Supprimer la classe"
+                  (click)="deleteClass(row)"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
               </td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="overviewColumns"></tr>

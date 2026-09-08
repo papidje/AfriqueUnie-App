@@ -5,6 +5,7 @@ import { ActiveSchoolService } from '../../service/active-school.service';
 import { SchoolClassService } from '../../service/school-class.service';
 import { StudentApiService } from '../../service/student-api.service';
 import { SchoolClassDto } from '../../models/academic.models';
+import { classLevelGroupSortKey } from '../../core/class-level-group-order';
 import { StudentListRow } from '../../models/student-list.models';
 import { AuthUtilsService } from '../../service/auth-utils.service';
 import { ROLES_STUDENT_REGISTRATION } from '../../core/app-roles';
@@ -26,8 +27,12 @@ export class StudentListComponent implements OnInit, OnDestroy {
   sortedClasses: SchoolClassDto[] = [];
 
   selectedIndex = 0;
+  unassignedSelected = false;
+  unassignedStudents: StudentListRow[] = [];
+  loadingUnassigned = false;
 
   readonly displayedColumns = ['lastName', 'firstName', 'matricule', 'sex', 'birthDate', 'actions'];
+  readonly unassignedColumns = ['lastName', 'firstName', 'matricule', 'sex', 'birthDate', 'status', 'actions'];
 
   readonly studentsByClassId = new Map<number, StudentListRow[]>();
   readonly loadingByClassId = new Set<number>();
@@ -58,6 +63,8 @@ export class StudentListComponent implements OnInit, OnDestroy {
           this.loadingByClassId.clear();
           this.sortedClasses = [];
           this.selectedIndex = 0;
+          this.unassignedSelected = false;
+          this.unassignedStudents = [];
         }),
         switchMap((schoolId) => {
           if (schoolId == null) {
@@ -107,12 +114,47 @@ export class StudentListComponent implements OnInit, OnDestroy {
   }
 
   onTabChange(index: number): void {
+    this.unassignedSelected = false;
     this.selectedIndex = index;
     const cl = this.sortedClasses[index];
     if (!cl) {
       return;
     }
     this.loadStudentsForClass(cl.id);
+  }
+
+  onUnassignedTab(): void {
+    this.unassignedSelected = true;
+    this.loadUnassigned();
+  }
+
+  statusLabel(status: string | null | undefined): string {
+    if (!status) return '—';
+    const labels: Record<string, string> = {
+      INSCRIT: 'Inscrit',
+      SANS_CLASSE: 'Sans classe',
+      DESINSCRIT: 'Désinscrit',
+      TRANSFERE: 'Transféré'
+    };
+    return labels[status] ?? status;
+  }
+
+  private loadUnassigned(): void {
+    if (this.schoolId == null) {
+      this.unassignedStudents = [];
+      return;
+    }
+    this.loadingUnassigned = true;
+    this.studentApi.getUnassignedBySchool(this.schoolId).pipe(
+      takeUntil(this.destroy$),
+      catchError(() => {
+        this.snackBar.open('Impossible de charger les élèves sans classe.', 'Fermer', { duration: 5000 });
+        return of<StudentListRow[]>([]);
+      })
+    ).subscribe((rows) => {
+      this.loadingUnassigned = false;
+      this.unassignedStudents = rows || [];
+    });
   }
 
   getStudentsForClass(classId: number): StudentListRow[] {
@@ -150,15 +192,11 @@ export class StudentListComponent implements OnInit, OnDestroy {
   }
 
   private sortClasses(list: SchoolClassDto[]): SchoolClassDto[] {
-    const orderByGroupCode: Record<string, number> = { MAT: 1, PRI: 2, COL: 3, LYC: 4 };
-
     return (list ?? [])
       .slice()
       .sort((a, b) => {
-        const ag = a.level?.group?.code ?? '_';
-        const bg = b.level?.group?.code ?? '_';
-        const ao = orderByGroupCode[ag] ?? Number.MAX_SAFE_INTEGER;
-        const bo = orderByGroupCode[bg] ?? Number.MAX_SAFE_INTEGER;
+        const ao = classLevelGroupSortKey(a.level?.group?.code);
+        const bo = classLevelGroupSortKey(b.level?.group?.code);
         if (ao !== bo) return ao - bo;
 
         const al = a.level?.id ?? 0;
