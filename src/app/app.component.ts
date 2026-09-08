@@ -55,8 +55,22 @@ export class AppComponent implements OnInit, OnDestroy {
       )
       .subscribe((event) => {
         const url = event.urlAfterRedirects.split('?')[0];
-        const authPages = ['/login', '/register', '/register-school', '/activate', '/resetPwd', '/newPwd'];
-        this.showLayout = !authPages.some((p) => url === p || url.startsWith(p + '/'));
+        const bareShellPages = [
+          '/login',
+          '/register',
+          '/register-school',
+          '/activate',
+          '/resetPwd',
+          '/newPwd',
+          '/contact',
+          '/cgu',
+          '/confidentialite',
+          '/mentions-legales',
+        ];
+        const isBareShell =
+          url === '/' ||
+          bareShellPages.some((p) => url === p || url.startsWith(p + '/'));
+        this.showLayout = !isBareShell;
         if (this.showLayout && this.authUtils.isAuthenticated()) {
           if (!this.isSchoolDirectoryDeferredRoute(url)) {
             this.activeSchool.refreshSchools();

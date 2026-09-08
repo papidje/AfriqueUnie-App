@@ -84,6 +84,12 @@ import { NotificationPageComponent } from './component/notification-page/notific
 import { AccesIndisponiblePageComponent } from './component/acces-indisponible-page/acces-indisponible-page.component';
 import { AuthService } from './service/auth.service';
 import { SchoolPickerComponent } from './shared/component/school-picker/school-picker.component';
+import { MarketingLayoutComponent } from './component/marketing/marketing-layout/marketing-layout.component';
+import { LandingPageComponent } from './component/marketing/landing-page/landing-page.component';
+import { ContactPageComponent } from './component/marketing/contact-page/contact-page.component';
+import { CguPageComponent } from './component/marketing/cgu-page/cgu-page.component';
+import { ConfidentialitePageComponent } from './component/marketing/confidentialite-page/confidentialite-page.component';
+import { MentionsLegalesPageComponent } from './component/marketing/mentions-legales-page/mentions-legales-page.component';
 
 export function initializeAuthFactory(authService: AuthService) {
   return () => authService.initializeAuthState();
@@ -139,7 +145,13 @@ export function initializeAuthFactory(authService: AuthService) {
     CommunicationHistoryDetailDialogComponent,
     SchoolPickerComponent,
     NotificationPageComponent,
-    AccesIndisponiblePageComponent
+    AccesIndisponiblePageComponent,
+    MarketingLayoutComponent,
+    LandingPageComponent,
+    ContactPageComponent,
+    CguPageComponent,
+    ConfidentialitePageComponent,
+    MentionsLegalesPageComponent
   ],
   imports: [
     BrowserModule,

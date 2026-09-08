@@ -48,14 +48,32 @@ import { NotificationPageComponent } from "./component/notification-page/notific
 import { AccesIndisponiblePageComponent } from "./component/acces-indisponible-page/acces-indisponible-page.component";
 import { PortalSchoolAccessGuard } from "./guards/portal-school-access.guard";
 import { AccesIndisponibleGuard } from "./guards/acces-indisponible.guard";
+import { MarketingLayoutComponent } from "./component/marketing/marketing-layout/marketing-layout.component";
+import { LandingPageComponent } from "./component/marketing/landing-page/landing-page.component";
+import { ContactPageComponent } from "./component/marketing/contact-page/contact-page.component";
+import { CguPageComponent } from "./component/marketing/cgu-page/cgu-page.component";
+import { ConfidentialitePageComponent } from "./component/marketing/confidentialite-page/confidentialite-page.component";
+import { MentionsLegalesPageComponent } from "./component/marketing/mentions-legales-page/mentions-legales-page.component";
 
 const routes: Routes = [
+  // 🌐 Accueil public + pages légales
+  {
+    path: '',
+    component: MarketingLayoutComponent,
+    children: [
+      { path: '', component: LandingPageComponent },
+      { path: 'contact', component: ContactPageComponent },
+      { path: 'cgu', component: CguPageComponent },
+      { path: 'confidentialite', component: ConfidentialitePageComponent },
+      { path: 'mentions-legales', component: MentionsLegalesPageComponent },
+    ]
+  },
+
   // 🔒 Layout d’authentification
   {
     path: '',
     component: AuthLayoutComponent,
     children: [
-      { path: '', redirectTo: '/login', pathMatch: 'full' },
       { path: 'login', component: LoginComponent },
       { path: 'register-school', component: RegisterSchoolComponent },
       { path: 'activate', component: ActivateComponent },
@@ -261,7 +279,7 @@ const routes: Routes = [
   { path: 'unauthorized', component: UnautorizedComponent },
 
   // 🧭 Fallback
-  { path: '**', redirectTo: '/dashboard' }
+  { path: '**', redirectTo: '/' }
 ];
 
 @NgModule({

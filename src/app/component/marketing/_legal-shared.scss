@@ -1,0 +1,85 @@
+:host {
+  --mk-ink: #14231c;
+  --mk-ink-soft: #3d4f45;
+  --mk-paper: #f6f1e8;
+  --mk-forest: #0f3d2e;
+  --mk-forest-deep: #0a2c21;
+  --mk-gold: #c9a227;
+  --mk-max: 800px;
+  --mk-display: 'Fraunces', 'Lora', Georgia, serif;
+  --mk-sans: 'DM Sans', 'Montserrat', system-ui, sans-serif;
+  display: block;
+  font-family: var(--mk-sans);
+  color: var(--mk-ink);
+}
+
+.legal {
+  max-width: var(--mk-max);
+  margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+}
+
+.legal__head h1 {
+  margin: 0;
+  font-family: var(--mk-display);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  color: var(--mk-forest-deep);
+  letter-spacing: -0.02em;
+}
+
+.legal__head p {
+  margin: 0.75rem 0 0;
+  color: var(--mk-ink-soft);
+  line-height: 1.5;
+}
+
+.legal h2 {
+  margin: 2rem 0 0.65rem;
+  font-size: 1.15rem;
+  color: var(--mk-forest);
+}
+
+.legal p,
+.legal li {
+  color: var(--mk-ink-soft);
+  line-height: 1.65;
+  font-size: 0.98rem;
+}
+
+.legal ul {
+  padding-left: 1.2rem;
+}
+
+.legal a {
+  color: var(--mk-forest);
+  font-weight: 600;
+}
+
+.legal__note {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--mk-forest) 14%, transparent);
+  font-size: 0.9rem;
+}
+
+.legal__disclaimer {
+  margin-top: 1.5rem;
+  padding: 0.9rem 1rem;
+  background: color-mix(in srgb, var(--mk-gold) 14%, #fff);
+  border-left: 3px solid var(--mk-gold);
+  font-size: 0.88rem;
+  color: var(--mk-ink);
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 700px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+}

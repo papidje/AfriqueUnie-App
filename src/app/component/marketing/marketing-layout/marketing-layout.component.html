@@ -1,0 +1,65 @@
+<div class="mk">
+  <header class="mk-header">
+    <div class="mk-header__inner">
+      <a routerLink="/" class="mk-brand" (click)="closeMenu()" aria-label="Karanso — accueil">
+        <span class="mk-logo" aria-hidden="true">
+          <svg viewBox="0 0 40 40" width="36" height="36" fill="none">
+            <rect width="40" height="40" rx="10" fill="currentColor" class="mk-logo__bg"/>
+            <path d="M12 28V12h4.2l6.4 10.2V12H27v16h-4.1L16.4 17.6V28H12z" fill="#F3EDE2"/>
+          </svg>
+        </span>
+        <span class="mk-brand__name">Karanso</span>
+      </a>
+
+      <nav class="mk-nav" [class.mk-nav--open]="menuOpen" aria-label="Navigation principale">
+        <a routerLink="/" fragment="produit" (click)="closeMenu()">Produit</a>
+        <a routerLink="/" fragment="modules" (click)="closeMenu()">Modules</a>
+        <a routerLink="/contact" (click)="closeMenu()">Contact</a>
+        <a routerLink="/login" class="mk-nav__login" (click)="closeMenu()">Se connecter</a>
+        <a routerLink="/register-school" class="mk-nav__cta" (click)="closeMenu()">Créer un compte</a>
+      </nav>
+
+      <button
+        type="button"
+        class="mk-burger"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen"
+        aria-label="Ouvrir le menu"
+      >
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main class="mk-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="mk-footer">
+    <div class="mk-footer__inner">
+      <div class="mk-footer__brand">
+        <strong>Karanso</strong>
+        <p>La gestion scolaire simple pour les établissements guinéens.</p>
+      </div>
+      <div class="mk-footer__cols">
+        <div>
+          <h3>Produit</h3>
+          <a routerLink="/login">Se connecter</a>
+          <a routerLink="/register-school">Créer un compte</a>
+        </div>
+        <div>
+          <h3>Informations</h3>
+          <a routerLink="/contact">Contact</a>
+          <a routerLink="/cgu">CGU</a>
+          <a routerLink="/confidentialite">Confidentialité</a>
+          <a routerLink="/mentions-legales">Mentions légales</a>
+        </div>
+        <div>
+          <h3>Éditeur</h3>
+          <p>Dianora<br />Fria, Quartier Aviation<br />Guinée</p>
+        </div>
+      </div>
+      <p class="mk-footer__copy">© {{ year }} Dianora — Karanso. Tous droits réservés.</p>
+    </div>
+  </footer>
+</div>
