@@ -37,8 +37,16 @@ export class ActivateComponent implements OnInit {
     this.route.queryParamMap.subscribe((params) => {
       this.showMailDisclaimer = params.get('registered') === '1';
       const email = (params.get('email') ?? '').trim();
+      const code = (params.get('code') ?? '').trim();
+      const patch: { email?: string; activationCode?: string } = {};
       if (email) {
-        this.activateForm.patchValue({ email });
+        patch.email = email;
+      }
+      if (code) {
+        patch.activationCode = code;
+      }
+      if (Object.keys(patch).length > 0) {
+        this.activateForm.patchValue(patch);
       }
     });
   }
