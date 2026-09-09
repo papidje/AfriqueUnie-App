@@ -10,9 +10,15 @@ import { SchoolClassService } from '../../service/school-class.service';
 import { ParentApiService } from '../../service/parent-api.service';
 import { StudentRegistrationService } from '../../service/student-registration.service';
 import { StudentApiService } from '../../service/student-api.service';
+import { FeeStructureService } from '../../service/fee-structure.service';
 import { SchoolClassDto, SchoolYearDto } from '../../models/academic.models';
-import { StudentRegistrationResponse } from '../../models/student-registration.models';
+import { FeeStructureDto } from '../../models/fee-structure.models';
+import {
+  FamilyPreviewResponse,
+  StudentRegistrationResponse
+} from '../../models/student-registration.models';
 import { prepareStudentPhotoFile } from '../../util/student-photo-upload.util';
+import { tuitionTotalExpected } from './registration-payment-allocation';
 import {
   compactGuineaPhone,
   emailControlError,
@@ -34,6 +40,7 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
 
   loading = false;
   submitting = false;
+  familyLoading = false;
   private readonly destroy$ = new Subject<void>();
 
   schoolId: number | null = null;
@@ -48,6 +55,10 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
 
   pendingPhotoFile: File | null = null;
   photoPreviewUrl: string | null = null;
+
+  familyPreview: FamilyPreviewResponse | null = null;
+  feeStructure: FeeStructureDto | null = null;
+  feeStructureMissing = false;
 
   readonly stepStudent = this.fb.group({
     civility: ['MONSIEUR' as Civility, Validators.required],
@@ -85,6 +96,10 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     allergies: ['']
   });
 
+  readonly stepTuition = this.fb.group({
+    tuitionPayablePercent: [100, [Validators.required, Validators.min(0), Validators.max(100)]]
+  });
+
   readonly phoneControlError = phoneControlError;
   readonly emailControlError = emailControlError;
 
@@ -96,6 +111,7 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     private readonly parentApi: ParentApiService,
     private readonly registrationService: StudentRegistrationService,
     private readonly studentApi: StudentApiService,
+    private readonly feeStructureService: FeeStructureService,
     private readonly snackBar: MatSnackBar,
     private readonly router: Router
   ) {}
@@ -128,6 +144,38 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
       return null;
     }
     return this.classes.find((c) => c.id === id) ?? null;
+  }
+
+  get tuitionPayablePercent(): number {
+    const v = Number(this.stepTuition.controls.tuitionPayablePercent.value);
+    if (!Number.isFinite(v)) {
+      return 100;
+    }
+    return Math.max(0, Math.min(100, Math.round(v)));
+  }
+
+  get tuitionCatalogAmount(): number {
+    if (!this.feeStructure) {
+      return 0;
+    }
+    return tuitionTotalExpected(this.feeStructure, 100);
+  }
+
+  get tuitionAmountToPay(): number {
+    if (!this.feeStructure) {
+      return 0;
+    }
+    return tuitionTotalExpected(this.feeStructure, this.tuitionPayablePercent);
+  }
+
+  get fatherDisplayName(): string {
+    const p = this.stepParents.getRawValue();
+    return `${(p.fatherFirstName || '').trim()} ${(p.fatherLastName || '').trim()}`.trim() || 'Père';
+  }
+
+  get motherDisplayName(): string {
+    const p = this.stepParents.getRawValue();
+    return `${(p.motherFirstName || '').trim()} ${(p.motherLastName || '').trim()}`.trim() || 'Mère';
   }
 
   lookupFather(): void {
@@ -172,6 +220,28 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     });
   }
 
+  onTuitionPercentInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const n = Number(input.value);
+    this.stepTuition.patchValue({
+      tuitionPayablePercent: Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 100
+    });
+  }
+
+  /** Chargé à l’entrée de l’étape scolarité. */
+  loadTuitionStepContext(): void {
+    this.loadFamilyPreview();
+    this.loadFeeStructureForSelectedClass();
+  }
+
+  asMoney(value: number | null | undefined): string {
+    const n = Number(value);
+    if (!Number.isFinite(n)) {
+      return '—';
+    }
+    return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(n);
+  }
+
   onPhotoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -202,10 +272,16 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     if (!this.schoolId) {
       return;
     }
-    if (this.stepStudent.invalid || this.stepParents.invalid || this.stepEmergency.invalid) {
+    if (
+      this.stepStudent.invalid ||
+      this.stepParents.invalid ||
+      this.stepEmergency.invalid ||
+      this.stepTuition.invalid
+    ) {
       this.stepStudent.markAllAsTouched();
       this.stepParents.markAllAsTouched();
       this.stepEmergency.markAllAsTouched();
+      this.stepTuition.markAllAsTouched();
       return;
     }
     const s = this.stepStudent.getRawValue();
@@ -228,6 +304,7 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
       .registerStudent({
         classId: s.classId!,
         amountPaid: 0,
+        tuitionPayablePercent: this.tuitionPayablePercent,
         student: {
           civility: s.civility as Civility,
           firstName: (s.firstName || '').trim(),
@@ -314,6 +391,9 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     this.registrationComplete = false;
     this.registeredStudentId = null;
     this.registeredStudentSummary = '';
+    this.familyPreview = null;
+    this.feeStructure = null;
+    this.feeStructureMissing = false;
     this.clearPendingPhoto();
     this.stepStudent.reset({
       civility: 'MONSIEUR',
@@ -346,6 +426,50 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
       emergencyContactPhone: '',
       bloodGroup: '',
       allergies: ''
+    });
+    this.stepTuition.reset({ tuitionPayablePercent: 100 });
+  }
+
+  private loadFamilyPreview(): void {
+    const fatherPhone = compactGuineaPhone(this.stepParents.controls.fatherPhone.value || '');
+    const motherPhone = compactGuineaPhone(this.stepParents.controls.motherPhone.value || '');
+    if (!fatherPhone || !motherPhone) {
+      this.familyPreview = null;
+      return;
+    }
+    this.familyLoading = true;
+    this.registrationService.previewFamily(fatherPhone, motherPhone).subscribe({
+      next: (preview) => {
+        this.familyPreview = preview;
+        this.familyLoading = false;
+      },
+      error: () => {
+        this.familyLoading = false;
+        this.familyPreview = null;
+        this.snackBar.open('Impossible de charger la fratrie.', 'Fermer', { duration: 4000 });
+      }
+    });
+  }
+
+  private loadFeeStructureForSelectedClass(): void {
+    const clazz = this.selectedClass;
+    const yearId = this.activeYear?.id;
+    const levelId = clazz?.level?.id;
+    if (!yearId || levelId == null) {
+      this.feeStructure = null;
+      this.feeStructureMissing = true;
+      return;
+    }
+    this.feeStructureService.listBySchoolYear(yearId).subscribe({
+      next: (list) => {
+        const found = (list || []).find((fs) => fs.classLevelId === levelId) ?? null;
+        this.feeStructure = found;
+        this.feeStructureMissing = !found;
+      },
+      error: () => {
+        this.feeStructure = null;
+        this.feeStructureMissing = true;
+      }
     });
   }
 

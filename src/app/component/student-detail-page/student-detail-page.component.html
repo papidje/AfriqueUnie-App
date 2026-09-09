@@ -77,7 +77,6 @@
         <mat-tab label="Scolarité">
           <div class="tab-head">
             <h3>Parcours scolaire</h3>
-            <button mat-stroked-button *ngIf="canWriteStudent" (click)="startEdit('schooling')">Modifier</button>
           </div>
 
           <div class="lifecycle-actions" *ngIf="canWriteStudent || canLifecycleAdmin">
@@ -120,21 +119,11 @@
           </div>
 
           <form class="grid schooling-form" [formGroup]="schoolingForm">
-            <mat-form-field *ngIf="editSchooling" appearance="outline">
-              <mat-label>Statut (édition)</mat-label>
-              <mat-select formControlName="enrollmentStatus">
-                <mat-option value="INSCRIT">Inscrit</mat-option>
-                <mat-option value="SANS_CLASSE">Sans classe</mat-option>
-                <mat-option value="DESINSCRIT">Désinscrit</mat-option>
-                <mat-option value="TRANSFERE">Transféré</mat-option>
-              </mat-select>
-            </mat-form-field>
             <mat-form-field appearance="outline" class="full">
               <mat-label>Historique des classes</mat-label>
-              <textarea matInput rows="3" formControlName="classHistory" [readonly]="!editSchooling"></textarea>
+              <textarea matInput rows="3" formControlName="classHistory" readonly></textarea>
             </mat-form-field>
           </form>
-          <div class="actions" *ngIf="editSchooling && schoolingForm.dirty"><button mat-flat-button color="primary" (click)="saveSchooling()">Enregistrer</button></div>
 
           <ng-container *ngIf="!s.schoolClassId">
             <p class="schooling-hint">Affectez l’élève à une classe pour afficher le relevé de notes et le bulletin par période.</p>

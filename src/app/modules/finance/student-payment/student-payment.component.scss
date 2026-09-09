@@ -25,6 +25,52 @@
   color: var(--app-text-muted);
 }
 
+.payment-card {
+  padding: 8px 12px 10px;
+}
+
+.payment-card mat-card-title {
+  font-size: 1rem;
+  margin: 0 0 6px;
+}
+
+.percent-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--app-text-secondary);
+}
+
+.payable-bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.bar-label {
+  font-size: 12px;
+  color: var(--app-text-muted);
+}
+
+.payable-range {
+  width: 100%;
+  direction: rtl;
+  accent-color: var(--app-primary, #1565c0);
+}
+
+.payable-percent {
+  margin: 6px 0 0;
+  font-size: 13px;
+}
+
+.payable-percent .muted {
+  color: var(--app-text-muted);
+}
+
+.save-percent {
+  margin-top: 6px;
+}
+
 .debts-wrap {
   flex: 1;
   min-height: 0;

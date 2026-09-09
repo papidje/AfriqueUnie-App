@@ -226,11 +226,6 @@
         <form [formGroup]="stepEmergency">
           <ng-template matStepLabel>Urgence</ng-template>
 
-          <p class="step-final-hint">
-            Après validation, l’élève sera créé sans encaissement ici. Utilisez la page <strong>Encaissement</strong> pour
-            enregistrer les paiements.
-          </p>
-
           <div class="grid">
             <mat-form-field appearance="outline" class="full">
               <mat-label>Contact d'urgence</mat-label>
@@ -259,8 +254,140 @@
               mat-raised-button
               color="primary"
               type="button"
+              matStepperNext
+              [disabled]="stepEmergency.invalid"
+              (click)="loadTuitionStepContext()"
+            >
+              Suivant
+            </button>
+          </div>
+        </form>
+      </mat-step>
+
+      <mat-step [stepControl]="stepTuition">
+        <form [formGroup]="stepTuition">
+          <ng-template matStepLabel>Scolarité</ng-template>
+
+          <p class="step-final-hint">
+            Vérifiez la composition familiale pour décider d’une éventuelle réduction sur la <strong>scolarité</strong>
+            uniquement (l’inscription n’est pas concernée). Puis validez l’inscription — l’encaissement se fait ensuite
+            sur la page dédiée.
+          </p>
+
+          <div class="parents-summary">
+            <mat-card class="parent-card">
+              <mat-card-title>Père — {{ fatherDisplayName }}</mat-card-title>
+              <p class="muted compact">
+                {{ stepParents.controls.fatherPhone.value }}
+                <span *ngIf="stepParents.controls.fatherProfession.value">
+                  · {{ stepParents.controls.fatherProfession.value }}</span
+                >
+              </p>
+              <p class="muted compact" *ngIf="familyPreview?.father as f">
+                {{ f.knownInDirectory ? 'Déjà connu dans l’annuaire' : 'Nouveau parent (sera créé à l’inscription)' }}
+              </p>
+            </mat-card>
+            <mat-card class="parent-card">
+              <mat-card-title>Mère — {{ motherDisplayName }}</mat-card-title>
+              <p class="muted compact">
+                {{ stepParents.controls.motherPhone.value }}
+                <span *ngIf="stepParents.controls.motherProfession.value">
+                  · {{ stepParents.controls.motherProfession.value }}</span
+                >
+              </p>
+              <p class="muted compact" *ngIf="familyPreview?.mother as m">
+                {{ m.knownInDirectory ? 'Déjà connue dans l’annuaire' : 'Nouveau parent (sera créé à l’inscription)' }}
+              </p>
+            </mat-card>
+          </div>
+
+          <div *ngIf="familyLoading" class="muted" style="margin-top: 12px">Chargement de la fratrie…</div>
+
+          <div class="sibling-lists" *ngIf="familyPreview && !familyLoading">
+            <mat-card class="sibling-card" *ngIf="familyPreview.siblingsBothParents.length">
+              <mat-card-title>Fratrie (même père et même mère)</mat-card-title>
+              <ul>
+                <li *ngFor="let s of familyPreview.siblingsBothParents">
+                  {{ s.firstName }} {{ s.lastName }}
+                  <span class="muted" *ngIf="s.className"> — {{ s.className }}</span>
+                  <span class="muted" *ngIf="s.matricule"> · {{ s.matricule }}</span>
+                </li>
+              </ul>
+            </mat-card>
+
+            <mat-card class="sibling-card" *ngIf="familyPreview.siblingsFatherOnly.length">
+              <mat-card-title>Autres enfants du père</mat-card-title>
+              <ul>
+                <li *ngFor="let s of familyPreview.siblingsFatherOnly">
+                  {{ s.firstName }} {{ s.lastName }}
+                  <span class="muted" *ngIf="s.className"> — {{ s.className }}</span>
+                  <span class="muted" *ngIf="s.matricule"> · {{ s.matricule }}</span>
+                </li>
+              </ul>
+            </mat-card>
+
+            <mat-card class="sibling-card" *ngIf="familyPreview.siblingsMotherOnly.length">
+              <mat-card-title>Autres enfants de la mère</mat-card-title>
+              <ul>
+                <li *ngFor="let s of familyPreview.siblingsMotherOnly">
+                  {{ s.firstName }} {{ s.lastName }}
+                  <span class="muted" *ngIf="s.className"> — {{ s.className }}</span>
+                  <span class="muted" *ngIf="s.matricule"> · {{ s.matricule }}</span>
+                </li>
+              </ul>
+            </mat-card>
+
+            <p
+              class="muted"
+              *ngIf="
+                !familyPreview.siblingsBothParents.length &&
+                !familyPreview.siblingsFatherOnly.length &&
+                !familyPreview.siblingsMotherOnly.length
+              "
+            >
+              Aucun autre élève déjà inscrit pour ces parents.
+            </p>
+          </div>
+
+          <mat-card class="payment-card">
+            <mat-card-title>Paiement</mat-card-title>
+            <p class="muted compact" *ngIf="feeStructureMissing">
+              Aucun barème de scolarité trouvé pour ce niveau — configurez les frais avant l’encaissement.
+            </p>
+            <p class="muted compact" *ngIf="feeStructure && !feeStructureMissing">
+              Scolarité barème : {{ asMoney(tuitionCatalogAmount) }} GNF
+              <span *ngIf="feeStructure.annualTuitionFee != null"> (annuelle)</span>
+              <span *ngIf="feeStructure.annualTuitionFee == null"> (mensuelle × 9)</span>
+              — hors inscription.
+            </p>
+
+            <div class="payable-bar">
+              <span class="bar-label">Complet</span>
+              <input
+                class="payable-range"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                [value]="tuitionPayablePercent"
+                (input)="onTuitionPercentInput($event)"
+              />
+              <span class="bar-label">Exempté</span>
+            </div>
+            <p class="payable-percent">À payer : <strong>{{ tuitionPayablePercent }}&nbsp;%</strong></p>
+            <p class="payable-amount">
+              Montant scolarité : <strong>{{ asMoney(tuitionAmountToPay) }} GNF</strong>
+            </p>
+          </mat-card>
+
+          <div class="actions">
+            <button mat-stroked-button matStepperPrevious type="button">Retour</button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="button"
               (click)="submit()"
-              [disabled]="submitting || stepEmergency.invalid"
+              [disabled]="submitting || stepTuition.invalid"
             >
               {{ submitting ? 'Enregistrement…' : 'Valider l’inscription' }}
             </button>

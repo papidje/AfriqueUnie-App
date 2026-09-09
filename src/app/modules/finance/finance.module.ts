@@ -16,6 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { StudentPaymentComponent } from './student-payment/student-payment.component';
 import { SharedModule } from '../../shared/shared.module';
 
@@ -41,7 +42,8 @@ import { SharedModule } from '../../shared/shared.module';
     MatIconModule,
     MatTooltipModule,
     MatCheckboxModule,
-    MatSelectModule
+    MatSelectModule,
+    MatButtonToggleModule
   ]
 })
 export class FinanceModule {}

@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ClassLevel } from '../../models/academic.models';
 import { classLevelGroupSortKey } from '../../core/class-level-group-order';
-import { FeeStructureDto, FeeStructureWritePayload } from '../../models/fee-structure.models';
+import { FeeStructureDto, FeeStructureWritePayload, resolveTuitionDisplayAmount, resolveTuitionInputMode } from '../../models/fee-structure.models';
 import { ClassLevelService } from '../../service/class-level.service';
 import { ActiveSchoolService } from '../../service/active-school.service';
 import { FeeStructureService } from '../../service/fee-structure.service';
@@ -26,7 +26,7 @@ export class FinancialSettingsPageComponent implements OnInit {
   activeYearId: number | null = null;
   activeYearLabel: string | null = null;
   rows: FinancialRow[] = [];
-  readonly displayedColumns = ['level', 'registrationFee', 'reRegistrationFee', 'monthlyTuitionFee', 'suppliesFee', 'suppliesColumnEnabled', 'actions'];
+  readonly displayedColumns = ['level', 'registrationFee', 'reRegistrationFee', 'tuitionFee', 'suppliesFee', 'suppliesColumnEnabled', 'actions'];
 
   constructor(
     private readonly classLevelService: ClassLevelService,
@@ -49,6 +49,7 @@ export class FinancialSettingsPageComponent implements OnInit {
     if (!this.activeYearId || !this.activeYearLabel) {
       return;
     }
+    const locked = !!row.feeStructure?.locked;
     const ref = this.dialog.open(FeeStructureDialogComponent, {
       width: '560px',
       disableClose: true,
@@ -58,12 +59,13 @@ export class FinancialSettingsPageComponent implements OnInit {
         classLevelId: row.level.id,
         classLevelCode: row.level.code,
         classLevelName: row.level.name,
-        existing: row.feeStructure ?? undefined
+        existing: row.feeStructure ?? undefined,
+        readOnly: locked
       }
     });
 
     ref.afterClosed().subscribe((result?: FeeStructureDialogResult) => {
-      if (!result) {
+      if (!result || locked) {
         return;
       }
       const payload: FeeStructureWritePayload = {
@@ -72,6 +74,7 @@ export class FinancialSettingsPageComponent implements OnInit {
         registrationFee: result.registrationFee,
         reRegistrationFee: result.reRegistrationFee,
         monthlyTuitionFee: result.monthlyTuitionFee,
+        annualTuitionFee: result.annualTuitionFee,
         suppliesFee: result.suppliesFee,
         suppliesColumnEnabled: result.suppliesColumnEnabled,
         currency: result.currency || 'GNF'
@@ -98,6 +101,17 @@ export class FinancialSettingsPageComponent implements OnInit {
       return '--';
     }
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
+  }
+
+  tuitionAmount(fs: FeeStructureDto | null | undefined): number | null {
+    return resolveTuitionDisplayAmount(fs ?? null);
+  }
+
+  tuitionPeriodLabel(fs: FeeStructureDto | null | undefined): string {
+    if (!fs) {
+      return '';
+    }
+    return resolveTuitionInputMode(fs) === 'ANNUAL' ? 'Annuelle' : 'Mensuelle';
   }
 
   private reload(): void {

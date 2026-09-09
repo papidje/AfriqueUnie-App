@@ -5,6 +5,45 @@
       <p class="sub">{{ info?.studentName }} · {{ info?.matricule }}</p>
     </div>
 
+    <mat-card class="payment-card" *ngIf="info">
+      <mat-card-title>Paiement</mat-card-title>
+      <p class="percent-hint" *ngIf="tuitionPercentLocked">
+        Scolarité à {{ draftPayablePercent }}&nbsp;%
+        (verrouillé après un premier encaissement de scolarité).
+        Barème : {{ asMoney(tuitionCatalogExpected) }} GNF → dû :
+        {{ asMoney(tuitionPayablePreview) }} GNF.
+      </p>
+      <ng-container *ngIf="!tuitionPercentLocked">
+        <div class="payable-bar">
+          <span class="bar-label">Complet</span>
+          <input
+            class="payable-range"
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            [value]="draftPayablePercent"
+            (input)="onPayablePercentInput($event)"
+          />
+          <span class="bar-label">Exempté</span>
+        </div>
+        <p class="payable-percent">À payer : <strong>{{ draftPayablePercent }}&nbsp;%</strong>
+          · {{ asMoney(tuitionPayablePreview) }} GNF
+          <span class="muted">(barème {{ asMoney(tuitionCatalogExpected) }} GNF, hors inscription)</span>
+        </p>
+        <button
+          mat-stroked-button
+          color="primary"
+          type="button"
+          class="save-percent"
+          [disabled]="savingPercent || draftPayablePercent === (info.tuitionPayablePercent ?? 100)"
+          (click)="saveTuitionPercent()"
+        >
+          {{ savingPercent ? 'Enregistrement…' : 'Enregistrer le pourcentage' }}
+        </button>
+      </ng-container>
+    </mat-card>
+
     <ng-container *ngIf="maxRemaining > 0; else settledTpl">
       <div class="debts-wrap">
         <div class="debts-row">

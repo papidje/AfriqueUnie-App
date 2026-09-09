@@ -7,9 +7,33 @@
   color: var(--app-text-muted);
 }
 
+.lock-hint {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--warning-bg, #fff8e1);
+  border: 1px solid var(--warning-border, #ffe082);
+  color: var(--warning-fg, #5d4037);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .fee-form {
   display: grid;
   gap: 10px;
+}
+
+.tuition-row {
+  display: grid;
+  gap: 8px;
+}
+
+.tuition-toggle {
+  width: fit-content;
+}
+
+.tuition-field {
+  width: 100%;
 }
 
 .supplies-enable-row {

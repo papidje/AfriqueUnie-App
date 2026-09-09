@@ -30,6 +30,18 @@ export class FinanceApiService {
     );
   }
 
+  updateTuitionPayablePercent(
+    studentId: number,
+    tuitionPayablePercent: number
+  ): Observable<{ studentId: number; studentAccountId: number; tuitionPayablePercent: number; locked: boolean }> {
+    return this.http
+      .put<{ studentId: number; studentAccountId: number; tuitionPayablePercent: number; locked: boolean }>(
+        `${this.base}/payment-info/${studentId}/tuition-payable-percent`,
+        { tuitionPayablePercent }
+      )
+      .pipe(catchError((err: HttpErrorResponse) => throwError(() => err)));
+  }
+
   listPaymentsForStudent(studentId: number): Observable<StudentPaymentLedgerRow[]> {
     return this.http.get<StudentPaymentLedgerRow[]>(`${this.base}/payments/student/${studentId}`).pipe(
       catchError((err: HttpErrorResponse) => throwError(() => err))

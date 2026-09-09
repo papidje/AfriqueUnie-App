@@ -65,7 +65,6 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
   printingBulletin = false;
 
   editGeneral = false;
-  editSchooling = false;
   editHealth = false;
 
   readonly canWriteStudent = this.authUtils.hasAnyRole([...ROLES_STUDENT_WRITE]);
@@ -165,10 +164,9 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     return `background: conic-gradient(#1976d2 ${pct}%, #e0e0e0 ${pct}% 100%);`;
   }
 
-  startEdit(section: 'general' | 'schooling' | 'health'): void {
+  startEdit(section: 'general' | 'health'): void {
     if (!this.canWriteStudent) return;
     if (section === 'general') this.editGeneral = true;
-    if (section === 'schooling') this.editSchooling = true;
     if (section === 'health') this.editHealth = true;
   }
 
@@ -176,14 +174,6 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     if (!this.studentId || this.generalForm.invalid || !this.generalForm.dirty) return;
     this.studentApi.updateProfile(this.studentId, this.generalForm.getRawValue()).pipe(takeUntil(this.destroy$)).subscribe({
       next: (s) => { this.applyStudent(s); this.editGeneral = false; this.snackBar.open('Informations générales mises à jour.', 'Fermer', { duration: 2500 }); },
-      error: (err) => this.snackBar.open(err?.error?.message || 'Mise à jour impossible.', 'Fermer', { duration: 5000 })
-    });
-  }
-
-  saveSchooling(): void {
-    if (!this.studentId || this.schoolingForm.invalid || !this.schoolingForm.dirty) return;
-    this.studentApi.updateProfile(this.studentId, this.schoolingForm.getRawValue()).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (s) => { this.applyStudent(s); this.editSchooling = false; this.snackBar.open('Scolarité mise à jour.', 'Fermer', { duration: 2500 }); },
       error: (err) => this.snackBar.open(err?.error?.message || 'Mise à jour impossible.', 'Fermer', { duration: 5000 })
     });
   }
@@ -306,10 +296,6 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   bannerEnrollmentLabel(): string {
-    if (this.editSchooling) {
-      const v = this.schoolingForm.get('enrollmentStatus')?.value as string | undefined;
-      return this.enrollmentStatusLabel(v);
-    }
     return this.enrollmentStatusLabel(this.student?.enrollmentStatus);
   }
 

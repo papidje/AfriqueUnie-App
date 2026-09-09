@@ -46,11 +46,14 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
 
   loading = true;
   submitting = false;
+  savingPercent = false;
   studentId: number | null = null;
   info: StudentPaymentInfoDto | null = null;
   debts: DebtItem[] = [];
   /** Somme des reliquats (dettes listées) ; plafond du champ montant. */
   maxRemaining = 0;
+  /** Brouillon local du % (avant enregistrement API). */
+  draftPayablePercent = 100;
 
   readonly form = this.fb.group({
     paymentMode: ['ESPECES', Validators.required],
@@ -240,6 +243,55 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
     return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(Number(value || 0));
   }
 
+  get tuitionPercentLocked(): boolean {
+    return !!this.info?.tuitionPercentLocked;
+  }
+
+  get tuitionCatalogExpected(): number {
+    return Number(this.info?.tuitionCatalogExpected ?? 0);
+  }
+
+  get tuitionPayablePreview(): number {
+    const catalog = this.tuitionCatalogExpected;
+    const p = Math.max(0, Math.min(100, Math.round(Number(this.draftPayablePercent) || 0)));
+    if (p >= 100) {
+      return catalog;
+    }
+    if (p <= 0) {
+      return 0;
+    }
+    return Math.round(catalog * (p / 100));
+  }
+
+  onPayablePercentInput(event: Event): void {
+    if (this.tuitionPercentLocked) {
+      return;
+    }
+    const n = Number((event.target as HTMLInputElement).value);
+    this.draftPayablePercent = Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 100;
+  }
+
+  saveTuitionPercent(): void {
+    if (this.studentId == null || this.tuitionPercentLocked) {
+      return;
+    }
+    const percent = Math.max(0, Math.min(100, Math.round(Number(this.draftPayablePercent) || 0)));
+    this.savingPercent = true;
+    this.financeApi.updateTuitionPayablePercent(this.studentId, percent).subscribe({
+      next: () => {
+        this.savingPercent = false;
+        this.snackBar.open('Pourcentage de scolarité enregistré.', 'Fermer', { duration: 3000 });
+        this.loadInfo(this.studentId!);
+      },
+      error: (err) => {
+        this.savingPercent = false;
+        this.snackBar.open(err?.error?.message || 'Impossible de modifier le pourcentage.', 'Fermer', {
+          duration: 5000
+        });
+      }
+    });
+  }
+
   trackDebtById(_index: number, debt: DebtItem): string {
     return debt.id;
   }
@@ -251,6 +303,10 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (info) => {
           this.info = info;
+          this.draftPayablePercent =
+            info.tuitionPayablePercent != null && Number.isFinite(Number(info.tuitionPayablePercent))
+              ? Math.round(Number(info.tuitionPayablePercent))
+              : 100;
           this.debts = this.buildDebts(info);
           this.maxRemaining = this.computeTotalRemaining(info);
           const amtCtrl = this.form.get('amountToCollect');

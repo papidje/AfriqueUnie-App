@@ -1,8 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../core/api-base';
-import { RegistrationDto, StudentRegistrationResponse } from '../models/student-registration.models';
+import {
+  FamilyPreviewResponse,
+  RegistrationDto,
+  StudentRegistrationResponse
+} from '../models/student-registration.models';
 
 @Injectable({ providedIn: 'root' })
 export class StudentRegistrationService {
@@ -13,5 +17,9 @@ export class StudentRegistrationService {
   registerStudent(payload: RegistrationDto): Observable<StudentRegistrationResponse> {
     return this.http.post<StudentRegistrationResponse>(this.base, payload);
   }
-}
 
+  previewFamily(fatherPhone: string, motherPhone: string): Observable<FamilyPreviewResponse> {
+    const params = new HttpParams().set('fatherPhone', fatherPhone).set('motherPhone', motherPhone);
+    return this.http.get<FamilyPreviewResponse>(`${this.base}/family-preview`, { params });
+  }
+}

@@ -41,6 +41,12 @@ export interface StudentPaymentInfoDto {
   /** Aligné sur la structure de frais : si false, pas de ligne fournitures à l’encaissement. Absent (API ancienne) = activé. */
   suppliesColumnEnabled?: boolean;
   monthlyTuition: MonthlyTuitionStatusDto[];
+  /** 0 = exempté, 100 = scolarité barème. */
+  tuitionPayablePercent?: number;
+  /** true après un premier paiement SCOLARITE. */
+  tuitionPercentLocked?: boolean;
+  /** Total scolarité barème avant %. */
+  tuitionCatalogExpected?: number;
 }
 
 export interface CreateStudentPaymentPayload {

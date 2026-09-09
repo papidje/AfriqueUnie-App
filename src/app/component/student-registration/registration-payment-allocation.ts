@@ -1,6 +1,6 @@
 import { FeeStructureDto } from '../../models/fee-structure.models';
 
-/** Même ordre que le backend (FinanceService.allocateAndPersistFromDeclaredTotal). */
+/** Même ordre que le backend (FinanceService / TuitionMonthDues). */
 export const REGISTRATION_MONTH_ORDER = [
   'OCT',
   'NOV',
@@ -31,11 +31,57 @@ export interface RegistrationAllocationLine {
   amount: number;
 }
 
+export function tuitionTotalExpected(fs: FeeStructureDto, payablePercent = 100): number {
+  const catalog =
+    fs.annualTuitionFee != null
+      ? Math.max(0, Number(fs.annualTuitionFee))
+      : Math.max(0, Number(fs.monthlyTuitionFee ?? 0)) * REGISTRATION_MONTH_ORDER.length;
+  const p = Math.max(0, Math.min(100, Number(payablePercent) || 0));
+  if (p >= 100) {
+    return catalog;
+  }
+  if (p <= 0) {
+    return 0;
+  }
+  return Math.round(catalog * (p / 100));
+}
+
+/** Dûs mensuels Oct→Juin après application du % à payer. */
+export function tuitionMonthDues(fs: FeeStructureDto, payablePercent = 100): number[] {
+  const base =
+    fs.annualTuitionFee != null
+      ? duesFromAnnual(Math.max(0, Number(fs.annualTuitionFee)))
+      : REGISTRATION_MONTH_ORDER.map(() => Math.max(0, Number(fs.monthlyTuitionFee ?? 0)));
+  const p = Math.max(0, Math.min(100, Number(payablePercent) || 0));
+  if (p >= 100) {
+    return base;
+  }
+  if (p <= 0) {
+    return REGISTRATION_MONTH_ORDER.map(() => 0);
+  }
+  return duesFromAnnual(Math.round(tuitionTotalExpected(fs, 100) * (p / 100)));
+}
+
+/**
+ * Annuelle : autres mois au millier inférieur de (annuel / 9) ;
+ * 1er mois = reste (ex. 1 675 000 → 187 000 + 8 × 186 000).
+ */
+export function duesFromAnnual(annualRaw: number): number[] {
+  const annual = Math.max(0, Math.round(annualRaw));
+  const count = REGISTRATION_MONTH_ORDER.length;
+  if (annual === 0) {
+    return Array(count).fill(0);
+  }
+  const average = Math.floor(annual / count);
+  const otherMonths = Math.floor(average / 1000) * 1000;
+  const firstMonth = annual - otherMonths * (count - 1);
+  return [firstMonth, ...Array(count - 1).fill(otherMonths)];
+}
+
 export function maxOpenDeclarationAmount(fs: FeeStructureDto): number {
   const reg = Math.max(0, Number(fs.registrationFee ?? 0));
   const sup = fs.suppliesColumnEnabled ? Math.max(0, Number(fs.suppliesFee ?? 0)) : 0;
-  const monthly = Math.max(0, Number(fs.monthlyTuitionFee ?? 0));
-  return reg + sup + monthly * REGISTRATION_MONTH_ORDER.length;
+  return reg + sup + tuitionTotalExpected(fs);
 }
 
 /**
@@ -53,7 +99,7 @@ export function computeRegistrationAllocationLines(
   const reg = Math.max(0, Number(fs.registrationFee ?? 0));
   const suppliesOn = !!fs.suppliesColumnEnabled;
   const supFee = suppliesOn ? Math.max(0, Number(fs.suppliesFee ?? 0)) : 0;
-  const monthly = Math.max(0, Number(fs.monthlyTuitionFee ?? 0));
+  const dues = tuitionMonthDues(fs);
 
   let R = total;
   const lines: RegistrationAllocationLine[] = [];
@@ -67,11 +113,12 @@ export function computeRegistrationAllocationLines(
     lines.push({ id: 'sup', label: 'Fournitures', amount: supFee });
     R -= supFee;
   }
-  for (const code of REGISTRATION_MONTH_ORDER) {
+  for (let i = 0; i < REGISTRATION_MONTH_ORDER.length; i++) {
     if (R <= 0) {
       break;
     }
-    const remain = monthly;
+    const code = REGISTRATION_MONTH_ORDER[i];
+    const remain = dues[i] ?? 0;
     const pay = Math.min(R, remain);
     if (pay > 0) {
       lines.push({

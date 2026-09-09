@@ -35,6 +35,8 @@ export interface RegistrationDto {
   amountPaid?: number | null;
   currency?: string | null;
   paymentMode?: RegistrationPaymentMode | null;
+  /** 0 = exempté, 100 = scolarité complète (défaut). */
+  tuitionPayablePercent?: number | null;
 }
 
 /** Réponse POST `/api/student-registrations` (élève créé). */
@@ -56,4 +58,32 @@ export interface ParentDto {
   email?: string | null;
   profession?: string | null;
   address?: string | null;
+}
+
+export interface SiblingStudentRow {
+  id: number;
+  firstName: string;
+  lastName: string;
+  matricule?: string | null;
+  className?: string | null;
+  enrollmentStatus?: string | null;
+}
+
+export interface FamilyParentSummary {
+  id: number | null;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string;
+  email?: string | null;
+  profession?: string | null;
+  address?: string | null;
+  knownInDirectory: boolean;
+}
+
+export interface FamilyPreviewResponse {
+  father: FamilyParentSummary;
+  mother: FamilyParentSummary;
+  siblingsBothParents: SiblingStudentRow[];
+  siblingsFatherOnly: SiblingStudentRow[];
+  siblingsMotherOnly: SiblingStudentRow[];
 }
