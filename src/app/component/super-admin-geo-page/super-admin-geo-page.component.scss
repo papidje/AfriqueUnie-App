@@ -104,24 +104,61 @@ h2 {
   }
 }
 
-.map {
-  height: 420px;
+.map-shell {
+  position: relative;
   width: 100%;
+  height: 420px;
   border: 1px solid var(--app-border);
   border-radius: 8px;
   overflow: hidden;
-  background: #d7e3ec;
-  z-index: 0;
+  background: #cfd8dc;
 }
 
-:host ::ng-deep .leaflet-container {
+.map {
   width: 100%;
   height: 100%;
-  font: inherit;
+  min-height: 420px;
+  z-index: 0;
+  background: #cfd8dc;
 }
 
-:host ::ng-deep .leaflet-tile-pane img {
+.map-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 500;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--app-text-muted);
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+/* Leaflet — styles critiques (évite tuiles invisibles / taille nulle) */
+:host ::ng-deep .leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  font: inherit;
+  background: #cfd8dc;
+}
+
+:host ::ng-deep .leaflet-pane,
+:host ::ng-deep .leaflet-map-pane,
+:host ::ng-deep .leaflet-tile,
+:host ::ng-deep .leaflet-marker-icon,
+:host ::ng-deep .leaflet-marker-shadow,
+:host ::ng-deep .leaflet-tile-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+:host ::ng-deep .leaflet-tile-pane img,
+:host ::ng-deep img.leaflet-tile {
   max-width: none !important;
+  max-height: none !important;
+  width: 256px !important;
+  height: 256px !important;
 }
 
 .map-hint {

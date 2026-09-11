@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   ElementRef,
@@ -6,7 +7,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import * as L from 'leaflet';
+import * as LeafletNamespace from 'leaflet';
 import {
   GeoCityStats,
   GeoRegionStats,
@@ -14,22 +15,27 @@ import {
   SuperAdminService
 } from '../../service/super-admin.service';
 
+/** Compat CommonJS / ESM (Angular + leaflet). */
+const L = (LeafletNamespace as unknown as { default?: typeof LeafletNamespace }).default ?? LeafletNamespace;
+
 @Component({
   selector: 'app-super-admin-geo-page',
   templateUrl: './super-admin-geo-page.component.html',
   styleUrls: ['./super-admin-geo-page.component.scss']
 })
-export class SuperAdminGeoPageComponent implements OnInit, OnDestroy {
-  @ViewChild('mapHost') mapHost?: ElementRef<HTMLDivElement>;
+export class SuperAdminGeoPageComponent implements OnInit, AfterViewInit, OnDestroy {
+  /** Toujours présent dans le DOM (hors *ngIf) pour une init Leaflet fiable. */
+  @ViewChild('mapHost', { static: true }) mapHost!: ElementRef<HTMLDivElement>;
 
   loading = true;
   error = false;
+  mapReady = false;
   stats: SuperAdminGeoStats | null = null;
   selectedRegionId: number | null = null;
 
-  private map: L.Map | null = null;
-  private markersLayer: L.LayerGroup | null = null;
-  private initScheduled = false;
+  private map: LeafletNamespace.Map | null = null;
+  private markersLayer: LeafletNamespace.LayerGroup | null = null;
+  private resizeObserver: ResizeObserver | null = null;
 
   constructor(
     private readonly superAdminService: SuperAdminService,
@@ -40,26 +46,36 @@ export class SuperAdminGeoPageComponent implements OnInit, OnDestroy {
     this.reload();
   }
 
+  ngAfterViewInit(): void {
+    this.initMap();
+    this.refreshMarkers();
+  }
+
   ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
     this.destroyMap();
   }
 
   reload(): void {
     this.loading = true;
     this.error = false;
-    this.destroyMap();
     this.superAdminService.getGeoStats().subscribe({
       next: (data) => {
         this.stats = data;
         this.loading = false;
         this.cdr.detectChanges();
-        this.scheduleMapInit();
+        // Laisser le layout se stabiliser (sidenav / grille) avant invalidateSize.
+        setTimeout(() => {
+          this.map?.invalidateSize({ animate: false });
+          this.refreshMarkers();
+        }, 50);
+        setTimeout(() => this.map?.invalidateSize({ animate: false }), 300);
       },
       error: () => {
         this.stats = null;
         this.loading = false;
         this.error = true;
-        this.destroyMap();
       }
     });
   }
@@ -99,51 +115,38 @@ export class SuperAdminGeoPageComponent implements OnInit, OnDestroy {
     this.refreshMarkers();
   }
 
-  /**
-   * Le conteneur carte est derrière un *ngIf : attendre le prochain paint après detectChanges.
-   */
-  private scheduleMapInit(attempt = 0): void {
-    if (this.initScheduled && attempt === 0) {
+  private initMap(): void {
+    if (this.map || !this.mapHost?.nativeElement) {
       return;
     }
-    this.initScheduled = true;
-    requestAnimationFrame(() => {
-      this.initScheduled = false;
-      const el = this.mapHost?.nativeElement ?? document.getElementById('super-admin-guinea-map');
-      if (!el) {
-        if (attempt < 10) {
-          setTimeout(() => this.scheduleMapInit(attempt + 1), 50);
-        }
-        return;
-      }
-      this.tryInitMap();
-      this.refreshMarkers();
-      // Leaflet calcule mal la taille si le layout n’est pas encore stable.
-      setTimeout(() => {
-        this.map?.invalidateSize();
-        this.refreshMarkers();
-      }, 120);
-    });
-  }
-
-  private tryInitMap(): void {
-    if (this.map) {
-      return;
-    }
-    const el = this.mapHost?.nativeElement ?? document.getElementById('super-admin-guinea-map');
-    if (!el) {
-      return;
-    }
+    const el = this.mapHost.nativeElement;
     this.map = L.map(el, {
       center: [9.95, -11.7],
       zoom: 6,
-      scrollWheelZoom: true
+      scrollWheelZoom: true,
+      zoomControl: true
     });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+    // Carto (OSM data) — plus fiable que tile.openstreetmap.org (souvent bloqué sans UA dédié).
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 18,
-      attribution: '&copy; OpenStreetMap'
+      subdomains: 'abcd',
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
     }).addTo(this.map);
+
     this.markersLayer = L.layerGroup().addTo(this.map);
+    this.mapReady = true;
+
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.map?.invalidateSize({ animate: false });
+      });
+      this.resizeObserver.observe(el);
+    }
+
+    // Premier paint : forcer le recalcul de taille.
+    requestAnimationFrame(() => this.map?.invalidateSize({ animate: false }));
   }
 
   private refreshMarkers(): void {
@@ -155,7 +158,7 @@ export class SuperAdminGeoPageComponent implements OnInit, OnDestroy {
     for (const c of cities) {
       const lat = Number(c.latitude);
       const lng = Number(c.longitude);
-      const radius = Math.min(18, 8 + Math.sqrt(c.schoolCount) * 3);
+      const radius = Math.min(18, 8 + Math.sqrt(Math.max(c.schoolCount, 1)) * 3);
       const marker = L.circleMarker([lat, lng], {
         radius,
         color: '#0f4c81',
@@ -169,8 +172,9 @@ export class SuperAdminGeoPageComponent implements OnInit, OnDestroy {
           `<br/>Écoles : ${c.schoolCount} (${c.activeSchoolCount} actives)` +
           `<br/>Élèves : ${c.studentCount}`
       );
-      marker.addTo(this.markersLayer);
+      marker.addTo(this.markersLayer!);
     }
+
     if (cities.length === 1) {
       this.map.setView([Number(cities[0].latitude), Number(cities[0].longitude)], 9);
     } else if (cities.length > 1) {
@@ -181,7 +185,7 @@ export class SuperAdminGeoPageComponent implements OnInit, OnDestroy {
     } else {
       this.map.setView([9.95, -11.7], 6);
     }
-    this.map.invalidateSize();
+    this.map.invalidateSize({ animate: false });
   }
 
   private destroyMap(): void {
@@ -189,6 +193,7 @@ export class SuperAdminGeoPageComponent implements OnInit, OnDestroy {
       this.map.remove();
       this.map = null;
       this.markersLayer = null;
+      this.mapReady = false;
     }
   }
 
