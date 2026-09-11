@@ -26,7 +26,7 @@ export class RoleGuard implements CanActivate, CanActivateChild {
       const hasAccess = allowedRoles.some(role => userRoles.includes(role));
       if (!hasAccess) {
         if (userRoles.includes(AppRoles.SUPER_ADMIN)) {
-          this.router.navigate(['/super-admin/dashboard']);
+          this.router.navigate(['/super-admin/tenants']);
         } else {
           this.router.navigate(['/dashboard'], { queryParams: { accessDenied: '1' } });
         }

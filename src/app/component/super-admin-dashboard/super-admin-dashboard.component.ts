@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { SuperAdminService, SuperAdminTenantRow } from '../../service/super-admin.service';
 
 @Component({
@@ -7,12 +8,15 @@ import { SuperAdminService, SuperAdminTenantRow } from '../../service/super-admi
   styleUrls: ['./super-admin-dashboard.component.scss']
 })
 export class SuperAdminDashboardComponent implements OnInit {
-  readonly displayedColumns: string[] = ['id', 'name', 'address', 'createdAt', 'schools'];
+  readonly displayedColumns: string[] = ['name', 'address', 'createdAt', 'schools', 'active'];
   rows: SuperAdminTenantRow[] = [];
   loading = true;
   error = false;
 
-  constructor(private readonly superAdminService: SuperAdminService) {}
+  constructor(
+    private readonly superAdminService: SuperAdminService,
+    private readonly router: Router
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -34,10 +38,17 @@ export class SuperAdminDashboardComponent implements OnInit {
     });
   }
 
-  formatSchools(row: SuperAdminTenantRow): string {
-    if (!row.schools?.length) {
-      return '—';
-    }
-    return row.schools.map((s) => `${s.name}${s.active ? '' : ' (inactive)'}`).join(' · ');
+  schoolCount(row: SuperAdminTenantRow): number {
+    return row.schools?.length ?? 0;
+  }
+
+  activeSchoolCount(row: SuperAdminTenantRow): number {
+    return (row.schools ?? []).filter((s) => s.active).length;
+  }
+
+  openSchools(row: SuperAdminTenantRow): void {
+    void this.router.navigate(['/super-admin/ecoles'], {
+      queryParams: { tenant: row.id }
+    });
   }
 }

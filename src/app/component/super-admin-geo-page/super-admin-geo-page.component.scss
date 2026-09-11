@@ -110,7 +110,18 @@ h2 {
   border: 1px solid var(--app-border);
   border-radius: 8px;
   overflow: hidden;
-  background: #e8eef2;
+  background: #d7e3ec;
+  z-index: 0;
+}
+
+:host ::ng-deep .leaflet-container {
+  width: 100%;
+  height: 100%;
+  font: inherit;
+}
+
+:host ::ng-deep .leaflet-tile-pane img {
+  max-width: none !important;
 }
 
 .map-hint {

@@ -10,7 +10,7 @@
     </button>
   </div>
 
-  <mat-card class="form-card">
+  <mat-card class="form-card" *ngIf="formOpen">
     <mat-card-title>{{ editingId != null ? 'Modifier la ville' : 'Ajouter une ville' }}</mat-card-title>
     <mat-card-content>
       <form [formGroup]="form" class="grid-form" (ngSubmit)="save()">

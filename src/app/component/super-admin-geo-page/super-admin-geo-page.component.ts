@@ -1,8 +1,10 @@
 import {
-  AfterViewInit,
+  ChangeDetectorRef,
   Component,
+  ElementRef,
   OnDestroy,
-  OnInit
+  OnInit,
+  ViewChild
 } from '@angular/core';
 import * as L from 'leaflet';
 import {
@@ -12,26 +14,14 @@ import {
   SuperAdminService
 } from '../../service/super-admin.service';
 
-/** Icônes Leaflet (chemins webpack / Angular). */
-function fixLeafletDefaultIcons(): void {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const proto = L.Icon.Default.prototype as any;
-  if (proto._getIconUrl) {
-    delete proto._getIconUrl;
-  }
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
-  });
-}
-
 @Component({
   selector: 'app-super-admin-geo-page',
   templateUrl: './super-admin-geo-page.component.html',
   styleUrls: ['./super-admin-geo-page.component.scss']
 })
-export class SuperAdminGeoPageComponent implements OnInit, AfterViewInit, OnDestroy {
+export class SuperAdminGeoPageComponent implements OnInit, OnDestroy {
+  @ViewChild('mapHost') mapHost?: ElementRef<HTMLDivElement>;
+
   loading = true;
   error = false;
   stats: SuperAdminGeoStats | null = null;
@@ -39,17 +29,15 @@ export class SuperAdminGeoPageComponent implements OnInit, AfterViewInit, OnDest
 
   private map: L.Map | null = null;
   private markersLayer: L.LayerGroup | null = null;
-  private viewReady = false;
+  private initScheduled = false;
 
-  constructor(private readonly superAdminService: SuperAdminService) {}
+  constructor(
+    private readonly superAdminService: SuperAdminService,
+    private readonly cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.reload();
-  }
-
-  ngAfterViewInit(): void {
-    this.viewReady = true;
-    this.tryInitMap();
   }
 
   ngOnDestroy(): void {
@@ -59,31 +47,39 @@ export class SuperAdminGeoPageComponent implements OnInit, AfterViewInit, OnDest
   reload(): void {
     this.loading = true;
     this.error = false;
+    this.destroyMap();
     this.superAdminService.getGeoStats().subscribe({
       next: (data) => {
         this.stats = data;
         this.loading = false;
-        this.tryInitMap();
-        this.refreshMarkers();
+        this.cdr.detectChanges();
+        this.scheduleMapInit();
       },
       error: () => {
         this.stats = null;
         this.loading = false;
         this.error = true;
+        this.destroyMap();
       }
     });
   }
 
+  /** Régions avec au moins une école ou un élève. */
   get regions(): GeoRegionStats[] {
-    return this.stats?.byRegion ?? [];
+    return (this.stats?.byRegion ?? []).filter(
+      (r) => (r.schoolCount ?? 0) > 0 || (r.studentCount ?? 0) > 0
+    );
   }
 
+  /** Villes avec au moins une école ou un élève (filtre région optionnel). */
   get filteredCities(): GeoCityStats[] {
-    const list = this.stats?.byCity ?? [];
-    if (this.selectedRegionId == null) {
-      return list;
+    let list = (this.stats?.byCity ?? []).filter(
+      (c) => (c.schoolCount ?? 0) > 0 || (c.studentCount ?? 0) > 0
+    );
+    if (this.selectedRegionId != null) {
+      list = list.filter((c) => c.regionId === this.selectedRegionId);
     }
-    return list.filter((c) => c.regionId === this.selectedRegionId);
+    return list;
   }
 
   get markerCities(): GeoCityStats[] {
@@ -92,8 +88,8 @@ export class SuperAdminGeoPageComponent implements OnInit, AfterViewInit, OnDest
         c.schoolCount > 0 &&
         c.latitude != null &&
         c.longitude != null &&
-        Number.isFinite(c.latitude) &&
-        Number.isFinite(c.longitude)
+        Number.isFinite(Number(c.latitude)) &&
+        Number.isFinite(Number(c.longitude))
     );
   }
 
@@ -103,15 +99,41 @@ export class SuperAdminGeoPageComponent implements OnInit, AfterViewInit, OnDest
     this.refreshMarkers();
   }
 
-  private tryInitMap(): void {
-    if (!this.viewReady || this.map || typeof document === 'undefined') {
+  /**
+   * Le conteneur carte est derrière un *ngIf : attendre le prochain paint après detectChanges.
+   */
+  private scheduleMapInit(attempt = 0): void {
+    if (this.initScheduled && attempt === 0) {
       return;
     }
-    const el = document.getElementById('super-admin-guinea-map');
+    this.initScheduled = true;
+    requestAnimationFrame(() => {
+      this.initScheduled = false;
+      const el = this.mapHost?.nativeElement ?? document.getElementById('super-admin-guinea-map');
+      if (!el) {
+        if (attempt < 10) {
+          setTimeout(() => this.scheduleMapInit(attempt + 1), 50);
+        }
+        return;
+      }
+      this.tryInitMap();
+      this.refreshMarkers();
+      // Leaflet calcule mal la taille si le layout n’est pas encore stable.
+      setTimeout(() => {
+        this.map?.invalidateSize();
+        this.refreshMarkers();
+      }, 120);
+    });
+  }
+
+  private tryInitMap(): void {
+    if (this.map) {
+      return;
+    }
+    const el = this.mapHost?.nativeElement ?? document.getElementById('super-admin-guinea-map');
     if (!el) {
       return;
     }
-    fixLeafletDefaultIcons();
     this.map = L.map(el, {
       center: [9.95, -11.7],
       zoom: 6,
@@ -122,8 +144,6 @@ export class SuperAdminGeoPageComponent implements OnInit, AfterViewInit, OnDest
       attribution: '&copy; OpenStreetMap'
     }).addTo(this.map);
     this.markersLayer = L.layerGroup().addTo(this.map);
-    setTimeout(() => this.map?.invalidateSize(), 0);
-    this.refreshMarkers();
   }
 
   private refreshMarkers(): void {
@@ -133,7 +153,16 @@ export class SuperAdminGeoPageComponent implements OnInit, AfterViewInit, OnDest
     this.markersLayer.clearLayers();
     const cities = this.markerCities;
     for (const c of cities) {
-      const marker = L.marker([c.latitude, c.longitude]);
+      const lat = Number(c.latitude);
+      const lng = Number(c.longitude);
+      const radius = Math.min(18, 8 + Math.sqrt(c.schoolCount) * 3);
+      const marker = L.circleMarker([lat, lng], {
+        radius,
+        color: '#0f4c81',
+        weight: 2,
+        fillColor: '#1e88e5',
+        fillOpacity: 0.85
+      });
       marker.bindPopup(
         `<strong>${this.escapeHtml(c.cityName)}</strong>` +
           (c.regionName ? `<br/>${this.escapeHtml(c.regionName)}` : '') +
@@ -143,14 +172,16 @@ export class SuperAdminGeoPageComponent implements OnInit, AfterViewInit, OnDest
       marker.addTo(this.markersLayer);
     }
     if (cities.length === 1) {
-      this.map.setView([cities[0].latitude, cities[0].longitude], 9);
+      this.map.setView([Number(cities[0].latitude), Number(cities[0].longitude)], 9);
     } else if (cities.length > 1) {
-      const bounds = L.latLngBounds(cities.map((c) => [c.latitude, c.longitude] as [number, number]));
-      this.map.fitBounds(bounds.pad(0.2));
+      const bounds = L.latLngBounds(
+        cities.map((c) => [Number(c.latitude), Number(c.longitude)] as [number, number])
+      );
+      this.map.fitBounds(bounds.pad(0.25));
     } else {
       this.map.setView([9.95, -11.7], 6);
     }
-    setTimeout(() => this.map?.invalidateSize(), 0);
+    this.map.invalidateSize();
   }
 
   private destroyMap(): void {

@@ -13,6 +13,8 @@ export class SuperAdminSubjectsPageComponent implements OnInit {
   subjects: SchoolSubject[] = [];
   loading = true;
   saving = false;
+  /** Formulaire visible uniquement après « Nouvelle matière » ou « Modifier ». */
+  formOpen = false;
   editingId: number | null = null;
 
   readonly form = this.fb.group({
@@ -47,15 +49,18 @@ export class SuperAdminSubjectsPageComponent implements OnInit {
 
   startCreate(): void {
     this.editingId = null;
+    this.formOpen = true;
     this.form.reset({ code: '', name: '' });
   }
 
   startEdit(s: SchoolSubject): void {
     this.editingId = s.id;
+    this.formOpen = true;
     this.form.reset({ code: s.code, name: s.name });
   }
 
   cancelEdit(): void {
+    this.formOpen = false;
     this.editingId = null;
     this.form.reset({ code: '', name: '' });
   }

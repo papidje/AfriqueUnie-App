@@ -44,8 +44,19 @@
             Toute la Guinée
           </button>
         </div>
-        <div id="super-admin-guinea-map" class="map" role="img" aria-label="Carte des écoles par ville"></div>
-        <p class="map-hint">Cliquez une région dans le tableau pour filtrer les marqueurs.</p>
+        <div
+          #mapHost
+          id="super-admin-guinea-map"
+          class="map"
+          role="img"
+          aria-label="Carte des écoles par ville"
+        ></div>
+        <p class="map-hint" *ngIf="markerCities.length === 0">
+          Aucune pastille : aucune école n’est encore rattachée à une ville. Assignez une ville aux établissements.
+        </p>
+        <p class="map-hint" *ngIf="markerCities.length > 0">
+          Cliquez une région dans le tableau pour filtrer les pastilles.
+        </p>
       </section>
 
       <section class="tables">
@@ -73,6 +84,7 @@
               </tr>
             </tbody>
           </table>
+          <p *ngIf="!regions.length" class="empty">Aucune région avec des données.</p>
         </div>
 
         <h2>Par ville{{ selectedRegionId != null ? ' (filtrée)' : '' }}</h2>
@@ -95,7 +107,7 @@
               </tr>
             </tbody>
           </table>
-          <p *ngIf="!filteredCities.length" class="empty">Aucune ville.</p>
+          <p *ngIf="!filteredCities.length" class="empty">Aucune ville avec des données.</p>
         </div>
       </section>
     </div>

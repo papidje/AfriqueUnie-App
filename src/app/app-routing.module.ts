@@ -28,6 +28,7 @@ import { SuperAdminDashboardComponent } from "./component/super-admin-dashboard/
 import { SuperAdminCitiesPageComponent } from "./component/super-admin-cities-page/super-admin-cities-page.component";
 import { SuperAdminSubjectsPageComponent } from "./component/super-admin-subjects-page/super-admin-subjects-page.component";
 import { SuperAdminGeoPageComponent } from "./component/super-admin-geo-page/super-admin-geo-page.component";
+import { SuperAdminSchoolsPageComponent } from "./component/super-admin-schools-page/super-admin-schools-page.component";
 import { MyEstablishmentsComponent } from "./component/my-establishments/my-establishments.component";
 import { SchoolClassesPageComponent } from "./component/school-classes-page/school-classes-page.component";
 import { SchoolYearCreatePageComponent } from "./component/school-year-create-page/school-year-create-page.component";
@@ -112,10 +113,17 @@ const routes: Routes = [
           roles: [...SCHOOL_PORTAL_ROLES]
         }
       },
-      { path: 'super-admin', pathMatch: 'full', redirectTo: 'super-admin/dashboard' },
+      { path: 'super-admin', pathMatch: 'full', redirectTo: 'super-admin/tenants' },
+      { path: 'super-admin/dashboard', pathMatch: 'full', redirectTo: 'super-admin/tenants' },
       {
-        path: 'super-admin/dashboard',
+        path: 'super-admin/tenants',
         component: SuperAdminDashboardComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [AppRoles.SUPER_ADMIN] }
+      },
+      {
+        path: 'super-admin/ecoles',
+        component: SuperAdminSchoolsPageComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: { roles: [AppRoles.SUPER_ADMIN] }
       },

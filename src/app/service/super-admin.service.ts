@@ -57,6 +57,23 @@ export interface SuperAdminGeoStats {
   byCity: GeoCityStats[];
 }
 
+export interface SuperAdminSchoolRow {
+  id: number;
+  name: string;
+  adress: string | null;
+  contact: string | null;
+  openDate: string | null;
+  logo: string | null;
+  active: boolean;
+  createdAt: string | null;
+  tenantId: number | null;
+  tenantName: string | null;
+  cityId: number | null;
+  cityName: string | null;
+  regionName: string | null;
+  studentCount: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SuperAdminService {
   private readonly apiUrl = API_BASE_URL;
@@ -65,6 +82,10 @@ export class SuperAdminService {
 
   getTenantsWithSchools(): Observable<SuperAdminTenantRow[]> {
     return this.http.get<SuperAdminTenantRow[]>(`${this.apiUrl}/super-admin/tenants`);
+  }
+
+  getSchools(): Observable<SuperAdminSchoolRow[]> {
+    return this.http.get<SuperAdminSchoolRow[]>(`${this.apiUrl}/super-admin/schools`);
   }
 
   getGeoStats(): Observable<SuperAdminGeoStats> {

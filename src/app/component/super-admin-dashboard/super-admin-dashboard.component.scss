@@ -1,33 +1,18 @@
 .page {
-  padding: 1rem 1.25rem;
-  max-width: 1200px;
+  padding: var(--sp-4) var(--sp-6) var(--sp-8);
+  max-width: var(--container-xl, 1100px);
   margin: 0 auto;
 }
 
 .page-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
   margin-bottom: 1.25rem;
-}
-
-.quick-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
 }
 
 h1 {
   font-size: 1.35rem;
-  margin: 0 0 0.35rem;
-}
-
-.subtitle {
-  color: var(--app-text-muted);
   margin: 0;
-  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .state {
@@ -42,15 +27,60 @@ h1 {
 
 .table-wrap {
   overflow-x: auto;
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+  background: var(--app-surface);
 }
 
 .tenants-table {
   width: 100%;
-  background: var(--app-surface);
+  background: transparent;
+
+  th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--app-text-muted);
+    font-weight: 600;
+  }
+}
+
+.tenant-name {
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--app-text-muted);
+}
+
+.count-btn {
+  min-width: 2.25rem;
+  height: 2rem;
+  padding: 0 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(25, 118, 210, 0.25);
+  background: rgba(25, 118, 210, 0.08);
+  color: var(--app-primary-dark, #0d47a1);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.count-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  border-color: var(--app-border);
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--app-text-muted);
+}
+
+.count-btn:not(:disabled):hover {
+  background: rgba(25, 118, 210, 0.16);
 }
 
 .empty {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  text-align: center;
   color: var(--app-text-muted);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }

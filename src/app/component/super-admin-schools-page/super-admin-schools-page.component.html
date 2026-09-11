@@ -1,0 +1,109 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <h1>Liste des écoles</h1>
+      <p class="subtitle" *ngIf="!loading && !error">
+        {{ schools.length }} établissement{{ schools.length > 1 ? 's' : '' }}
+        · {{ activeCount }} actif{{ activeCount > 1 ? 's' : '' }}
+      </p>
+    </div>
+  </header>
+
+  <div *ngIf="loading" class="state">Chargement…</div>
+  <p *ngIf="error && !loading" class="state error">Impossible de charger les écoles.</p>
+
+  <ng-container *ngIf="!loading && !error">
+    <div class="toolbar">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Rechercher</mat-label>
+        <input matInput [(ngModel)]="search" placeholder="Nom, tenant, ville, contact…" />
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+
+      <div class="chips" role="group" aria-label="Filtrer par statut">
+        <button
+          type="button"
+          class="chip"
+          [class.chip--on]="statusFilter === 'all'"
+          (click)="setStatusFilter('all')"
+        >
+          Toutes
+        </button>
+        <button
+          type="button"
+          class="chip"
+          [class.chip--on]="statusFilter === 'active'"
+          (click)="setStatusFilter('active')"
+        >
+          Actives
+        </button>
+        <button
+          type="button"
+          class="chip"
+          [class.chip--on]="statusFilter === 'inactive'"
+          (click)="setStatusFilter('inactive')"
+        >
+          Inactives
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-banner" *ngIf="tenantFilterId != null">
+      <span>
+        Filtre tenant :
+        <strong>{{ tenantFilterName }}</strong>
+      </span>
+      <button mat-button type="button" color="primary" (click)="clearTenantFilter()">Effacer</button>
+    </div>
+
+    <div class="table-wrap" *ngIf="filteredSchools.length">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th class="col-school">École</th>
+            <th>Tenant</th>
+            <th>Localisation</th>
+            <th>Contact</th>
+            <th>Ouverture</th>
+            <th class="num">Élèves</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of filteredSchools">
+            <td class="col-school">
+              <div class="school-cell">
+                <div class="logo-wrap">
+                  <img *ngIf="logoUrl(s.logo) as src" [src]="src" alt="" />
+                  <mat-icon *ngIf="!logoUrl(s.logo)" aria-hidden="true">domain</mat-icon>
+                </div>
+                <div class="school-meta">
+                  <span class="school-name">{{ s.name }}</span>
+                  <span class="school-adress muted">{{ s.adress || 'Adresse non renseignée' }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="tenant">{{ s.tenantName || '—' }}</span>
+            </td>
+            <td>
+              <span [class.muted]="!s.cityName">{{ placeLabel(s) }}</span>
+            </td>
+            <td>{{ s.contact || '—' }}</td>
+            <td>{{ s.openDate ? (s.openDate | displayDate) : '—' }}</td>
+            <td class="num">{{ s.studentCount }}</td>
+            <td>
+              <span class="status" [class.status--on]="s.active" [class.status--off]="!s.active">
+                {{ s.active ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="empty" *ngIf="!filteredSchools.length">
+      Aucune école ne correspond à ces critères.
+    </p>
+  </ng-container>
+</div>

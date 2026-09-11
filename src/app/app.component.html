@@ -236,7 +236,22 @@
               <a
                 mat-list-item
                 *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
-                routerLink="/schools"
+                routerLink="/super-admin/tenants"
+                routerLinkActive="sidenav-link-active"
+                [routerLinkActiveOptions]="{ exact: false }"
+                matTooltip="Tenants"
+                [matTooltipDisabled]="sidebarExpanded"
+                matTooltipPosition="right"
+              >
+                <div class="nav-item-stack">
+                  <mat-icon>apartment</mat-icon>
+                  <span *ngIf="sidebarExpanded">Tenants</span>
+                </div>
+              </a>
+              <a
+                mat-list-item
+                *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
+                routerLink="/super-admin/ecoles"
                 routerLinkActive="sidenav-link-active"
                 [routerLinkActiveOptions]="{ exact: false }"
                 matTooltip="Écoles"
@@ -246,21 +261,6 @@
                 <div class="nav-item-stack">
                   <mat-icon>domain</mat-icon>
                   <span *ngIf="sidebarExpanded">Écoles</span>
-                </div>
-              </a>
-              <a
-                mat-list-item
-                *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
-                routerLink="/super-admin/dashboard"
-                routerLinkActive="sidenav-link-active"
-                [routerLinkActiveOptions]="{ exact: false }"
-                matTooltip="Tenants / écoles"
-                [matTooltipDisabled]="sidebarExpanded"
-                matTooltipPosition="right"
-              >
-                <div class="nav-item-stack">
-                  <mat-icon>apartment</mat-icon>
-                  <span *ngIf="sidebarExpanded">Tenants / écoles</span>
                 </div>
               </a>
               <a

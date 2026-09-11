@@ -1,34 +1,23 @@
 <div class="page">
-  <div class="page-head">
-    <div>
-      <h1>Super admin — Tenants & écoles</h1>
-      <p class="subtitle">Liste de tous les tenants et des écoles rattachées (schools.tenant_id).</p>
-    </div>
-    <div class="quick-links">
-      <a mat-stroked-button routerLink="/super-admin/carte">Carte &amp; stats</a>
-      <a mat-stroked-button routerLink="/super-admin/villes">Villes</a>
-      <a mat-stroked-button routerLink="/super-admin/matieres">Matières</a>
-    </div>
-  </div>
+  <header class="page-head">
+    <h1>Liste des tenants</h1>
+  </header>
 
   <div *ngIf="loading" class="state">Chargement…</div>
   <p *ngIf="error && !loading" class="state error">Impossible de charger les données.</p>
 
-  <div class="table-wrap" *ngIf="!loading && !error">
-    <table mat-table [dataSource]="rows" class="mat-elevation-z2 tenants-table">
-      <ng-container matColumnDef="id">
-        <th mat-header-cell *matHeaderCellDef>ID</th>
-        <td mat-cell *matCellDef="let row">{{ row.id }}</td>
-      </ng-container>
-
+  <div class="table-wrap" *ngIf="!loading && !error && rows.length">
+    <table mat-table [dataSource]="rows" class="tenants-table">
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>Tenant</th>
-        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+        <td mat-cell *matCellDef="let row">
+          <span class="tenant-name">{{ row.name }}</span>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="address">
         <th mat-header-cell *matHeaderCellDef>Adresse</th>
-        <td mat-cell *matCellDef="let row">{{ row.address || '—' }}</td>
+        <td mat-cell *matCellDef="let row" class="muted">{{ row.address || '—' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="createdAt">
@@ -37,13 +26,31 @@
       </ng-container>
 
       <ng-container matColumnDef="schools">
-        <th mat-header-cell *matHeaderCellDef>Écoles rattachées</th>
-        <td mat-cell *matCellDef="let row">{{ formatSchools(row) }}</td>
+        <th mat-header-cell *matHeaderCellDef>Écoles</th>
+        <td mat-cell *matCellDef="let row">
+          <button
+            type="button"
+            class="count-btn"
+            (click)="openSchools(row)"
+            [disabled]="schoolCount(row) === 0"
+            [attr.aria-label]="'Voir les écoles du tenant ' + row.name"
+          >
+            {{ schoolCount(row) }}
+          </button>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="active">
+        <th mat-header-cell *matHeaderCellDef>Actives</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="muted">{{ activeSchoolCount(row) }} / {{ schoolCount(row) }}</span>
+        </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
-    <p *ngIf="!rows.length" class="empty">Aucun tenant enregistré.</p>
   </div>
+
+  <p *ngIf="!loading && !error && !rows.length" class="empty">Aucun tenant enregistré.</p>
 </div>

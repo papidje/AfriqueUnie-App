@@ -19,6 +19,8 @@ export class SuperAdminCitiesPageComponent implements OnInit {
   regions: RegionDto[] = [];
   loading = true;
   saving = false;
+  /** Formulaire visible uniquement après « Nouvelle ville » ou « Modifier ». */
+  formOpen = false;
   editingId: number | null = null;
 
   readonly regionLabel = cityRegionLabel;
@@ -66,6 +68,7 @@ export class SuperAdminCitiesPageComponent implements OnInit {
 
   startCreate(): void {
     this.editingId = null;
+    this.formOpen = true;
     this.form.reset({
       code: '',
       name: '',
@@ -78,6 +81,7 @@ export class SuperAdminCitiesPageComponent implements OnInit {
 
   startEdit(city: CityDto): void {
     this.editingId = city.id;
+    this.formOpen = true;
     this.form.reset({
       code: city.code,
       name: city.name,
@@ -89,6 +93,7 @@ export class SuperAdminCitiesPageComponent implements OnInit {
   }
 
   cancelEdit(): void {
+    this.formOpen = false;
     this.editingId = null;
     this.form.reset({
       code: '',

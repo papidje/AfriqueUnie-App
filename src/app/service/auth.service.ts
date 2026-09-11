@@ -134,7 +134,7 @@ export class AuthService {
         const roles = this.extractJwtRoleAuthorities(decoded);
         const primary = this.pickPrimaryRoleAuthority(roles);
         if (primary === AppRoles.SUPER_ADMIN) {
-          return ['/super-admin/dashboard'];
+          return ['/super-admin/tenants'];
         }
         return ['/dashboard'];
       } catch {
@@ -143,7 +143,7 @@ export class AuthService {
     }
     const role = localStorage.getItem(this.ROLE_KEY);
     if (role === AppRoles.SUPER_ADMIN) {
-      return ['/super-admin/dashboard'];
+      return ['/super-admin/tenants'];
     }
     return ['/dashboard'];
   }
