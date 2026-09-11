@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SchoolClassDto } from '../../models/academic.models';
 import { SchoolClassService } from '../../service/school-class.service';
+import { sortSchoolClassesByLevel } from '../../core/class-level-group-order';
 
 export interface TransferStudentDialogData {
   schoolId: number;
@@ -29,7 +30,9 @@ export class TransferStudentDialogComponent implements OnInit {
   ngOnInit(): void {
     this.schoolClassService.listForActiveSchoolYear(this.data.schoolId).subscribe({
       next: (classes) => {
-        this.classes = (classes || []).filter((c) => c.id !== this.data.currentClassId);
+        this.classes = sortSchoolClassesByLevel(
+          (classes || []).filter((c) => c.id !== this.data.currentClassId)
+        );
         this.loading = false;
         if (!this.classes.length) {
           this.errorMessage = 'Aucune autre classe disponible pour l’année active.';

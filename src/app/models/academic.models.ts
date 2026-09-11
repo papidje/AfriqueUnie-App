@@ -40,6 +40,6 @@ export interface SchoolClassDto {
   periodType?: SchoolClassPeriodType;
   enrolledStudentCount?: number;
   subjectCount?: number;
-  year?: { id: number; label?: string };
+  year?: { id: number; label?: string; startDate?: string; endDate?: string };
   level?: ClassLevel;
 }

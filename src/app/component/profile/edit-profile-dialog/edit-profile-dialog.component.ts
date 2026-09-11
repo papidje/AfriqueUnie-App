@@ -7,6 +7,7 @@ import { switchMap, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../service/auth.service';
 import { UserService } from '../../../service/user.service';
 import { UserProfile } from '../profile.models';
+import { staffBirthDateBoundsAsDate } from '../../../util/date-input-bounds.util';
 
 export interface EditProfileDialogData {
   user: UserProfile;
@@ -22,6 +23,9 @@ export class EditProfileDialogComponent implements OnInit, OnDestroy {
 
   saving = false;
   serverError: string | null = null;
+
+  readonly birthMin = staffBirthDateBoundsAsDate().min;
+  readonly birthMax = staffBirthDateBoundsAsDate().max;
 
   readonly form = this.fb.group({
     gender: [''],

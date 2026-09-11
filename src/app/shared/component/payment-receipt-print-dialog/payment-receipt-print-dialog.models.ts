@@ -14,6 +14,7 @@ export interface PaymentReceiptPrintData {
   schoolYearLabel?: string | null;
   reference: string;
   recordedBy?: string | null;
+  paymentReference?: string | null;
   paymentMode?: string | null;
   currency?: string | null;
   paymentDate?: string | null;

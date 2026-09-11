@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Ouvrir une classe</h2>
+<h2 mat-dialog-title>{{ isEdit ? 'Modifier la classe' : 'Ouvrir une classe' }}</h2>
 
 <mat-dialog-content>
   <p class="dialog-sub">Année active : {{ data.activeYear.label }}</p>
@@ -26,12 +26,18 @@
 
     <mat-form-field appearance="outline" class="full">
       <mat-label>Capacité (places)</mat-label>
-      <input matInput type="number" formControlName="capacity" min="1" max="200" />
-      <mat-hint>Effectif maximum pour l’affichage inscription / capacité.</mat-hint>
-      <mat-error>Entre 1 et 200.</mat-error>
+      <input matInput type="number" formControlName="capacity" [min]="minCapacity" max="200" />
+      <mat-hint *ngIf="!isEdit">Effectif maximum pour l’affichage inscription / capacité.</mat-hint>
+      <mat-hint *ngIf="isEdit">Minimum {{ minCapacity }} (effectif actuel).</mat-hint>
+      <mat-error *ngIf="form.controls.capacity.hasError('min')">
+        Au moins {{ minCapacity }} place(s).
+      </mat-error>
+      <mat-error *ngIf="form.controls.capacity.hasError('max') || form.controls.capacity.hasError('required')">
+        Entre {{ minCapacity }} et 200.
+      </mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full">
+    <mat-form-field *ngIf="!isEdit" appearance="outline" class="full">
       <mat-label>Périodes de notation</mat-label>
       <mat-select formControlName="periodType">
         <mat-option value="TRIMESTER">3 trimestres (sur l’année active)</mat-option>
@@ -51,6 +57,7 @@
     (click)="submit()"
     [disabled]="saving || form.invalid"
   >
-    {{ saving ? 'Création…' : 'Créer la classe' }}
+    <ng-container *ngIf="isEdit">{{ saving ? 'Enregistrement…' : 'Enregistrer' }}</ng-container>
+    <ng-container *ngIf="!isEdit">{{ saving ? 'Création…' : 'Créer la classe' }}</ng-container>
   </button>
 </mat-dialog-actions>

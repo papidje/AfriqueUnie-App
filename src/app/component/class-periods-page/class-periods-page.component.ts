@@ -6,15 +6,18 @@ import { forkJoin, of, Subject } from 'rxjs';
 import { catchError, takeUntil, finalize, switchMap } from 'rxjs/operators';
 import { SchoolClassService } from '../../service/school-class.service';
 import { EvaluationApiService } from '../../service/evaluation-api.service';
-import { SchoolClassDto, SchoolClassPeriodType } from '../../models/academic.models';
+import { SchoolClassDto, SchoolClassPeriodType, SchoolYearDto } from '../../models/academic.models';
 import { GradingPeriodSummary } from '../../models/evaluation.models';
 import { AuthUtilsService } from '../../service/auth-utils.service';
 import { AppRoles } from '../../core/app-roles';
+import { SchoolYearService } from '../../service/school-year.service';
+import { toDateInputValue as toYmdBound } from '../../util/date-input-bounds.util';
 
 interface ClassPeriodsLoad {
   sc: SchoolClassDto | null;
   periods: GradingPeriodSummary[];
   evals: unknown[];
+  year: SchoolYearDto | null;
 }
 
 @Component({
@@ -30,6 +33,7 @@ export class ClassPeriodsPageComponent implements OnInit, OnDestroy {
   savingSchedule = false;
   savingType = false;
   schoolClass: SchoolClassDto | null = null;
+  schoolYear: SchoolYearDto | null = null;
   periods: GradingPeriodSummary[] = [];
   hasAnyEvaluation = false;
 
@@ -48,11 +52,20 @@ export class ClassPeriodsPageComponent implements OnInit, OnDestroy {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly schoolClassService: SchoolClassService,
+    private readonly schoolYearService: SchoolYearService,
     private readonly evaluationApi: EvaluationApiService,
     private readonly snackBar: MatSnackBar,
     private readonly authUtils: AuthUtilsService,
     private readonly fb: FormBuilder
   ) {}
+
+  get yearDateMin(): string {
+    return toYmdBound(this.schoolYear?.startDate);
+  }
+
+  get yearDateMax(): string {
+    return toYmdBound(this.schoolYear?.endDate);
+  }
 
   ngOnInit(): void {
     this.route.parent?.paramMap
@@ -66,15 +79,23 @@ export class ClassPeriodsPageComponent implements OnInit, OnDestroy {
             return of<ClassPeriodsLoad | null>(null);
           }
           this.loading = true;
-          return forkJoin({
-            sc: this.schoolClassService.getById(this.classId).pipe(
-              catchError(() => of<SchoolClassDto | null>(null))
-            ),
-            periods: this.evaluationApi.listGradingPeriods(this.classId).pipe(
-              catchError(() => of<GradingPeriodSummary[]>([]))
-            ),
-            evals: this.evaluationApi.listForClass(this.classId).pipe(catchError(() => of([])))
-          }).pipe(
+          return this.schoolClassService.getById(this.classId).pipe(
+            catchError(() => of<SchoolClassDto | null>(null)),
+            switchMap((sc) => {
+              const yearId = sc?.year?.id;
+              const year$ =
+                yearId != null
+                  ? this.schoolYearService.getById(yearId).pipe(catchError(() => of<SchoolYearDto | null>(null)))
+                  : of<SchoolYearDto | null>(null);
+              return forkJoin({
+                sc: of(sc),
+                periods: this.evaluationApi.listGradingPeriods(this.classId!).pipe(
+                  catchError(() => of<GradingPeriodSummary[]>([]))
+                ),
+                evals: this.evaluationApi.listForClass(this.classId!).pipe(catchError(() => of([]))),
+                year: year$
+              });
+            }),
             finalize(() => {
               this.loading = false;
             })
@@ -86,6 +107,7 @@ export class ClassPeriodsPageComponent implements OnInit, OnDestroy {
           return;
         }
         this.schoolClass = res.sc;
+        this.schoolYear = res.year;
         this.periods = (res.periods ?? []).map((p) => ({
           ...p,
           locked: p.locked === true
@@ -210,14 +232,25 @@ export class ClassPeriodsPageComponent implements OnInit, OnDestroy {
       return;
     }
     this.loading = true;
-    forkJoin({
-      sc: this.schoolClassService.getById(this.classId).pipe(catchError(() => of(null))),
-      periods: this.evaluationApi.listGradingPeriods(this.classId).pipe(
-        catchError(() => of<GradingPeriodSummary[]>([]))
-      ),
-      evals: this.evaluationApi.listForClass(this.classId).pipe(catchError(() => of([])))
-    })
+    this.schoolClassService
+      .getById(this.classId)
       .pipe(
+        catchError(() => of<SchoolClassDto | null>(null)),
+        switchMap((sc) => {
+          const yearId = sc?.year?.id;
+          const year$ =
+            yearId != null
+              ? this.schoolYearService.getById(yearId).pipe(catchError(() => of<SchoolYearDto | null>(null)))
+              : of<SchoolYearDto | null>(null);
+          return forkJoin({
+            sc: of(sc),
+            periods: this.evaluationApi
+              .listGradingPeriods(this.classId!)
+              .pipe(catchError(() => of<GradingPeriodSummary[]>([]))),
+            evals: this.evaluationApi.listForClass(this.classId!).pipe(catchError(() => of([]))),
+            year: year$
+          });
+        }),
         takeUntil(this.destroy$),
         finalize(() => {
           this.loading = false;
@@ -225,6 +258,7 @@ export class ClassPeriodsPageComponent implements OnInit, OnDestroy {
       )
       .subscribe((res) => {
         this.schoolClass = res.sc;
+        this.schoolYear = res.year;
         this.periods = (res.periods ?? []).map((p) => ({ ...p, locked: p.locked === true }));
         this.hasAnyEvaluation = (res.evals as unknown[]).length > 0;
         const pt = res.sc?.periodType;

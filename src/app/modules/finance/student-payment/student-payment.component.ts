@@ -58,6 +58,7 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
   readonly form = this.fb.group({
     paymentMode: ['ESPECES', Validators.required],
     recordedBy: ['', [Validators.required, Validators.maxLength(200), recordedByNotBlank()]],
+    paymentReference: [''],
     amountToCollect: [0, [Validators.required, Validators.min(0.01)]]
   });
 
@@ -71,6 +72,10 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
     private readonly cdr: ChangeDetectorRef
   ) {}
 
+  get showPaymentReference(): boolean {
+    return this.form.value.paymentMode !== 'ESPECES';
+  }
+
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('studentId'));
     if (!id) {
@@ -80,6 +85,12 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
     }
     this.studentId = id;
     this.loadInfo(id);
+
+    this.form
+      .get('paymentMode')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe((mode) => this.syncPaymentReferenceValidators(mode));
+    this.syncPaymentReferenceValidators(this.form.value.paymentMode);
 
     this.form
       .get('amountToCollect')
@@ -99,6 +110,20 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
         }
         this.cdr.markForCheck();
       });
+  }
+
+  private syncPaymentReferenceValidators(mode: string | null | undefined): void {
+    const ctrl = this.form.get('paymentReference');
+    if (!ctrl) {
+      return;
+    }
+    if (mode && mode !== 'ESPECES') {
+      ctrl.setValidators([Validators.required, Validators.maxLength(100), recordedByNotBlank()]);
+    } else {
+      ctrl.clearValidators();
+      ctrl.setValue('', { emitEvent: false });
+    }
+    ctrl.updateValueAndValidity({ emitEvent: false });
   }
 
   ngOnDestroy(): void {
@@ -159,11 +184,20 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const paymentReference =
+      mode !== 'ESPECES' ? String(this.form.value.paymentReference ?? '').trim() : null;
+    if (mode !== 'ESPECES' && !paymentReference) {
+      this.snackBar.open('Indiquez la référence de paiement.', 'Fermer', { duration: 3500 });
+      this.form.get('paymentReference')?.markAsTouched();
+      return;
+    }
+
     if (this.paymentInputSource === 'amount') {
       payload = {
         paymentMode: mode,
         currency: 'GNF',
         recordedBy: author,
+        paymentReference,
         totalDeclaredAmount: amountNum,
         payInsReins: false,
         insReinsAmount: 0,
@@ -182,6 +216,7 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
         paymentMode: mode,
         currency: 'GNF',
         recordedBy: author,
+        paymentReference,
         payInsReins: !!insReins,
         insReinsAmount: insReins?.amount ?? 0,
         paySupplies: selected.some((d) => d.kind === 'supplies'),
@@ -206,6 +241,7 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
             matricule: this.info?.matricule ?? '',
             reference: res.receiptReference,
             recordedBy: res.recordedBy,
+            paymentReference: res.paymentReference,
             paymentMode: res.paymentMode,
             currency: 'GNF',
             paymentDate: new Date().toISOString(),

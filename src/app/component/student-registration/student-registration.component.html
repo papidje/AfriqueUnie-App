@@ -54,7 +54,13 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Date de naissance</mat-label>
-              <input matInput type="date" formControlName="birthDate" />
+              <input
+                matInput
+                type="date"
+                formControlName="birthDate"
+                [min]="studentBirthMin"
+                [max]="studentBirthMax"
+              />
               <mat-error *ngIf="stepStudent.controls.birthDate.hasError('required')">Requis</mat-error>
             </mat-form-field>
 
@@ -94,49 +100,12 @@
               </mat-select>
               <mat-error *ngIf="stepStudent.controls.classId.hasError('required')">Requis</mat-error>
             </mat-form-field>
-          </div>
 
-          <div class="photo-block">
-            <img *ngIf="photoPreviewUrl; else noRegPhoto" [src]="photoPreviewUrl" class="student-photo" alt="Aperçu photo" />
-            <ng-template #noRegPhoto>
-              <div class="photo-placeholder">Pas de photo</div>
-            </ng-template>
-            <div class="photo-actions">
-              <input
-                #galleryInput
-                type="file"
-                accept="image/*"
-                (change)="onPhotoSelected($event)"
-                [disabled]="submitting"
-                hidden
-              />
-              <input
-                #cameraInput
-                type="file"
-                accept="image/*"
-                capture="environment"
-                (change)="onPhotoSelected($event)"
-                [disabled]="submitting"
-                hidden
-              />
-              <button mat-stroked-button type="button" (click)="galleryInput.click()" [disabled]="submitting">
-                <mat-icon>photo_library</mat-icon>
-                Galerie
-              </button>
-              <button mat-stroked-button type="button" (click)="cameraInput.click()" [disabled]="submitting">
-                <mat-icon>photo_camera</mat-icon>
-                Appareil photo
-              </button>
-              <button
-                mat-button
-                type="button"
-                *ngIf="pendingPhotoFile"
-                (click)="clearPendingPhoto()"
-                [disabled]="submitting"
-              >
-                Retirer la photo
-              </button>
-            </div>
+            <mat-form-field appearance="outline">
+              <mat-label>N° de carte</mat-label>
+              <input matInput formControlName="cardNumber" />
+              <mat-hint>Carte scolaire remise à l’élève (modifiable plus tard en cas de perte)</mat-hint>
+            </mat-form-field>
           </div>
 
           <div class="actions">
@@ -147,7 +116,7 @@
 
       <mat-step [stepControl]="stepParents">
         <form [formGroup]="stepParents">
-          <ng-template matStepLabel>Responsables légaux</ng-template>
+          <ng-template matStepLabel>Parents</ng-template>
 
           <div class="parents-wrap">
             <mat-card class="parent-card">

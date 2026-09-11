@@ -54,6 +54,8 @@ export interface CreateStudentPaymentPayload {
   currency: string;
   /** Personne ayant enregistré l’encaissement (obligatoire côté API). */
   recordedBy: string;
+  /** Référence transaction (obligatoire hors espèces). */
+  paymentReference?: string | null;
   /** Si défini (> 0), le serveur répartit ce montant (inscription → fournitures complètes → mois). */
   totalDeclaredAmount?: number | null;
   payInsReins: boolean;
@@ -74,6 +76,8 @@ export interface StudentPaymentLedgerRow {
   /** Même valeur pour toutes les lignes d’un même encaissement ; absent pour d’anciennes données. */
   receiptReference?: string | null;
   recordedBy?: string | null;
+  /** Référence opérateur/banque (hors espèces). */
+  paymentReference?: string | null;
   /** Nom du compte ayant enregistré la ligne (historique fiche élève uniquement). */
   validatedByUserName?: string | null;
   /** Libellé du mois pour une ligne SCOLARITE (ex. « Octobre »). */
@@ -94,6 +98,7 @@ export interface CreateStudentPaymentResponse {
   paymentMode: string;
   receiptReference: string;
   recordedBy: string;
+  paymentReference?: string | null;
   lines: PaymentReceiptLineDto[];
 }
 
@@ -104,6 +109,7 @@ export interface PaymentReceiptViewDto {
   schoolYearLabel: string;
   receiptReference: string;
   recordedBy: string;
+  paymentReference?: string | null;
   paymentMode: string;
   currency: string;
   paymentDate: string;

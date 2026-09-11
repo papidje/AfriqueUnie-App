@@ -7,7 +7,24 @@
 }
 
 .shell {
-  max-width: 640px;
+  max-width: 860px;
+}
+
+.children-card {
+  margin-top: 16px;
+}
+
+.children-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.children-table {
+  width: 100%;
 }
 
 h1 {

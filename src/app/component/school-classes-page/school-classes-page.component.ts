@@ -9,7 +9,11 @@ import { ClassLevelService } from '../../service/class-level.service';
 import { SchoolClassService } from '../../service/school-class.service';
 import { SchoolYearService } from '../../service/school-year.service';
 import { ClassLevel, SchoolClassDto, SchoolYearDto } from '../../models/academic.models';
-import { classLevelGroupSortKey } from '../../core/class-level-group-order';
+import {
+  classLevelCodeSortKey,
+  classLevelGroupSortKey,
+  sortSchoolClassesByLevel
+} from '../../core/class-level-group-order';
 import { ClassFormDialogComponent, ClassFormDialogData } from '../class-form-dialog/class-form-dialog.component';
 import { ConfirmDialogComponent } from '../../shared/component/confirm-dialog/confirm-dialog.component';
 import { AuthUtilsService } from '../../service/auth-utils.service';
@@ -60,8 +64,40 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
     return this.authUtils.hasAnyRole([AppRoles.ADMIN_ECOLE, AppRoles.DIRECTOR, AppRoles.STAFF]);
   }
 
+  canEditClass(): boolean {
+    return this.canManageClassDelete();
+  }
+
   canDeleteClass(row: SchoolClassDto): boolean {
     return this.canManageClassDelete() && (row.enrolledStudentCount ?? 0) === 0;
+  }
+
+  /** Ouvre la modale d’édition (nom, niveau, capacité). */
+  openEditDialog(row: SchoolClassDto): void {
+    if (!this.canEditClass() || this.schoolId == null || !this.activeYear || this.loadingLevels) {
+      return;
+    }
+    const data: ClassFormDialogData = {
+      mode: 'edit',
+      schoolId: this.schoolId,
+      activeYear: this.activeYear,
+      levelGroups: this.levelGroups,
+      schoolClass: row
+    };
+    this.dialog
+      .open(ClassFormDialogComponent, {
+        data,
+        width: '520px',
+        maxWidth: '95vw',
+        autoFocus: false,
+        restoreFocus: true
+      })
+      .afterClosed()
+      .subscribe((updated) => {
+        if (updated) {
+          this.refreshList();
+        }
+      });
   }
 
   deleteClass(row: SchoolClassDto): void {
@@ -98,6 +134,7 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
       return;
     }
     const data: ClassFormDialogData = {
+      mode: 'create',
       schoolId: this.schoolId,
       activeYear: this.activeYear,
       levelGroups: this.levelGroups
@@ -200,7 +237,13 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
       .map(([groupCode, value]) => ({
         groupCode,
         groupLabel: value.groupLabel,
-        levels: value.levels.slice().sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
+        levels: value.levels.slice().sort((a, b) => {
+          const byLevel = classLevelCodeSortKey(a.code) - classLevelCodeSortKey(b.code);
+          if (byLevel !== 0) {
+            return byLevel;
+          }
+          return (a.code ?? '').localeCompare(b.code ?? '', 'fr');
+        })
       }))
       .sort((a, b) => {
         const ao = classLevelGroupSortKey(a.groupCode);
@@ -281,18 +324,6 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
   }
 
   private sortClasses(list: SchoolClassDto[]): SchoolClassDto[] {
-    return (list ?? [])
-      .slice()
-      .sort((a, b) => {
-        const ag = a.level?.group?.id ?? Number.MAX_SAFE_INTEGER;
-        const bg = b.level?.group?.id ?? Number.MAX_SAFE_INTEGER;
-        if (ag !== bg) return ag - bg;
-
-        const al = a.level?.id ?? Number.MAX_SAFE_INTEGER;
-        const bl = b.level?.id ?? Number.MAX_SAFE_INTEGER;
-        if (al !== bl) return al - bl;
-
-        return (a.id ?? 0) - (b.id ?? 0);
-      });
+    return sortSchoolClassesByLevel(list);
   }
 }

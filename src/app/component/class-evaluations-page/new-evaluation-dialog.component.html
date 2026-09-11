@@ -36,7 +36,14 @@
 
   <mat-form-field appearance="outline" class="third">
     <mat-label>Date</mat-label>
-    <input matInput type="date" formControlName="examDate" required />
+    <input
+      matInput
+      type="date"
+      formControlName="examDate"
+      required
+      [min]="examDateMin || null"
+      [max]="examDateMax || null"
+    />
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="third">

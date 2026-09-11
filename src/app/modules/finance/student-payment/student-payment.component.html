@@ -87,6 +87,22 @@
           </mat-error>
         </mat-form-field>
 
+        <mat-form-field
+          *ngIf="showPaymentReference"
+          appearance="outline"
+          subscriptSizing="dynamic"
+          class="ff-author"
+        >
+          <mat-label>Référence</mat-label>
+          <input matInput formControlName="paymentReference" autocomplete="off" />
+          <mat-hint>N° de transaction (Orange Money, Moov ou virement).</mat-hint>
+          <mat-error
+            *ngIf="form.get('paymentReference')?.hasError('required') || form.get('paymentReference')?.hasError('blank')"
+          >
+            Champ obligatoire.
+          </mat-error>
+        </mat-form-field>
+
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ff-amt">
           <mat-label>Montant à encaisser</mat-label>
           <input

@@ -89,6 +89,17 @@
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef></th>
               <td mat-cell *matCellDef="let row">
+                <button
+                  *ngIf="canEditClass()"
+                  mat-icon-button
+                  type="button"
+                  color="primary"
+                  matTooltip="Modifier"
+                  aria-label="Modifier la classe"
+                  (click)="openEditDialog(row)"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
                 <a
                   mat-icon-button
                   color="primary"

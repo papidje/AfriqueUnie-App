@@ -1,0 +1,100 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1>Référentiel des villes</h1>
+      <p class="subtitle">Préfectures / communes utilisées à la création et à la modification des écoles.</p>
+    </div>
+    <button mat-raised-button color="primary" type="button" (click)="startCreate()">
+      <mat-icon>add</mat-icon>
+      Nouvelle ville
+    </button>
+  </div>
+
+  <mat-card class="form-card">
+    <mat-card-title>{{ editingId != null ? 'Modifier la ville' : 'Ajouter une ville' }}</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="form" class="grid-form" (ngSubmit)="save()">
+        <mat-form-field appearance="outline">
+          <mat-label>Code</mat-label>
+          <input matInput formControlName="code" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Nom</mat-label>
+          <input matInput formControlName="name" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Région</mat-label>
+          <mat-select formControlName="regionId">
+            <mat-option *ngFor="let r of regions" [value]="r.id">{{ r.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Latitude</mat-label>
+          <input matInput type="number" step="0.0001" formControlName="latitude" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Longitude</mat-label>
+          <input matInput type="number" step="0.0001" formControlName="longitude" />
+        </mat-form-field>
+        <mat-slide-toggle formControlName="active" color="primary">Active</mat-slide-toggle>
+        <div class="actions">
+          <button mat-button type="button" (click)="cancelEdit()" [disabled]="saving">Annuler</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="saving || form.invalid">
+            {{ saving ? 'Enregistrement…' : editingId != null ? 'Mettre à jour' : 'Ajouter' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <div *ngIf="loading" class="state">Chargement…</div>
+
+  <div class="table-wrap" *ngIf="!loading">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Nom</th>
+          <th>Région</th>
+          <th>Écoles</th>
+          <th>Statut</th>
+          <th class="actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of cities">
+          <td>{{ c.code }}</td>
+          <td>{{ c.name }}</td>
+          <td>{{ regionLabel(c) || '—' }}</td>
+          <td>{{ c.schoolCount ?? 0 }}</td>
+          <td>
+            <span [class.inactive]="c.active === false">{{ c.active === false ? 'Inactive' : 'Active' }}</span>
+          </td>
+          <td class="actions">
+            <button mat-icon-button type="button" (click)="startEdit(c)" aria-label="Modifier">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              (click)="toggleActive(c)"
+              [attr.aria-label]="c.active === false ? 'Activer' : 'Désactiver'"
+            >
+              <mat-icon>{{ c.active === false ? 'toggle_off' : 'toggle_on' }}</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              (click)="delete(c)"
+              aria-label="Supprimer"
+              [disabled]="(c.schoolCount ?? 0) > 0"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="!cities.length" class="empty">Aucune ville.</p>
+  </div>
+</div>

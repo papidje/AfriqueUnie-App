@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, of } from 'rxjs';
 import { catchError, map, switchMap, takeUntil } from 'rxjs/operators';
 import { ActiveSchoolService } from '../../service/active-school.service';
@@ -13,6 +13,8 @@ import { StudentApiService } from '../../service/student-api.service';
 import { FeeStructureService } from '../../service/fee-structure.service';
 import { SchoolClassDto, SchoolYearDto } from '../../models/academic.models';
 import { FeeStructureDto } from '../../models/fee-structure.models';
+import { sortSchoolClassesByLevel } from '../../core/class-level-group-order';
+import { studentBirthDateBounds } from '../../util/date-input-bounds.util';
 import {
   FamilyPreviewResponse,
   StudentRegistrationResponse
@@ -47,6 +49,8 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
   schoolName: string | null = null;
   activeYear: SchoolYearDto | null = null;
   classes: SchoolClassDto[] = [];
+  /** Classe préselectionnée (ex. onglet courant sur la liste élèves). */
+  private preferredClassId: number | null = null;
 
   /** Après inscription réussie (sans paiement à cette étape). */
   registrationComplete = false;
@@ -70,7 +74,8 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     address: [''],
     communicationPhone: ['', guineaPhoneValidator()],
     communicationEmail: ['', optionalEmailValidator()],
-    classId: [null as number | null, Validators.required]
+    classId: [null as number | null, Validators.required],
+    cardNumber: ['']
   });
 
   readonly stepParents = this.fb.group({
@@ -103,6 +108,9 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
   readonly phoneControlError = phoneControlError;
   readonly emailControlError = emailControlError;
 
+  readonly studentBirthMin = studentBirthDateBounds().min;
+  readonly studentBirthMax = studentBirthDateBounds().max;
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly activeSchool: ActiveSchoolService,
@@ -113,10 +121,16 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     private readonly studentApi: StudentApiService,
     private readonly feeStructureService: FeeStructureService,
     private readonly snackBar: MatSnackBar,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    const raw = this.route.snapshot.queryParamMap.get('classId');
+    const fromQuery = Number(raw);
+    this.preferredClassId =
+      raw != null && raw !== '' && Number.isFinite(fromQuery) && fromQuery > 0 ? fromQuery : null;
+
     this.schoolId = this.activeSchool.getActiveSchoolId();
     if (!this.schoolId) {
       return;
@@ -320,7 +334,8 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
             ? compactGuineaPhone(e.emergencyContactPhone!)
             : null,
           bloodGroup: trimOrNull(e.bloodGroup),
-          allergies: trimOrNull(e.allergies)
+          allergies: trimOrNull(e.allergies),
+          cardNumber: trimOrNull(s.cardNumber)
         },
         father: {
           lastName: (p.fatherLastName || '').trim(),
@@ -405,7 +420,8 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
       address: '',
       communicationPhone: '',
       communicationEmail: '',
-      classId: null
+      classId: this.resolvePreferredClassId(),
+      cardNumber: ''
     });
     this.stepParents.reset({
       fatherLastName: '',
@@ -488,7 +504,8 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
         }
         this.schoolClassService.listForActiveSchoolYear(this.schoolId!).subscribe({
           next: (classes) => {
-            this.classes = classes || [];
+            this.classes = sortSchoolClassesByLevel(classes || []);
+            this.applyPreferredClass();
             this.loading = false;
           },
           error: () => {
@@ -502,6 +519,20 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
         this.snackBar.open("Impossible de charger l'année active.", 'Fermer', { duration: 5000 });
       }
     });
+  }
+
+  private resolvePreferredClassId(): number | null {
+    if (this.preferredClassId == null) {
+      return null;
+    }
+    return this.classes.some((c) => c.id === this.preferredClassId) ? this.preferredClassId : null;
+  }
+
+  private applyPreferredClass(): void {
+    const classId = this.resolvePreferredClassId();
+    if (classId != null) {
+      this.stepStudent.patchValue({ classId });
+    }
   }
 
   private revokePhotoPreview(): void {

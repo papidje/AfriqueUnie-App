@@ -1,0 +1,103 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1>Carte &amp; regroupements</h1>
+      <p class="subtitle">
+        Écoles et élèves par région et par ville. Les marqueurs utilisent les coordonnées des villes (pas des régions).
+      </p>
+    </div>
+    <button mat-stroked-button type="button" (click)="reload()" [disabled]="loading">Actualiser</button>
+  </div>
+
+  <div *ngIf="loading" class="state">Chargement…</div>
+  <p *ngIf="error && !loading" class="state error">Impossible de charger les statistiques géographiques.</p>
+
+  <ng-container *ngIf="!loading && !error && stats as s">
+    <div class="kpis">
+      <div class="kpi">
+        <span class="kpi-label">Écoles</span>
+        <span class="kpi-value">{{ s.totals.schools }}</span>
+        <span class="kpi-hint">{{ s.totals.schoolsWithCity }} avec ville · {{ s.totals.schoolsWithoutCity }} sans</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Élèves</span>
+        <span class="kpi-value">{{ s.totals.students }}</span>
+        <span class="kpi-hint">{{ s.totals.studentsWithCity }} avec ville · {{ s.totals.studentsWithoutCity }} sans</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Marqueurs</span>
+        <span class="kpi-value">{{ markerCities.length }}</span>
+        <span class="kpi-hint">Villes avec au moins une école</span>
+      </div>
+    </div>
+
+    <div class="layout">
+      <section class="map-panel">
+        <div class="panel-title-row">
+          <h2>Carte Guinée</h2>
+          <button
+            mat-button
+            type="button"
+            *ngIf="selectedRegionId != null"
+            (click)="selectRegion(null)"
+          >
+            Toute la Guinée
+          </button>
+        </div>
+        <div id="super-admin-guinea-map" class="map" role="img" aria-label="Carte des écoles par ville"></div>
+        <p class="map-hint">Cliquez une région dans le tableau pour filtrer les marqueurs.</p>
+      </section>
+
+      <section class="tables">
+        <h2>Par région</h2>
+        <div class="table-wrap">
+          <table class="tbl tbl--regions">
+            <thead>
+              <tr>
+                <th>Région</th>
+                <th>Écoles</th>
+                <th>Actives</th>
+                <th>Élèves</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let r of regions"
+                [class.selected]="selectedRegionId === r.regionId"
+                (click)="selectRegion(r.regionId)"
+              >
+                <td>{{ r.regionName }}</td>
+                <td>{{ r.schoolCount }}</td>
+                <td>{{ r.activeSchoolCount }}</td>
+                <td>{{ r.studentCount }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Par ville{{ selectedRegionId != null ? ' (filtrée)' : '' }}</h2>
+        <div class="table-wrap">
+          <table class="tbl tbl--cities">
+            <thead>
+              <tr>
+                <th>Ville</th>
+                <th>Région</th>
+                <th>Écoles</th>
+                <th>Élèves</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of filteredCities">
+                <td>{{ c.cityName }}</td>
+                <td>{{ c.regionName || '—' }}</td>
+                <td>{{ c.schoolCount }}</td>
+                <td>{{ c.studentCount }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p *ngIf="!filteredCities.length" class="empty">Aucune ville.</p>
+        </div>
+      </section>
+    </div>
+  </ng-container>
+</div>

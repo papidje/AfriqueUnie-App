@@ -6,6 +6,7 @@ import { SchoolClassDto, SchoolYearDto } from '../../../models/academic.models';
 import { ActiveSchoolService } from '../../../service/active-school.service';
 import { SchoolClassService } from '../../../service/school-class.service';
 import { SchoolYearService } from '../../../service/school-year.service';
+import { sortSchoolClassesByLevel } from '../../../core/class-level-group-order';
 
 export type ClassWorkspaceSegment = 'planning' | 'matieres' | 'periodes';
 
@@ -76,7 +77,11 @@ export class ClassWorkspaceContextBarComponent implements OnInit, OnDestroy {
               return of<SchoolContext>({ schoolId: sid, year: null, classes: [] });
             }
             return this.schoolClassService.listForActiveSchoolYear(sid).pipe(
-              map((classes) => ({ schoolId: sid, year, classes })),
+              map((classes) => ({
+                schoolId: sid,
+                year,
+                classes: sortSchoolClassesByLevel(classes ?? [])
+              })),
               catchError(() => of<SchoolContext>({ schoolId: sid, year, classes: [] }))
             );
           })

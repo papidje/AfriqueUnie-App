@@ -1,0 +1,159 @@
+.page {
+  padding: var(--sp-4) var(--sp-6) var(--sp-8);
+  max-width: var(--container-xl, 1200px);
+  margin: 0 auto;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+}
+
+h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.95rem;
+  max-width: 52rem;
+}
+
+.state {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--app-text-muted);
+}
+
+.state.error {
+  color: var(--danger-fg, #b91c1c);
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.kpi {
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  background: var(--app-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.kpi-label {
+  font-size: 0.8rem;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.kpi-value {
+  font-size: 1.5rem;
+  font-weight: 650;
+}
+
+.kpi-hint {
+  font-size: 0.8rem;
+  color: var(--app-text-muted);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.map-panel,
+.tables {
+  min-width: 0;
+}
+
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.map {
+  height: 420px;
+  width: 100%;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #e8eef2;
+}
+
+.map-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--app-text-muted);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+}
+
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th,
+  td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  tbody tr {
+    cursor: default;
+  }
+
+  tbody tr.selected {
+    background: rgba(25, 118, 210, 0.1);
+  }
+}
+
+.tbl--regions tbody tr {
+  cursor: pointer;
+}
+
+.tbl--regions tbody tr:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.empty {
+  color: var(--app-text-muted);
+  font-size: 0.9rem;
+}

@@ -12,6 +12,7 @@ import {
 import { ClassSubjectRow } from '../../models/subject.models';
 import { ClassSubjectService } from '../../service/class-subject.service';
 import { EvaluationApiService } from '../../service/evaluation-api.service';
+import { toDateInputValue, toYmdLocal } from '../../util/date-input-bounds.util';
 
 export interface NewEvaluationDialogData {
   classId: number;
@@ -30,6 +31,8 @@ export class NewEvaluationDialogComponent implements OnInit, OnDestroy {
   loading = true;
   saving = false;
   periods: GradingPeriodSummary[] = [];
+  examDateMin = '';
+  examDateMax = '';
   form: FormGroup;
 
   constructor(
@@ -73,6 +76,11 @@ export class NewEvaluationDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.form
+      .get('gradingPeriodId')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe((periodId: number | null) => this.applyExamDateBounds(periodId));
+
     forkJoin({
       periods: this.evalApi.listGradingPeriods(this.data.classId),
       subjects: this.classSubjectService.listForClass(this.data.classId)
@@ -88,6 +96,8 @@ export class NewEvaluationDialogComponent implements OnInit, OnDestroy {
           }
           if (periods.length === 1) {
             this.form.patchValue({ gradingPeriodId: periods[0].id });
+          } else {
+            this.applyExamDateBounds(this.form.get('gradingPeriodId')?.value);
           }
         },
         error: () => {
@@ -98,6 +108,24 @@ export class NewEvaluationDialogComponent implements OnInit, OnDestroy {
   }
 
   subjects: ClassSubjectRow[] = [];
+
+  private applyExamDateBounds(periodId: number | null | undefined): void {
+    const p = this.periods.find((x) => x.id === periodId);
+    this.examDateMin = p ? toDateInputValue(p.startDate) : '';
+    this.examDateMax = p ? toDateInputValue(p.endDate) : '';
+    if (!this.examDateMin || !this.examDateMax) {
+      return;
+    }
+    const current = toDateInputValue(this.form.get('examDate')?.value);
+    if (!current || current < this.examDateMin || current > this.examDateMax) {
+      const today = toYmdLocal(new Date());
+      const clamped =
+        today >= this.examDateMin && today <= this.examDateMax
+          ? today
+          : this.examDateMin;
+      this.form.patchValue({ examDate: clamped }, { emitEvent: false });
+    }
+  }
 
   /** Coefficient matière/classe (même valeur que sur « Matières de la classe ») — utilisé pour les moyennes. */
   get selectedSubjectCoefficient(): number | null {

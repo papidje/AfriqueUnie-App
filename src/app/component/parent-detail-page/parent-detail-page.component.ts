@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ParentApiService } from '../../service/parent-api.service';
 import { BackNavigationService } from '../../core/back-navigation.service';
+import { ParentChildRowDto } from '../../models/student-list.models';
 import {
   compactGuineaPhone,
   emailControlError,
@@ -25,6 +26,8 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
   loading = true;
   saving = false;
   parentId: number | null = null;
+  children: ParentChildRowDto[] = [];
+  readonly childColumns = ['name', 'matricule', 'className', 'relation', 'status', 'actions'];
 
   readonly form = this.fb.nonNullable.group({
     lastName: ['', Validators.required],
@@ -73,6 +76,7 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
             profession: p.profession ?? '',
             address: p.address ?? ''
           });
+          this.children = p.children ?? [];
           this.loading = false;
         },
         error: () => {
@@ -86,6 +90,38 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  relationLabel(relation: string | null | undefined): string {
+    switch (relation) {
+      case 'PERE':
+        return 'Père';
+      case 'MERE':
+        return 'Mère';
+      case 'PERE_ET_MERE':
+        return 'Père et mère';
+      default:
+        return '—';
+    }
+  }
+
+  statusLabel(status: string | null | undefined): string {
+    switch (status) {
+      case 'INSCRIT':
+        return 'Inscrit';
+      case 'SANS_CLASSE':
+        return 'Sans classe';
+      case 'DESINSCRIT':
+        return 'Désinscrit';
+      case 'TRANSFERE':
+        return 'Transféré';
+      default:
+        return status || '—';
+    }
+  }
+
+  openStudent(childId: number): void {
+    void this.router.navigate(['/students', childId]);
   }
 
   save(): void {
@@ -116,6 +152,7 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
             profession: updated.profession ?? '',
             address: updated.address ?? ''
           });
+          this.children = updated.children ?? this.children;
           this.snackBar.open('Fiche parent enregistrée.', 'Fermer', { duration: 3000 });
         },
         error: (err: { error?: { message?: string } }) => {

@@ -23,6 +23,8 @@ import {
   THEME_SWATCH_PRIMARY
 } from '../../../../core/school-theme';
 import { ThemeService } from '../../../../service/theme.service';
+import { CityDto, CityService } from '../../../../service/city.service';
+import { schoolOpenDateBounds } from '../../../../util/date-input-bounds.util';
 
 @Component({
   selector: 'app-school-details',
@@ -34,6 +36,7 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
 
   schoolId: number | null = null;
   school: School | null = null;
+  cities: CityDto[] = [];
   admins: Array<{ id: number; fullname: string; email: string }> = [];
   years: SchoolYearDto[] = [];
   loading = true;
@@ -51,11 +54,15 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
   readonly fontKeys = [...SCHOOL_FONT_KEYS];
   readonly fontLabels = FONT_LABELS;
 
+  readonly openDateMin = schoolOpenDateBounds().min;
+  readonly openDateMax = schoolOpenDateBounds().max;
+
   readonly form = this.fb.group({
     name: ['', Validators.required],
     adress: ['', Validators.required],
     contact: ['', Validators.required],
-    openDate: ['', Validators.required]
+    openDate: ['', Validators.required],
+    cityId: [null as number | null, Validators.required]
   });
 
   constructor(
@@ -63,6 +70,7 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly fb: FormBuilder,
     private readonly schoolService: SchoolService,
+    private readonly cityService: CityService,
     private readonly userService: UserService,
     private readonly schoolYearService: SchoolYearService,
     private readonly dialog: MatDialog,
@@ -71,6 +79,16 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.cityService
+      .listActive()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (list) => {
+          this.cities = list || [];
+          this.ensureCurrentCityOption();
+        },
+        error: () => (this.cities = [])
+      });
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((pm) => {
       const id = pm.get('id');
       this.schoolId = id != null ? Number(id) : null;
@@ -140,10 +158,47 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
       name: s.name ?? '',
       adress: s.adress ?? '',
       contact: s.contact ?? '',
-      openDate: od
+      openDate: od,
+      cityId: s.city?.id ?? null
     });
     this.selectedTheme = normalizeThemeKey(s.themeName);
     this.selectedFont = normalizeFontKey(s.fontName);
+    this.ensureCurrentCityOption();
+  }
+
+  /** Conserve la ville actuelle dans le select même si elle n’est plus active. */
+  private ensureCurrentCityOption(): void {
+    const c = this.school?.city;
+    if (c?.id == null) {
+      return;
+    }
+      if (!this.cities.some((x) => x.id === c.id)) {
+      this.cities = [
+        {
+          id: c.id,
+          code: c.code || '',
+          name: c.name || `Ville #${c.id}`,
+          region: c.region?.name
+            ? { id: c.region.id ?? 0, code: c.region.code || '', name: c.region.name }
+            : null,
+          latitude: 0,
+          longitude: 0,
+          active: false
+        },
+        ...this.cities
+      ];
+    }
+  }
+
+  private cityPayloadFromSchoolOrForm(): { id: number } | null {
+    const formCityId = this.form.getRawValue().cityId;
+    if (formCityId != null) {
+      return { id: formCityId };
+    }
+    if (this.school?.city?.id != null) {
+      return { id: this.school.city.id };
+    }
+    return null;
   }
 
   private loadAdmins(): void {
@@ -170,6 +225,11 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
     if (this.schoolId == null || this.school == null) {
       return;
     }
+    const city = this.cityPayloadFromSchoolOrForm();
+    if (city == null) {
+      this.snackBar.open('La ville est obligatoire avant d’enregistrer.', 'Fermer', { duration: 4000 });
+      return;
+    }
     this.savingVisual = true;
     const s = this.school;
     this.schoolService
@@ -178,6 +238,7 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
         adress: s.adress ?? '',
         contact: s.contact ?? '',
         openDate: typeof s.openDate === 'string' ? s.openDate : '',
+        city,
         themeName: this.selectedTheme,
         fontName: this.selectedFont
       })
@@ -206,6 +267,7 @@ export class SchoolDetailsComponent implements OnInit, OnDestroy {
         adress: (v.adress || '').trim(),
         contact: (v.contact || '').trim(),
         openDate: v.openDate || '',
+        city: { id: v.cityId as number },
         themeName: this.selectedTheme,
         fontName: this.selectedFont
       })

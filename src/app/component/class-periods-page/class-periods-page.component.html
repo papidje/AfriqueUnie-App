@@ -65,6 +65,8 @@
                   type="date"
                   class="cell-date"
                   [value]="toDateInputValue(p.startDate)"
+                  [min]="yearDateMin || null"
+                  [max]="yearDateMax || null"
                   (input)="onStartChange(p, $any($event.target).value)"
                 />
                 <span *ngIf="periodRowLocked(p)">{{ p.startDate | displayDate }}</span>
@@ -78,6 +80,8 @@
                   type="date"
                   class="cell-date"
                   [value]="toDateInputValue(p.endDate)"
+                  [min]="yearDateMin || null"
+                  [max]="yearDateMax || null"
                   (input)="onEndChange(p, $any($event.target).value)"
                 />
                 <span *ngIf="periodRowLocked(p)">{{ p.endDate | displayDate }}</span>

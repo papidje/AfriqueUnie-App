@@ -6,7 +6,7 @@ import { catchError, distinctUntilChanged, filter, switchMap, takeUntil, tap } f
 import { ActiveSchoolService } from '../../service/active-school.service';
 import { SchoolClassService } from '../../service/school-class.service';
 import { SchoolClassDto } from '../../models/academic.models';
-import { classLevelGroupSortKey } from '../../core/class-level-group-order';
+import { sortSchoolClassesByLevel } from '../../core/class-level-group-order';
 import { HubHeaderActionService } from '../../service/hub-header-action.service';
 
 @Component({
@@ -151,20 +151,6 @@ export class ClassHubShellComponent implements OnInit, OnDestroy {
   }
 
   private sortClasses(list: SchoolClassDto[]): SchoolClassDto[] {
-    return (list ?? [])
-      .slice()
-      .sort((a, b) => {
-        const ao = classLevelGroupSortKey(a.level?.group?.code);
-        const bo = classLevelGroupSortKey(b.level?.group?.code);
-        if (ao !== bo) {
-          return ao - bo;
-        }
-        const al = a.level?.id ?? 0;
-        const bl = b.level?.id ?? 0;
-        if (al !== bl) {
-          return al - bl;
-        }
-        return (a.id ?? 0) - (b.id ?? 0);
-      });
+    return sortSchoolClassesByLevel(list);
   }
 }

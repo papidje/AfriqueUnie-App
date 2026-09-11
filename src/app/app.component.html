@@ -251,7 +251,7 @@
               <a
                 mat-list-item
                 *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
-                routerLink="/super-admin"
+                routerLink="/super-admin/dashboard"
                 routerLinkActive="sidenav-link-active"
                 [routerLinkActiveOptions]="{ exact: false }"
                 matTooltip="Tenants / écoles"
@@ -261,6 +261,51 @@
                 <div class="nav-item-stack">
                   <mat-icon>apartment</mat-icon>
                   <span *ngIf="sidebarExpanded">Tenants / écoles</span>
+                </div>
+              </a>
+              <a
+                mat-list-item
+                *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
+                routerLink="/super-admin/villes"
+                routerLinkActive="sidenav-link-active"
+                [routerLinkActiveOptions]="{ exact: false }"
+                matTooltip="Villes"
+                [matTooltipDisabled]="sidebarExpanded"
+                matTooltipPosition="right"
+              >
+                <div class="nav-item-stack">
+                  <mat-icon>location_city</mat-icon>
+                  <span *ngIf="sidebarExpanded">Villes</span>
+                </div>
+              </a>
+              <a
+                mat-list-item
+                *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
+                routerLink="/super-admin/matieres"
+                routerLinkActive="sidenav-link-active"
+                [routerLinkActiveOptions]="{ exact: false }"
+                matTooltip="Matières (référentiel)"
+                [matTooltipDisabled]="sidebarExpanded"
+                matTooltipPosition="right"
+              >
+                <div class="nav-item-stack">
+                  <mat-icon>menu_book</mat-icon>
+                  <span *ngIf="sidebarExpanded">Matières</span>
+                </div>
+              </a>
+              <a
+                mat-list-item
+                *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
+                routerLink="/super-admin/carte"
+                routerLinkActive="sidenav-link-active"
+                [routerLinkActiveOptions]="{ exact: false }"
+                matTooltip="Carte & stats"
+                [matTooltipDisabled]="sidebarExpanded"
+                matTooltipPosition="right"
+              >
+                <div class="nav-item-stack">
+                  <mat-icon>map</mat-icon>
+                  <span *ngIf="sidebarExpanded">Carte & stats</span>
                 </div>
               </a>
               <ng-container *ngIf="showAdministrationNav()">

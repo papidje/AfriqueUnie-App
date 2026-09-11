@@ -14,7 +14,7 @@ import { StudentPeriodDashboardResponse } from '../../models/grading.models';
 import { StudentDetailDto } from '../../models/student-list.models';
 import { PaymentReceiptViewDto, StudentPaymentInfoDto, StudentPaymentLedgerRow } from '../../models/finance.models';
 import { AuthUtilsService } from '../../service/auth-utils.service';
-import { AppRoles, ROLES_STUDENT_WRITE } from '../../core/app-roles';
+import { AppRoles, ROLES_FINANCIAL_NAV, ROLES_STUDENT_WRITE } from '../../core/app-roles';
 import { ConfirmDialogComponent } from '../../shared/component/confirm-dialog/confirm-dialog.component';
 import { TransferStudentDialogComponent } from '../transfer-student-dialog/transfer-student-dialog.component';
 import { PaymentReceiptPrintDialogComponent } from '../../shared/component/payment-receipt-print-dialog/payment-receipt-print-dialog.component';
@@ -22,6 +22,7 @@ import { ActiveSchoolService } from '../../service/active-school.service';
 import { PaymentReceiptPrintData } from '../../shared/component/payment-receipt-print-dialog/payment-receipt-print-dialog.models';
 import { API_BASE_URL } from '../../core/api-base';
 import { prepareStudentPhotoFile } from '../../util/student-photo-upload.util';
+import { studentBirthDateBounds } from '../../util/date-input-bounds.util';
 import { formatDisplayDateTimeAt } from '../../shared/util/display-date.util';
 
 export interface StudentPaymentHistoryGroupRow {
@@ -33,6 +34,7 @@ export interface StudentPaymentHistoryGroupRow {
   amount: number;
   currency: string;
   recordedBy: string | null;
+  paymentReference: string | null;
   validatedByUserName: string | null;
 }
 
@@ -78,6 +80,9 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
   /** Onglet Finances (API finance réservée hors enseignants côté navigation). */
   readonly showStudentFinanceTab = !this.authUtils.hasRole(AppRoles.TEACHER);
 
+  /** Accès page encaissement (mêmes rôles que le module Finance). */
+  readonly canEncaisser = this.authUtils.hasAnyRole([...ROLES_FINANCIAL_NAV]);
+
   readonly generalForm = this.fb.group({
     civility: ['MONSIEUR', Validators.required],
     firstName: ['', Validators.required],
@@ -87,7 +92,8 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     nationality: [''],
     address: [''],
     communicationPhone: [''],
-    communicationEmail: ['']
+    communicationEmail: [''],
+    cardNumber: ['']
   });
 
   readonly schoolingForm = this.fb.group({
@@ -112,6 +118,9 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
   ];
 
   readonly gradeColumns = ['subject', 'coefficient', 'continuous', 'composition', 'periodFinal'];
+
+  readonly studentBirthMin = studentBirthDateBounds().min;
+  readonly studentBirthMax = studentBirthDateBounds().max;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -162,6 +171,30 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     const paid = Math.min(exp, Number(this.paymentInfo.insReinsPaid || 0));
     const pct = exp <= 0 ? 0 : Math.round((paid / exp) * 100);
     return `background: conic-gradient(#1976d2 ${pct}%, #e0e0e0 ${pct}% 100%);`;
+  }
+
+  /** Reliquat (inscription, fournitures, mois) — masque Encaisser si tout est soldé. */
+  get hasRemainingBalance(): boolean {
+    const fi = this.paymentInfo;
+    if (!fi) {
+      return false;
+    }
+    let rem = Number(fi.insReinsRemaining || 0);
+    const suppliesOn = fi.suppliesColumnEnabled !== false;
+    if (suppliesOn && !fi.suppliesPaid) {
+      rem += Number(fi.suppliesExpected || 0);
+    }
+    for (const m of fi.monthlyTuition ?? []) {
+      rem += Math.max(0, Number(m.dueAmount || 0) - Number(m.paidAmount || 0));
+    }
+    return rem >= 1;
+  }
+
+  goToEncaissement(): void {
+    if (this.studentId == null || !this.canEncaisser) {
+      return;
+    }
+    void this.router.navigate(['/finance/payment', this.studentId]);
   }
 
   startEdit(section: 'general' | 'health'): void {
@@ -524,6 +557,7 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
       schoolYearLabel: dto.schoolYearLabel,
       reference: dto.receiptReference,
       recordedBy: dto.recordedBy,
+      paymentReference: dto.paymentReference,
       paymentMode: dto.paymentMode,
       currency: dto.currency,
       paymentDate: dto.paymentDate,
@@ -567,7 +601,8 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
       nationality: s.nationality ?? '',
       address: s.address ?? '',
       communicationPhone: s.communicationPhone ?? '',
-      communicationEmail: s.communicationEmail ?? ''
+      communicationEmail: s.communicationEmail ?? '',
+      cardNumber: s.cardNumber ?? ''
     }, { emitEvent: false });
     this.schoolingForm.patchValue({
       enrollmentStatus: s.enrollmentStatus ?? 'INSCRIT',
@@ -608,6 +643,7 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
         amount: gRows.reduce((s, r) => s + (Number(r.amount) || 0), 0),
         currency: gRows[0].currency || 'GNF',
         recordedBy: gRows.map((r) => r.recordedBy?.trim()).find(Boolean) || null,
+        paymentReference: gRows.map((r) => r.paymentReference?.trim()).find(Boolean) || null,
         validatedByUserName: gRows.map((r) => r.validatedByUserName?.trim()).find(Boolean) || null
       });
     }

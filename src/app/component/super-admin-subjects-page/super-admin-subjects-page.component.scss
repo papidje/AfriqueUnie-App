@@ -1,0 +1,77 @@
+.page {
+  padding: var(--sp-4) var(--sp-6) var(--sp-8);
+  max-width: var(--container-xl, 900px);
+  margin: 0 auto;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.95rem;
+}
+
+.form-card {
+  margin-bottom: 1.5rem;
+}
+
+.grid-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem 1rem;
+  align-items: start;
+}
+
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.state {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--app-text-muted);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th,
+  td {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  th.actions,
+  td.actions {
+    text-align: right;
+    white-space: nowrap;
+  }
+}
+
+.empty {
+  margin-top: 1rem;
+  color: var(--app-text-muted);
+}

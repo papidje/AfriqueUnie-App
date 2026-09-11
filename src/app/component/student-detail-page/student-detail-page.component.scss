@@ -152,6 +152,14 @@
 .grid .full { grid-column: 1 / -1; }
 .actions { margin: 12px 0; display:flex; justify-content:flex-end; }
 .parents-block { background:var(--app-surface-2); border:1px solid var(--app-border); border-radius:8px; padding:12px; }
+.finance-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 12px 0 0;
+}
+.finance-actions button mat-icon {
+  margin-right: 6px;
+}
 .finance-cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 12px 0; }
 .finance-cards .card { border:1px solid var(--app-border); border-radius:8px; padding:12px; }
 .pie { width:72px; height:72px; border-radius:50%; margin:8px 0; }

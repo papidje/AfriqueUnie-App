@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ClassLevel } from '../../models/academic.models';
-import { classLevelGroupSortKey } from '../../core/class-level-group-order';
+import { sortClassLevelsByPedagogy } from '../../core/class-level-group-order';
 import { FeeStructureDto, FeeStructureWritePayload, resolveTuitionDisplayAmount, resolveTuitionInputMode } from '../../models/fee-structure.models';
 import { ClassLevelService } from '../../service/class-level.service';
 import { ActiveSchoolService } from '../../service/active-school.service';
@@ -166,18 +166,6 @@ export class FinancialSettingsPageComponent implements OnInit {
   }
 
   private sortLevels(levels: ClassLevel[]): ClassLevel[] {
-    return (levels ?? [])
-      .slice()
-      .sort((a, b) => {
-        const ao = classLevelGroupSortKey(a.group?.code);
-        const bo = classLevelGroupSortKey(b.group?.code);
-        if (ao !== bo) return ao - bo;
-
-        const al = a.id ?? 0;
-        const bl = b.id ?? 0;
-        if (al !== bl) return al - bl;
-
-        return (a.code ?? '').localeCompare(b.code ?? '');
-      });
+    return sortClassLevelsByPedagogy(levels);
   }
 }

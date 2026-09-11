@@ -40,7 +40,15 @@
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Date d’ouverture</mat-label>
-          <input matInput type="date" formControlName="openDate" />
+          <input matInput type="date" formControlName="openDate" [min]="openDateMin" [max]="openDateMax" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Ville</mat-label>
+          <mat-select formControlName="cityId">
+            <mat-option *ngFor="let c of cities" [value]="c.id">
+              {{ c.name }}<span *ngIf="c.region?.name"> ({{ c.region?.name }})</span>
+            </mat-option>
+          </mat-select>
         </mat-form-field>
         <div class="full-row actions-row">
           <button mat-raised-button color="primary" type="submit" [disabled]="saving || form.invalid">

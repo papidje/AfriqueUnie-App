@@ -12,6 +12,12 @@ export interface CreateSchoolClassRequest {
   periodType?: SchoolClassPeriodType;
 }
 
+export interface UpdateSchoolClassRequest {
+  name: string;
+  levelId: number;
+  capacity: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SchoolClassService {
   private readonly base = `${API_BASE_URL}/api/school-classes`;
@@ -33,6 +39,10 @@ export class SchoolClassService {
 
   create(body: CreateSchoolClassRequest): Observable<SchoolClassDto> {
     return this.http.post<SchoolClassDto>(this.base, body);
+  }
+
+  update(classId: number, body: UpdateSchoolClassRequest): Observable<SchoolClassDto> {
+    return this.http.put<SchoolClassDto>(`${this.base}/${classId}`, body);
   }
 
   updatePeriodType(classId: number, periodType: SchoolClassPeriodType): Observable<void> {

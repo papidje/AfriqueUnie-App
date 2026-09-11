@@ -21,6 +21,8 @@ export interface StudentRegistrationDto {
   emergencyContactPhone?: string | null;
   bloodGroup?: string | null;
   allergies?: string | null;
+  /** Numéro de la carte scolaire remise à l’inscription. */
+  cardNumber?: string | null;
 }
 
 /** Valeurs `PaymentMode` côté API (inscription / encaissement). */

@@ -17,6 +17,18 @@ export interface ParentDetailDto {
   email: string | null;
   profession: string | null;
   address: string | null;
+  children?: ParentChildRowDto[] | null;
+}
+
+export interface ParentChildRowDto {
+  id: number;
+  firstName: string;
+  lastName: string;
+  matricule?: string | null;
+  className?: string | null;
+  enrollmentStatus?: string | null;
+  /** PERE | MERE | PERE_ET_MERE */
+  relation?: string | null;
 }
 
 export interface StudentDetailDto {
@@ -28,6 +40,8 @@ export interface StudentDetailDto {
   birthPlace?: string | null;
   nationality?: string | null;
   matricule: string;
+  /** Numéro de carte scolaire (modifiable). */
+  cardNumber?: string | null;
   address?: string | null;
   communicationPhone?: string | null;
   communicationEmail?: string | null;
@@ -71,4 +85,5 @@ export interface StudentProfileUpdatePayload {
   tutorEmail?: string | null;
   enrollmentStatus?: string | null;
   classHistory?: string | null;
+  cardNumber?: string | null;
 }

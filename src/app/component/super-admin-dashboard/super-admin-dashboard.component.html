@@ -1,6 +1,15 @@
 <div class="page">
-  <h1>Super admin — Tenants & écoles</h1>
-  <p class="subtitle">Liste de tous les tenants et des écoles rattachées (schools.tenant_id).</p>
+  <div class="page-head">
+    <div>
+      <h1>Super admin — Tenants & écoles</h1>
+      <p class="subtitle">Liste de tous les tenants et des écoles rattachées (schools.tenant_id).</p>
+    </div>
+    <div class="quick-links">
+      <a mat-stroked-button routerLink="/super-admin/carte">Carte &amp; stats</a>
+      <a mat-stroked-button routerLink="/super-admin/villes">Villes</a>
+      <a mat-stroked-button routerLink="/super-admin/matieres">Matières</a>
+    </div>
+  </div>
 
   <div *ngIf="loading" class="state">Chargement…</div>
   <p *ngIf="error && !loading" class="state error">Impossible de charger les données.</p>

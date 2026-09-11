@@ -25,6 +25,9 @@ import {
   ROLES_STUDENT_WRITE,
 } from "./core/app-roles";
 import { SuperAdminDashboardComponent } from "./component/super-admin-dashboard/super-admin-dashboard.component";
+import { SuperAdminCitiesPageComponent } from "./component/super-admin-cities-page/super-admin-cities-page.component";
+import { SuperAdminSubjectsPageComponent } from "./component/super-admin-subjects-page/super-admin-subjects-page.component";
+import { SuperAdminGeoPageComponent } from "./component/super-admin-geo-page/super-admin-geo-page.component";
 import { MyEstablishmentsComponent } from "./component/my-establishments/my-establishments.component";
 import { SchoolClassesPageComponent } from "./component/school-classes-page/school-classes-page.component";
 import { SchoolYearCreatePageComponent } from "./component/school-year-create-page/school-year-create-page.component";
@@ -113,6 +116,24 @@ const routes: Routes = [
       {
         path: 'super-admin/dashboard',
         component: SuperAdminDashboardComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [AppRoles.SUPER_ADMIN] }
+      },
+      {
+        path: 'super-admin/villes',
+        component: SuperAdminCitiesPageComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [AppRoles.SUPER_ADMIN] }
+      },
+      {
+        path: 'super-admin/matieres',
+        component: SuperAdminSubjectsPageComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [AppRoles.SUPER_ADMIN] }
+      },
+      {
+        path: 'super-admin/carte',
+        component: SuperAdminGeoPageComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: { roles: [AppRoles.SUPER_ADMIN] }
       },

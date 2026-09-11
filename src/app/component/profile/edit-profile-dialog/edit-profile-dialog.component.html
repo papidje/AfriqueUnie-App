@@ -28,9 +28,15 @@
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Date de naissance</mat-label>
-      <input matInput [matDatepicker]="bdPicker" formControlName="birthDate" />
+      <input
+        matInput
+        [matDatepicker]="bdPicker"
+        formControlName="birthDate"
+        [min]="birthMin"
+        [max]="birthMax"
+      />
       <mat-datepicker-toggle matIconSuffix [for]="bdPicker"></mat-datepicker-toggle>
-      <mat-datepicker #bdPicker></mat-datepicker>
+      <mat-datepicker #bdPicker [startAt]="birthMax"></mat-datepicker>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">

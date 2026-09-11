@@ -11,6 +11,7 @@
       Réf. <code>{{ data.reference }}</code>
     </p>
     <p><strong>Auteur :</strong> {{ data.recordedBy || '—' }}</p>
+    <p *ngIf="data.paymentReference"><strong>Référence :</strong> {{ data.paymentReference }}</p>
     <p><strong>Mode :</strong> {{ modeLabel(data.paymentMode) }} · <strong>Total :</strong> {{ asMoney(data.totalCollected) }}</p>
     <p><strong>Date :</strong> {{ formatDate(data.paymentDate) }}</p>
   </div>

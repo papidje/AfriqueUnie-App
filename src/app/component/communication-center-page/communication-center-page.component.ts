@@ -13,6 +13,7 @@ import {
 } from '../../service/communication-api.service';
 import { SchoolClassService } from '../../service/school-class.service';
 import { SchoolClassDto } from '../../models/academic.models';
+import { sortSchoolClassesByLevel } from '../../core/class-level-group-order';
 import { CommunicationBatchSettingsDialogComponent } from './communication-batch-settings-dialog.component';
 import { CommunicationHistoryDetailDialogComponent } from './communication-history-detail-dialog.component';
 
@@ -82,7 +83,7 @@ export class CommunicationCenterPageComponent implements OnInit, OnDestroy {
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (list) => {
-              this.schoolClasses = list ?? [];
+              this.schoolClasses = sortSchoolClassesByLevel(list ?? []);
             },
             error: () => {
               this.schoolClasses = [];
