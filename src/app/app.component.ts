@@ -6,6 +6,7 @@ import { AuthUtilsService } from './service/auth-utils.service';
 import { ActiveSchoolService } from './service/active-school.service';
 import { ThemeService } from './service/theme.service';
 import { InAppNotificationApiService } from './service/in-app-notification-api.service';
+import { MessagingApiService } from './service/messaging-api.service';
 import { Subject, interval, merge, of } from 'rxjs';
 import { catchError, filter, switchMap, take, takeUntil } from 'rxjs/operators';
 import {
@@ -31,6 +32,7 @@ export class AppComponent implements OnInit, OnDestroy {
   sidebarExpanded = false;
   showLayout = true;
   unreadBadgeCount = 0;
+  messagingBadgeCount = 0;
 
   /** Exposés au template : mêmes chaînes que JWT / Spring */
   readonly AppRoles = AppRoles;
@@ -46,7 +48,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private authUtils: AuthUtilsService,
     readonly activeSchool: ActiveSchoolService,
     private readonly themeService: ThemeService,
-    private readonly inAppNotifications: InAppNotificationApiService
+    private readonly inAppNotifications: InAppNotificationApiService,
+    private readonly messagingApi: MessagingApiService
   ) {
     this.router.events
       .pipe(
@@ -79,9 +82,11 @@ export class AppComponent implements OnInit, OnDestroy {
             this.activeSchool.stopBackgroundSchoolListPolling();
           }
           this.refreshUnreadBadgeCount();
+          this.refreshMessagingBadgeCount();
         } else {
           this.activeSchool.stopBackgroundSchoolListPolling();
           this.unreadBadgeCount = 0;
+          this.messagingBadgeCount = 0;
         }
       });
   }
@@ -97,6 +102,15 @@ export class AppComponent implements OnInit, OnDestroy {
         )
       )
       .subscribe((n) => (this.unreadBadgeCount = n));
+
+    merge(this.messagingApi.unreadBump$, interval(10000))
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(() => this.authUtils.isAuthenticated()),
+        filter(() => typeof document === 'undefined' || !document.hidden),
+        switchMap(() => this.messagingApi.unreadSummary().pipe(catchError(() => of(0))))
+      )
+      .subscribe((n) => (this.messagingBadgeCount = n));
   }
 
   ngOnDestroy(): void {
@@ -133,6 +147,20 @@ export class AppComponent implements OnInit, OnDestroy {
       });
   }
 
+  private refreshMessagingBadgeCount(): void {
+    if (!this.authUtils.isAuthenticated()) {
+      this.messagingBadgeCount = 0;
+      return;
+    }
+    this.messagingApi
+      .unreadSummary()
+      .pipe(take(1), takeUntil(this.destroy$))
+      .subscribe({
+        next: (n) => (this.messagingBadgeCount = n),
+        error: () => (this.messagingBadgeCount = 0)
+      });
+  }
+
   /** Identité affichée dans le menu compte (header). */
   get identity(): { displayName: string; roleLabel: string } {
     return this.authService.getIdentitySnapshot();
@@ -158,6 +186,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.authService.logout().subscribe({
       next: () => {
         this.unreadBadgeCount = 0;
+        this.messagingBadgeCount = 0;
         this.activeSchool.clear();
         this.router.navigate(['/login']);
       }

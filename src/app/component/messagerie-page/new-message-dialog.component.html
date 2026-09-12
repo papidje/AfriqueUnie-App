@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>Nouveau message</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Rechercher un contact</mat-label>
+    <input matInput [(ngModel)]="search" (ngModelChange)="reload()" placeholder="Nom ou e-mail…" />
+    <mat-icon matPrefix>search</mat-icon>
+  </mat-form-field>
+
+  <div *ngIf="loading" class="state">Chargement…</div>
+  <p *ngIf="!loading && !contacts.length" class="state muted">Aucun contact disponible.</p>
+
+  <button
+    type="button"
+    class="contact-row"
+    *ngFor="let c of contacts"
+    (click)="select(c)"
+    [disabled]="selectingId === c.id"
+  >
+    <span class="avatar" aria-hidden="true">{{ initials(c.fullname) }}</span>
+    <span class="meta">
+      <span class="name">{{ c.fullname }}</span>
+      <span class="sub">{{ c.roleLabel }}<ng-container *ngIf="c.email"> · {{ c.email }}</ng-container></span>
+    </span>
+  </button>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Annuler</button>
+</mat-dialog-actions>

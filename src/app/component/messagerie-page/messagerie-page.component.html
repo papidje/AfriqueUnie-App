@@ -1,26 +1,141 @@
-<section class="messagerie-page">
+<section
+  class="messagerie-page"
+  [class.thread-open]="mobileShowThread && !!active"
+>
   <mat-card *ngIf="tenantDesactive" class="restriction-banner restriction-banner--warn" role="status">
     <mat-card-content>
       <p class="restriction-banner-title">Organisation désactivée</p>
       <p>
-        Votre organisation est temporairement désactivée. La messagerie restera consultable ici ; le reste du portail
-        école n’est pas disponible.
+        Votre organisation est temporairement désactivée. La messagerie reste disponible pour échanger avec le support.
       </p>
     </mat-card-content>
   </mat-card>
 
-  <div class="page-head">
-    <h1>Messagerie</h1>
-    <p class="sub">Échanges avec l’administration et votre organisation.</p>
+  <div class="split">
+    <aside class="pane pane-list" [class.hidden-mobile]="mobileShowThread && !!active">
+      <header class="pane-head">
+        <h1>Messagerie</h1>
+        <button mat-flat-button color="primary" type="button" (click)="openNewMessage()">
+          <mat-icon>edit</mat-icon>
+          Nouveau
+        </button>
+      </header>
+
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Rechercher</mat-label>
+        <input matInput [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Nom, message…" />
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+
+      <div *ngIf="listLoading" class="state">Chargement…</div>
+      <p *ngIf="listError && !listLoading" class="state error">Impossible de charger les conversations.</p>
+      <p *ngIf="!listLoading && !listError && !filteredConversations.length" class="state">
+        Aucune conversation. Démarrez avec <strong>Nouveau</strong>.
+      </p>
+
+      <div class="conv-list" *ngIf="filteredConversations.length">
+        <button
+          type="button"
+          class="conv-row"
+          *ngFor="let c of filteredConversations"
+          [class.active]="active?.id === c.id"
+          (click)="selectConversation(c)"
+        >
+          <span class="avatar" aria-hidden="true">{{ initials(c.counterpart?.fullname) }}</span>
+          <span class="conv-meta">
+            <span class="conv-top">
+              <span class="conv-name">{{ c.counterpart?.fullname }}</span>
+              <span class="conv-time">{{ formatTime(c.lastMessageAt) }}</span>
+            </span>
+            <span class="conv-bottom">
+              <span class="conv-preview">{{ c.lastMessagePreview || '—' }}</span>
+              <span class="unread" *ngIf="c.unreadCount > 0">{{ c.unreadCount }}</span>
+            </span>
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <section class="pane pane-thread" [class.hidden-mobile]="!mobileShowThread || !active">
+      <ng-container *ngIf="active; else emptyThread">
+        <header class="thread-head">
+          <button
+            mat-icon-button
+            type="button"
+            class="back-btn"
+            (click)="backToList()"
+            aria-label="Retour aux conversations"
+          >
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <span class="avatar sm" aria-hidden="true">{{ initials(active.counterpart?.fullname) }}</span>
+          <div class="thread-title">
+            <strong>{{ active.counterpart?.fullname }}</strong>
+            <span class="muted">{{ active.counterpart?.roleLabel }}</span>
+          </div>
+        </header>
+
+        <div
+          class="thread-scroll"
+          #threadScroll
+          (scroll)="onThreadScroll()"
+        >
+          <div *ngIf="threadLoading" class="state">Chargement des messages…</div>
+          <div *ngIf="!threadLoading && !messages.length" class="state">
+            Aucun message pour l’instant. Écrivez le premier.
+          </div>
+
+          <div
+            *ngFor="let m of messages"
+            class="bubble-row"
+            [class.mine]="m.mine"
+            [class.theirs]="!m.mine"
+          >
+            <div class="bubble">
+              <p class="bubble-body">{{ m.body }}</p>
+              <time class="bubble-time">{{ formatTime(m.createdAt) }}</time>
+            </div>
+          </div>
+        </div>
+
+        <button
+          *ngIf="pendingNewCount > 0"
+          type="button"
+          class="new-chip"
+          (click)="jumpToLatest()"
+        >
+          {{ pendingNewCount > 1 ? pendingNewCount + ' nouveaux messages' : '1 nouveau message' }}
+        </button>
+
+        <footer class="composer">
+          <textarea
+            rows="2"
+            [(ngModel)]="draft"
+            (keydown)="onComposerKeydown($event)"
+            placeholder="Écrire un message…"
+            [disabled]="sending"
+          ></textarea>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="send()"
+            [disabled]="sending || !draft.trim()"
+          >
+            Envoyer
+          </button>
+        </footer>
+      </ng-container>
+
+      <ng-template #emptyThread>
+        <div class="empty-thread">
+          <mat-icon aria-hidden="true">forum</mat-icon>
+          <p>Sélectionnez une conversation ou créez-en une nouvelle.</p>
+          <button mat-stroked-button type="button" color="primary" (click)="openNewMessage()">
+            Nouveau message
+          </button>
+        </div>
+      </ng-template>
+    </section>
   </div>
-
-  <mat-card class="placeholder-card">
-    <mat-card-content>
-      <p class="lead">Cette page sera bientôt disponible.</p>
-      <p class="muted">
-        Vous pourrez y consulter et envoyer des messages liés à votre compte. En attendant, utilisez le centre de
-        <a routerLink="/notifications">notifications</a>.
-      </p>
-    </mat-card-content>
-  </mat-card>
 </section>

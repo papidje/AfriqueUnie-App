@@ -48,11 +48,21 @@
             <span>Mon profil</span>
           </button>
           <button mat-menu-item type="button" routerLink="/notifications" (click)="userMenuTrigger.closeMenu()">
-            <mat-icon>notifications</mat-icon>
+            <mat-icon
+              [matBadge]="unreadBadgeCount"
+              matBadgeColor="warn"
+              matBadgeSize="small"
+              [matBadgeHidden]="unreadBadgeCount < 1"
+            >notifications</mat-icon>
             <span>Notifications</span>
           </button>
           <button mat-menu-item type="button" routerLink="/messagerie" (click)="userMenuTrigger.closeMenu()">
-            <mat-icon>mail_outline</mat-icon>
+            <mat-icon
+              [matBadge]="messagingBadgeCount"
+              matBadgeColor="warn"
+              matBadgeSize="small"
+              [matBadgeHidden]="messagingBadgeCount < 1"
+            >mail_outline</mat-icon>
             <span>Messagerie</span>
           </button>
           <mat-divider></mat-divider>

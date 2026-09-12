@@ -89,6 +89,7 @@ import { CommunicationHistoryDetailDialogComponent } from './component/communica
 import { NotificationPageComponent } from './component/notification-page/notification-page.component';
 import { AccesIndisponiblePageComponent } from './component/acces-indisponible-page/acces-indisponible-page.component';
 import { MessageriePageComponent } from './component/messagerie-page/messagerie-page.component';
+import { NewMessageDialogComponent } from './component/messagerie-page/new-message-dialog.component';
 import { AuthService } from './service/auth.service';
 import { SchoolPickerComponent } from './shared/component/school-picker/school-picker.component';
 import { MarketingLayoutComponent } from './component/marketing/marketing-layout/marketing-layout.component';
@@ -160,6 +161,7 @@ export function initializeAuthFactory(authService: AuthService) {
     NotificationPageComponent,
     AccesIndisponiblePageComponent,
     MessageriePageComponent,
+    NewMessageDialogComponent,
     MarketingLayoutComponent,
     LandingPageComponent,
     ContactPageComponent,

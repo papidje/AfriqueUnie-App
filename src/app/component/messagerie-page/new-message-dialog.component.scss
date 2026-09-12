@@ -1,0 +1,67 @@
+.full {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.state {
+  padding: 1rem 0;
+  text-align: center;
+  color: var(--app-text-muted);
+}
+
+.muted {
+  color: var(--app-text-muted);
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 0.65rem 0.35rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.contact-row:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.contact-row:disabled {
+  opacity: 0.6;
+}
+
+.avatar {
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(25, 118, 210, 0.12);
+  color: var(--app-primary-dark, #0d47a1);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.sub {
+  font-size: 0.8rem;
+  color: var(--app-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
