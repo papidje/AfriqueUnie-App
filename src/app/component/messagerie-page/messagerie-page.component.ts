@@ -259,9 +259,19 @@ export class MessageriePageComponent implements OnInit, OnDestroy, AfterViewChec
       return;
     }
     const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
-    this.stickToBottom = distance < 80;
-    if (this.stickToBottom) {
+    const atBottom = distance < 80;
+    if (atBottom) {
+      const shouldMarkRead =
+        !this.stickToBottom ||
+        this.pendingNewCount > 0 ||
+        (this.active?.unreadCount ?? 0) > 0;
+      this.stickToBottom = true;
       this.pendingNewCount = 0;
+      if (shouldMarkRead) {
+        this.markActiveRead();
+      }
+    } else {
+      this.stickToBottom = false;
     }
     if (el.scrollTop < 48 && !this.loadingOlder && this.messages.length) {
       this.loadOlder();
