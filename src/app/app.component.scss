@@ -166,6 +166,33 @@ html, body {
   margin-right: 8px;
 }
 
+.header-alerts {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+.header-alert-btn.mat-mdc-icon-button {
+  color: var(--app-on-primary, #fff);
+  --mat-icon-button-state-layer-color: color-mix(in srgb, var(--app-on-primary, #fff) 18%, transparent);
+
+  .mat-mdc-button-persistent-ripple,
+  .mat-mdc-button-touch-target {
+    color: inherit;
+  }
+
+  mat-icon {
+    color: inherit;
+  }
+
+  /* Pastille lisible sur fond primary */
+  ::ng-deep .mat-badge-content {
+    font-weight: 700;
+  }
+}
+
 .header-title-group {
   display: inline-flex;
   align-items: center;

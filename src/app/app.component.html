@@ -14,6 +14,44 @@
         <app-karanso-brand variant="header"></app-karanso-brand>
         <app-school-picker *ngIf="vm.fullChrome" class="header-school-picker"></app-school-picker>
         <span class="spacer"></span>
+        <div class="header-alerts" role="group" aria-label="Alertes">
+          <button
+            mat-icon-button
+            type="button"
+            class="header-alert-btn"
+            routerLink="/notifications"
+            [attr.aria-label]="
+              unreadBadgeCount > 0
+                ? 'Notifications, ' + unreadBadgeCount + ' non lue' + (unreadBadgeCount > 1 ? 's' : '')
+                : 'Notifications'
+            "
+          >
+            <mat-icon
+              [matBadge]="unreadBadgeCount > 99 ? '99+' : unreadBadgeCount"
+              matBadgeColor="warn"
+              matBadgeSize="small"
+              [matBadgeHidden]="unreadBadgeCount < 1"
+            >notifications</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            class="header-alert-btn"
+            routerLink="/messagerie"
+            [attr.aria-label]="
+              messagingBadgeCount > 0
+                ? 'Messagerie, ' + messagingBadgeCount + ' conversation' + (messagingBadgeCount > 1 ? 's' : '') + ' non lue' + (messagingBadgeCount > 1 ? 's' : '')
+                : 'Messagerie'
+            "
+          >
+            <mat-icon
+              [matBadge]="messagingBadgeCount > 99 ? '99+' : messagingBadgeCount"
+              matBadgeColor="warn"
+              matBadgeSize="small"
+              [matBadgeHidden]="messagingBadgeCount < 1"
+            >mail_outline</mat-icon>
+          </button>
+        </div>
         <button
           mat-button
           type="button"
@@ -22,10 +60,6 @@
           [attr.aria-label]="'Menu compte : ' + identity.displayName"
           [matMenuTriggerFor]="userAccountMenu"
           #userMenuTrigger="matMenuTrigger"
-          [matBadge]="unreadBadgeCount"
-          matBadgeColor="warn"
-          matBadgeSize="small"
-          [matBadgeHidden]="unreadBadgeCount < 1"
         >
           <span class="profile-trigger-inner">
             <span class="profile-avatar" aria-hidden="true">{{ userInitials }}</span>
