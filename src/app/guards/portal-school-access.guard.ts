@@ -9,18 +9,21 @@ import {
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ActiveSchoolService } from '../service/active-school.service';
+import { AuthService } from '../service/auth.service';
 import { AuthUtilsService } from '../service/auth-utils.service';
 
 /**
  * Profils avec annuaire d’établissements : sans accès à un établissement → redirection vers {@code /acces-indisponible},
  * avec exceptions pour les notifications et la page d’explication elle-même.
+ * Tenant désactivé : seule la page d’explication (et la déconnexion) reste accessible.
  */
 @Injectable({ providedIn: 'root' })
 export class PortalSchoolAccessGuard implements CanActivateChild {
   constructor(
     private readonly router: Router,
     private readonly authUtils: AuthUtilsService,
-    private readonly activeSchool: ActiveSchoolService
+    private readonly activeSchool: ActiveSchoolService,
+    private readonly authService: AuthService
   ) {}
 
   canActivateChild(
@@ -31,6 +34,14 @@ export class PortalSchoolAccessGuard implements CanActivateChild {
       return of(true);
     }
     const path = this.normalizePath(state.url);
+
+    if (this.authService.isTenantDisabledSession()) {
+      if (this.isAccesIndisponiblePath(path)) {
+        return of(true);
+      }
+      return of(this.router.createUrlTree(['/acces-indisponible'], { queryParams: { raison: 'tenant' } }));
+    }
+
     /**
      * Centre de notifications : accessible même sans {@code school_id} valide dans le JWT ou avec annuaire vide.
      * Ne pas enchaîner {@link ActiveSchoolService.ensureInitialSchoolsSnapshot$} ici : sinon un GET /schools vide
@@ -69,10 +80,15 @@ export class PortalSchoolAccessGuard implements CanActivateChild {
   /** Quand aucun établissement accessible : page dédiée + centre de notifications. */
   private isAllowedWhenBlocked(url: string): boolean {
     const path = url.startsWith('/') ? url : `/${url}`;
-    if (path === '/acces-indisponible' || path.startsWith('/acces-indisponible/')) {
+    if (this.isAccesIndisponiblePath(path)) {
       return true;
     }
     return this.isNotificationsPath(path);
+  }
+
+  private isAccesIndisponiblePath(normalizedPath: string): boolean {
+    const path = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
+    return path === '/acces-indisponible' || path.startsWith('/acces-indisponible/');
   }
 
   private isNotificationsPath(normalizedPath: string): boolean {

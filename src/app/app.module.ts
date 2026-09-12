@@ -52,6 +52,7 @@ import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { ApiUnavailableComponent } from './component/api-unavailable/api-unavailable.component';
 import { RegisterSchoolComponent } from './component/register-school/register-school.component';
 import { SuperAdminDashboardComponent } from './component/super-admin-dashboard/super-admin-dashboard.component';
+import { TenantSubscriptionDialogComponent } from './component/super-admin-dashboard/tenant-subscription-dialog.component';
 import { SuperAdminCitiesPageComponent } from './component/super-admin-cities-page/super-admin-cities-page.component';
 import { SuperAdminSubjectsPageComponent } from './component/super-admin-subjects-page/super-admin-subjects-page.component';
 import { SuperAdminGeoPageComponent } from './component/super-admin-geo-page/super-admin-geo-page.component';
@@ -120,6 +121,7 @@ export function initializeAuthFactory(authService: AuthService) {
     ApiUnavailableComponent,
     RegisterSchoolComponent,
     SuperAdminDashboardComponent,
+    TenantSubscriptionDialogComponent,
     SuperAdminSchoolsPageComponent,
     SuperAdminCitiesPageComponent,
     SuperAdminSubjectsPageComponent,

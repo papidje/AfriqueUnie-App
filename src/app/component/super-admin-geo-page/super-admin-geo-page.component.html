@@ -58,61 +58,78 @@
       <p class="map-hint" *ngIf="!loading && !error && markerCities.length === 0">
         Aucune pastille : aucune école n’est encore rattachée à une ville.
       </p>
-      <p class="map-hint" *ngIf="!loading && !error && markerCities.length > 0">
-        Cliquez une région dans le tableau pour filtrer les pastilles.
+      <p class="map-hint" *ngIf="!loading && !error && markerCities.length > 0 && listTabIndex === 0">
+        Cliquez une région dans l’onglet pour filtrer les pastilles.
+      </p>
+      <p class="map-hint" *ngIf="!loading && !error && markerCities.length > 0 && listTabIndex === 1 && selectedRegionId != null">
+        Filtre région actif —
+        <button mat-button type="button" class="hint-clear" (click)="selectRegion(null)">Tout afficher</button>
       </p>
     </section>
 
     <section class="tables" *ngIf="!loading && !error && stats">
-      <h2>Par région</h2>
-      <div class="table-wrap">
-        <table class="tbl tbl--regions">
-          <thead>
-            <tr>
-              <th>Région</th>
-              <th>Écoles</th>
-              <th>Actives</th>
-              <th>Élèves</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              *ngFor="let r of regions"
-              [class.selected]="selectedRegionId === r.regionId"
-              (click)="selectRegion(r.regionId)"
-            >
-              <td>{{ r.regionName }}</td>
-              <td>{{ r.schoolCount }}</td>
-              <td>{{ r.activeSchoolCount }}</td>
-              <td>{{ r.studentCount }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <p *ngIf="!regions.length" class="empty">Aucune région avec des données.</p>
-      </div>
+      <mat-tab-group
+        class="geo-tabs"
+        animationDuration="0ms"
+        [(selectedIndex)]="listTabIndex"
+        (selectedIndexChange)="onListTabChange($event)"
+      >
+        <mat-tab label="Par région">
+          <div class="tab-body">
+            <div class="table-wrap">
+              <table class="tbl tbl--regions">
+                <thead>
+                  <tr>
+                    <th>Région</th>
+                    <th>Écoles</th>
+                    <th>Actives</th>
+                    <th>Élèves</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="let r of regions"
+                    [class.selected]="selectedRegionId === r.regionId"
+                    (click)="selectRegion(r.regionId)"
+                  >
+                    <td>{{ r.regionName }}</td>
+                    <td>{{ r.schoolCount }}</td>
+                    <td>{{ r.activeSchoolCount }}</td>
+                    <td>{{ r.studentCount }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p *ngIf="!regions.length" class="empty">Aucune région avec des données.</p>
+            </div>
+          </div>
+        </mat-tab>
 
-      <h2>Par ville{{ selectedRegionId != null ? ' (filtrée)' : '' }}</h2>
-      <div class="table-wrap">
-        <table class="tbl tbl--cities">
-          <thead>
-            <tr>
-              <th>Ville</th>
-              <th>Région</th>
-              <th>Écoles</th>
-              <th>Élèves</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let c of filteredCities">
-              <td>{{ c.cityName }}</td>
-              <td>{{ c.regionName || '—' }}</td>
-              <td>{{ c.schoolCount }}</td>
-              <td>{{ c.studentCount }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <p *ngIf="!filteredCities.length" class="empty">Aucune ville avec des données.</p>
-      </div>
+        <mat-tab label="Par ville">
+          <div class="tab-body">
+            <div class="table-wrap">
+              <table class="tbl tbl--cities">
+                <thead>
+                  <tr>
+                    <th>Ville</th>
+                    <th>Écoles</th>
+                    <th>Actives</th>
+                    <th>Élèves</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let c of filteredCities">
+                    <td>{{ cityLabel(c) }}</td>
+                    <td>{{ c.schoolCount }}</td>
+                    <td>{{ c.activeSchoolCount }}</td>
+                    <td>{{ c.studentCount }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p *ngIf="!filteredCities.length" class="empty">Aucune ville avec des données.</p>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
     </section>
   </div>
 </div>

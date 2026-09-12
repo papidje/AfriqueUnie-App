@@ -25,6 +25,11 @@ export class AuthService {
 
   private accountDisabledNavigated = false;
 
+  /** Réponses API {@code tenantDisabled} — organisation suspendue. */
+  private tenantDisabledSession = false;
+
+  private tenantDisabledNavigated = false;
+
   /** Snapshot pour menu entête (JWT + rôle stocké). */
   getIdentitySnapshot(): { displayName: string; roleLabel: string } {
     const token = this.getToken();
@@ -71,6 +76,8 @@ export class AuthService {
   saveTokens(jwt: string, refresh: string): void {
     this.accountDisabledSession = false;
     this.accountDisabledNavigated = false;
+    this.tenantDisabledSession = false;
+    this.tenantDisabledNavigated = false;
     localStorage.setItem('jwt', jwt);
     localStorage.setItem('refresh', refresh);
     this.saveClaims(jwt);
@@ -80,6 +87,8 @@ export class AuthService {
   clearTokens(): void {
     this.accountDisabledSession = false;
     this.accountDisabledNavigated = false;
+    this.tenantDisabledSession = false;
+    this.tenantDisabledNavigated = false;
     localStorage.removeItem('jwt');
     localStorage.removeItem('refresh');
     localStorage.removeItem(this.ROLE_KEY);
@@ -114,6 +123,22 @@ export class AuthService {
       return false;
     }
     this.accountDisabledNavigated = true;
+    return true;
+  }
+
+  isTenantDisabledSession(): boolean {
+    return this.tenantDisabledSession;
+  }
+
+  /**
+   * Marque la session comme organisation désactivée ; {@code true} uniquement au premier appel.
+   */
+  beginTenantDisabledFlow(): boolean {
+    this.tenantDisabledSession = true;
+    if (this.tenantDisabledNavigated) {
+      return false;
+    }
+    this.tenantDisabledNavigated = true;
     return true;
   }
 

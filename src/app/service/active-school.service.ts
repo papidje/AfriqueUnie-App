@@ -121,6 +121,16 @@ export class ActiveSchoolService {
     this.authService.clearSchoolHeaderTitle();
   }
 
+  /** Organisation (tenant) désactivée : portail bloqué, navigation limitée à la page d’explication. */
+  applyTenantDisabledPortalState(): void {
+    if (!this.authUtils.isAuthenticated()) {
+      return;
+    }
+    this.portalAccessBlockedSubject.next(true);
+    this.schoolDirectoryLoadedSubject.next(true);
+    this.authService.clearSchoolHeaderTitle();
+  }
+
   private computeFullPortalChrome(blocked: boolean, loaded: boolean): boolean {
     if (!this.authUtils.isAuthenticated()) {
       return true;
@@ -251,7 +261,11 @@ export class ActiveSchoolService {
       catchError(() => {
         this.schools$.next([]);
         this.selectedId$.next(null);
-        if (this.shouldLoadSchoolsForPicker() && !this.authService.isAccountDisabledSession()) {
+        if (
+          this.shouldLoadSchoolsForPicker() &&
+          !this.authService.isAccountDisabledSession() &&
+          !this.authService.isTenantDisabledSession()
+        ) {
           this.portalAccessBlockedSubject.next(false);
         }
         return of([]);

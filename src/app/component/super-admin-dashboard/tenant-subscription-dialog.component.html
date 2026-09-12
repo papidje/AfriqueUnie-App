@@ -1,0 +1,24 @@
+<h2 mat-dialog-title>Fin d’abonnement requise</h2>
+
+<mat-dialog-content [formGroup]="form">
+  <p class="lead">
+    Le tenant <strong>{{ data.tenantName }}</strong> compte
+    <strong>{{ data.studentCount }}</strong> élève{{ data.studentCount > 1 ? 's' : '' }}
+    (toutes écoles confondues). Au-delà de 100 élèves, une date de fin d’abonnement est obligatoire pour l’activer.
+  </p>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Fin d’abonnement</mat-label>
+    <input matInput [matDatepicker]="picker" [min]="minDate" formControlName="subscriptionEndsOn" />
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    <mat-error *ngIf="form.controls.subscriptionEndsOn.hasError('required')">
+      Date obligatoire.
+    </mat-error>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Annuler</button>
+  <button mat-flat-button color="primary" type="button" (click)="confirm()">Activer</button>
+</mat-dialog-actions>

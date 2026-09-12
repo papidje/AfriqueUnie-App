@@ -42,11 +42,17 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(authReq).pipe(
       catchError((error) => {
-        if (error instanceof HttpErrorResponse && error.status === 403 && this.isAccountDisabledBody(error)) {
-          if (!this.isInAppNotificationReadRequest(req.url)) {
-            this.triggerAccountDisabledUi();
+        if (error instanceof HttpErrorResponse && error.status === 403) {
+          if (this.isTenantDisabledBody(error)) {
+            this.triggerTenantDisabledUi();
+            return throwError(() => error);
           }
-          return throwError(() => error);
+          if (this.isAccountDisabledBody(error)) {
+            if (!this.isInAppNotificationReadRequest(req.url)) {
+              this.triggerAccountDisabledUi();
+            }
+            return throwError(() => error);
+          }
         }
         // 403 métier : pas de refresh token ; 401 → tentative refresh ci-dessous.
         if (error instanceof HttpErrorResponse && error.status === 401) {
@@ -64,12 +70,28 @@ export class AuthInterceptor implements HttpInterceptor {
     }
   }
 
+  private triggerTenantDisabledUi(): void {
+    if (this.authService.beginTenantDisabledFlow()) {
+      this.activeSchool.applyTenantDisabledPortalState();
+      void this.router.navigate(['/acces-indisponible'], { queryParams: { raison: 'tenant' } });
+    }
+  }
+
   private isAccountDisabledBody(error: HttpErrorResponse): boolean {
     const body = error.error;
     return (
       body !== null &&
       typeof body === 'object' &&
       (body as { accountDisabled?: unknown }).accountDisabled === true
+    );
+  }
+
+  private isTenantDisabledBody(error: HttpErrorResponse): boolean {
+    const body = error.error;
+    return (
+      body !== null &&
+      typeof body === 'object' &&
+      (body as { tenantDisabled?: unknown }).tenantDisabled === true
     );
   }
 
@@ -111,11 +133,17 @@ export class AuthInterceptor implements HttpInterceptor {
     return this.refreshSessionJwt().pipe(
       switchMap((newJwt) => next.handle(this.addTokenHeader(request, newJwt))),
       catchError((err) => {
-        if (err instanceof HttpErrorResponse && err.status === 403 && this.isAccountDisabledBody(err)) {
-          if (!this.isInAppNotificationReadRequest(request.url)) {
-            this.triggerAccountDisabledUi();
+        if (err instanceof HttpErrorResponse && err.status === 403) {
+          if (this.isTenantDisabledBody(err)) {
+            this.triggerTenantDisabledUi();
+            return throwError(() => err);
           }
-          return throwError(() => err);
+          if (this.isAccountDisabledBody(err)) {
+            if (!this.isInAppNotificationReadRequest(request.url)) {
+              this.triggerAccountDisabledUi();
+            }
+            return throwError(() => err);
+          }
         }
         this.authService.clearTokens();
         this.router.navigate(['/login']);

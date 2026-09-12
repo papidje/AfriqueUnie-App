@@ -17,8 +17,9 @@ import { AuthService } from '../../service/auth.service';
 export class AccesIndisponiblePageComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
-  /** Variante message : compte utilisateur désactivé vs aucune école accessible. */
+  /** Variante message : compte utilisateur désactivé vs tenant désactivé vs aucune école accessible. */
   compteDesactive = false;
+  tenantDesactive = false;
 
   constructor(
     private readonly authService: AuthService,
@@ -46,10 +47,12 @@ export class AccesIndisponiblePageComponent implements OnInit, OnDestroy {
   private applyRouteParams(q: ParamMap): void {
     this.compteDesactive =
       this.authService.isAccountDisabledSession() || q.get('raison') === 'compte';
+    this.tenantDesactive =
+      this.authService.isTenantDisabledSession() || q.get('raison') === 'tenant';
   }
 
   /**
-   * Vérifie périodiquement si l’admin a réactivé l’utilisateur (GET /schools avec au moins une école).
+   * Vérifie périodiquement si l’accès a été rétabli (GET /schools avec au moins une école).
    * Accueil portail : {@code /dashboard} (la route {@code /} mène au login dans cette appli).
    */
   private startReactivationPolling(): void {
@@ -67,7 +70,7 @@ export class AccesIndisponiblePageComponent implements OnInit, OnDestroy {
         if (!this.activeSchool.shouldLoadSchoolsForPicker()) {
           return;
         }
-        if (this.authService.isAccountDisabledSession()) {
+        if (this.authService.isAccountDisabledSession() || this.authService.isTenantDisabledSession()) {
           return;
         }
         if (schools.length > 0) {

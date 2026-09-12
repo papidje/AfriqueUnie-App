@@ -1,56 +1,154 @@
 <div class="page">
   <header class="page-head">
-    <h1>Liste des tenants</h1>
+    <div>
+      <h1>Liste des tenants</h1>
+      <p class="subtitle" *ngIf="!loading && !error">
+        {{ rows.length }} tenant{{ rows.length > 1 ? 's' : '' }}
+        · {{ activeCount }} actif{{ activeCount > 1 ? 's' : '' }}
+      </p>
+    </div>
   </header>
 
   <div *ngIf="loading" class="state">Chargement…</div>
   <p *ngIf="error && !loading" class="state error">Impossible de charger les données.</p>
 
-  <div class="table-wrap" *ngIf="!loading && !error && rows.length">
-    <table mat-table [dataSource]="rows" class="tenants-table">
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>Tenant</th>
-        <td mat-cell *matCellDef="let row">
-          <span class="tenant-name">{{ row.name }}</span>
-        </td>
-      </ng-container>
+  <ng-container *ngIf="!loading && !error">
+    <div class="toolbar">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Rechercher</mat-label>
+        <input matInput [(ngModel)]="search" placeholder="Nom, adresse, administrateur…" />
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
 
-      <ng-container matColumnDef="address">
-        <th mat-header-cell *matHeaderCellDef>Adresse</th>
-        <td mat-cell *matCellDef="let row" class="muted">{{ row.address || '—' }}</td>
-      </ng-container>
+      <div class="chips" role="group" aria-label="Filtrer par statut">
+        <button
+          type="button"
+          class="chip"
+          [class.chip--on]="statusFilter === 'all'"
+          (click)="setStatusFilter('all')"
+        >
+          Tous
+        </button>
+        <button
+          type="button"
+          class="chip"
+          [class.chip--on]="statusFilter === 'active'"
+          (click)="setStatusFilter('active')"
+        >
+          Actifs
+        </button>
+        <button
+          type="button"
+          class="chip"
+          [class.chip--on]="statusFilter === 'inactive'"
+          (click)="setStatusFilter('inactive')"
+        >
+          Inactifs
+        </button>
+      </div>
+    </div>
 
-      <ng-container matColumnDef="createdAt">
-        <th mat-header-cell *matHeaderCellDef>Créé le</th>
-        <td mat-cell *matCellDef="let row">{{ row.createdAt | displayDate:'datetime' }}</td>
-      </ng-container>
+    <div class="table-wrap" *ngIf="filteredRows.length">
+      <table mat-table [dataSource]="filteredRows" class="tenants-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Tenant</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="tenant-name" [class.inactive]="row.active === false">{{ row.name }}</span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="schools">
-        <th mat-header-cell *matHeaderCellDef>Écoles</th>
-        <td mat-cell *matCellDef="let row">
-          <button
-            type="button"
-            class="count-btn"
-            (click)="openSchools(row)"
-            [disabled]="schoolCount(row) === 0"
-            [attr.aria-label]="'Voir les écoles du tenant ' + row.name"
-          >
-            {{ schoolCount(row) }}
-          </button>
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="admins">
+          <th mat-header-cell *matHeaderCellDef>Administrateurs</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="admins" [title]="adminsLabel(row)">{{ adminsLabel(row) }}</span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="active">
-        <th mat-header-cell *matHeaderCellDef>Actives</th>
-        <td mat-cell *matCellDef="let row">
-          <span class="muted">{{ activeSchoolCount(row) }} / {{ schoolCount(row) }}</span>
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="address">
+          <th mat-header-cell *matHeaderCellDef>Adresse</th>
+          <td mat-cell *matCellDef="let row" class="muted">{{ row.address || '—' }}</td>
+        </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-    </table>
-  </div>
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Créé le</th>
+          <td mat-cell *matCellDef="let row">{{ row.createdAt | displayDate:'datetime' }}</td>
+        </ng-container>
 
-  <p *ngIf="!loading && !error && !rows.length" class="empty">Aucun tenant enregistré.</p>
+        <ng-container matColumnDef="subscriptionEndsOn">
+          <th mat-header-cell *matHeaderCellDef>Fin d’abonnement</th>
+          <td mat-cell *matCellDef="let row">
+            <span
+              [class.muted]="!row.subscriptionEndsOn"
+              [class.unlimited]="!row.subscriptionEndsOn"
+            >
+              {{
+                row.subscriptionEndsOn
+                  ? (row.subscriptionEndsOn | displayDate:'date')
+                  : 'Sans échéance'
+              }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="schools">
+          <th mat-header-cell *matHeaderCellDef>Écoles</th>
+          <td mat-cell *matCellDef="let row">
+            <button
+              type="button"
+              class="count-btn"
+              (click)="openSchools(row)"
+              [disabled]="schoolCount(row) === 0"
+              [attr.aria-label]="'Voir les écoles du tenant ' + row.name"
+            >
+              {{ schoolCount(row) }}
+            </button>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="activeSchools">
+          <th mat-header-cell *matHeaderCellDef>Écoles actives</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="muted">{{ activeSchoolCount(row) }} / {{ schoolCount(row) }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="students">
+          <th mat-header-cell *matHeaderCellDef class="num">Élèves</th>
+          <td mat-cell *matCellDef="let row" class="num">
+            {{ row.studentCount ?? 0 }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Statut</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-label" [class.inactive]="row.active === false">
+              {{ row.active === false ? 'Inactif' : 'Actif' }}
+            </span>
+            <button
+              mat-icon-button
+              type="button"
+              class="toggle-btn"
+              (click)="toggleActive(row)"
+              [disabled]="togglingId === row.id"
+              [attr.aria-label]="row.active === false ? 'Activer le tenant' : 'Désactiver le tenant'"
+            >
+              <mat-icon>{{ row.active === false ? 'toggle_off' : 'toggle_on' }}</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          [class.row-inactive]="row.active === false"
+        ></tr>
+      </table>
+    </div>
+
+    <p *ngIf="!filteredRows.length" class="empty">
+      {{ rows.length ? 'Aucun tenant ne correspond aux filtres.' : 'Aucun tenant enregistré.' }}
+    </p>
+  </ng-container>
 </div>

@@ -32,6 +32,8 @@ export class SuperAdminGeoPageComponent implements OnInit, AfterViewInit, OnDest
   mapReady = false;
   stats: SuperAdminGeoStats | null = null;
   selectedRegionId: number | null = null;
+  /** 0 = régions, 1 = villes */
+  listTabIndex = 0;
 
   private map: LeafletNamespace.Map | null = null;
   private markersLayer: LeafletNamespace.LayerGroup | null = null;
@@ -113,6 +115,18 @@ export class SuperAdminGeoPageComponent implements OnInit, AfterViewInit, OnDest
     this.selectedRegionId =
       regionId != null && this.selectedRegionId === regionId ? null : regionId;
     this.refreshMarkers();
+  }
+
+  onListTabChange(index: number): void {
+    this.listTabIndex = index;
+    // Passage sur l’onglet villes : garder le filtre région s’il est actif.
+    setTimeout(() => this.map?.invalidateSize({ animate: false }), 0);
+  }
+
+  /** Affiche « (Région) Ville ». */
+  cityLabel(c: GeoCityStats): string {
+    const name = c.cityName || '—';
+    return c.regionName ? `(${c.regionName}) ${name}` : name;
   }
 
   private initMap(): void {

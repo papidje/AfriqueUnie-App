@@ -10,12 +10,22 @@ export interface TenantSchoolSummary {
   active: boolean;
 }
 
+export interface TenantAdminSummary {
+  id: number;
+  fullname: string;
+  email: string | null;
+}
+
 export interface SuperAdminTenantRow {
   id: number;
   name: string;
   address: string | null;
   logo: string | null;
   createdAt: string;
+  active: boolean;
+  subscriptionEndsOn: string | null;
+  studentCount: number;
+  admins: TenantAdminSummary[];
   schools: TenantSchoolSummary[];
 }
 
@@ -82,6 +92,17 @@ export class SuperAdminService {
 
   getTenantsWithSchools(): Observable<SuperAdminTenantRow[]> {
     return this.http.get<SuperAdminTenantRow[]>(`${this.apiUrl}/super-admin/tenants`);
+  }
+
+  setTenantActive(
+    id: number,
+    active: boolean,
+    body?: { subscriptionEndsOn?: string | null }
+  ): Observable<SuperAdminTenantRow> {
+    return this.http.patch<SuperAdminTenantRow>(
+      `${this.apiUrl}/super-admin/tenants/${id}/active/${active}`,
+      body ?? {}
+    );
   }
 
   getSchools(): Observable<SuperAdminSchoolRow[]> {

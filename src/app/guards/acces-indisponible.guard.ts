@@ -8,9 +8,7 @@ import { AuthUtilsService } from '../service/auth-utils.service';
 
 /**
  * La route {@code /acces-indisponible} n’est pertinente que pour les profils « annuaire écoles »
- * sans aucun établissement accessible (ou compte désactivé côté API). Les autres utilisateurs sont renvoyés vers les notifications.
- * Pas de boucle avec {@link PortalSchoolAccessGuard} : {@code /notifications} est autorisée sans passer par ce garde ;
- * un clic depuis cette page vers les notifications ne doit pas être bloqué.
+ * sans aucun établissement accessible, compte désactivé, ou tenant désactivé.
  */
 @Injectable({ providedIn: 'root' })
 export class AccesIndisponibleGuard implements CanActivate {
@@ -25,11 +23,17 @@ export class AccesIndisponibleGuard implements CanActivate {
     if (!this.authUtils.isAuthenticated()) {
       return this.router.parseUrl('/login');
     }
+    if (this.authService.isTenantDisabledSession() || this.authService.isAccountDisabledSession()) {
+      return true;
+    }
     if (!this.activeSchool.shouldLoadSchoolsForPicker()) {
       return this.router.parseUrl('/notifications');
     }
     return this.activeSchool.ensureInitialSchoolsSnapshot$().pipe(
       map(() => {
+        if (this.authService.isTenantDisabledSession()) {
+          return true;
+        }
         const noSchoolAccess =
           this.activeSchool.isPortalAccessBlocked() || this.authService.isAccountDisabledSession();
         if (!noSchoolAccess) {
