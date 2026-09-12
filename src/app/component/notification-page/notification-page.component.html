@@ -10,6 +10,16 @@
     </mat-card-content>
   </mat-card>
 
+  <mat-card *ngIf="restrictionBanner === 'tenant'" class="restriction-banner restriction-banner--warn" role="status">
+    <mat-card-content>
+      <p class="restriction-banner-title">Organisation désactivée</p>
+      <p>
+        Votre organisation est désactivée. Vous pouvez consulter vos notifications et la
+        <a routerLink="/messagerie">messagerie</a> ; le reste du portail école n’est pas disponible.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
   <mat-card *ngIf="restrictionBanner === 'compte'" class="restriction-banner restriction-banner--warn" role="alert">
     <mat-card-content>
       <p class="restriction-banner-title">Compte désactivé</p>

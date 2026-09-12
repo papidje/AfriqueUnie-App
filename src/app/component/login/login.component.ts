@@ -33,7 +33,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.authService.isAccessTokenValid()) {
-      this.router.navigate(this.authService.getPostLoginCommands());
+      this.authService.navigateAfterLogin(this.router);
       return;
     }
     const refresh = this.authService.getRefreshToken();
@@ -49,15 +49,14 @@ export class LoginComponent implements OnInit {
   onSubmit() {
     if (this.loginForm.valid) {
       if (this.authService.isAccessTokenValid()) {
-        this.router.navigate(this.authService.getPostLoginCommands());
+        this.authService.navigateAfterLogin(this.router);
         return;
       }
       this.loginErrorMessage = null;
       this.authService.login(this.loginForm.value).subscribe({
         next: (res) => {
-          console.log('Login successful', res);
           this.authService.saveTokens(res.bearer, res.refresh);
-          this.router.navigate(this.authService.getPostLoginCommands());
+          this.authService.navigateAfterLogin(this.router);
         },
         error: (err: HttpErrorResponse) => {
           this.loginErrorMessage = this.resolveLoginErrorMessage(err);

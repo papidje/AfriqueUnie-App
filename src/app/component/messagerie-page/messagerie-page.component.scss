@@ -1,0 +1,45 @@
+.messagerie-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--sp-4) var(--sp-6) var(--sp-8);
+}
+
+.page-head {
+  margin-bottom: 1.25rem;
+}
+
+h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.sub {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.95rem;
+}
+
+.restriction-banner {
+  margin-bottom: 1rem;
+}
+
+.restriction-banner-title {
+  margin: 0 0 0.35rem;
+  font-weight: 650;
+}
+
+.restriction-banner--warn {
+  border-left: 4px solid var(--warn-fg, #b45309);
+}
+
+.placeholder-card .lead {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.muted {
+  margin: 0;
+  color: var(--app-text-muted);
+  line-height: 1.45;
+}

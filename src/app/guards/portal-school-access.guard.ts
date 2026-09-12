@@ -14,8 +14,8 @@ import { AuthUtilsService } from '../service/auth-utils.service';
 
 /**
  * Profils avec annuaire d’établissements : sans accès à un établissement → redirection vers {@code /acces-indisponible},
- * avec exceptions pour les notifications et la page d’explication elle-même.
- * Tenant désactivé : seule la page d’explication (et la déconnexion) reste accessible.
+ * avec exceptions pour les notifications, la messagerie et la page d’explication.
+ * Tenant désactivé : page d’explication + notifications + messagerie.
  */
 @Injectable({ providedIn: 'root' })
 export class PortalSchoolAccessGuard implements CanActivateChild {
@@ -36,18 +36,17 @@ export class PortalSchoolAccessGuard implements CanActivateChild {
     const path = this.normalizePath(state.url);
 
     if (this.authService.isTenantDisabledSession()) {
-      if (this.isAccesIndisponiblePath(path)) {
+      if (this.isAllowedWhenTenantDisabled(path)) {
         return of(true);
       }
       return of(this.router.createUrlTree(['/acces-indisponible'], { queryParams: { raison: 'tenant' } }));
     }
 
     /**
-     * Centre de notifications : accessible même sans {@code school_id} valide dans le JWT ou avec annuaire vide.
-     * Ne pas enchaîner {@link ActiveSchoolService.ensureInitialSchoolsSnapshot$} ici : sinon un GET /schools vide
-     * déclenche une redirection globale depuis l’alignement JWT et casse la navigation depuis {@code /acces-indisponible}.
+     * Centre de notifications / messagerie : accessibles même sans {@code school_id} valide dans le JWT
+     * ou avec annuaire vide. Ne pas enchaîner {@link ActiveSchoolService.ensureInitialSchoolsSnapshot$} ici.
      */
-    if (this.isNotificationsPath(path)) {
+    if (this.isNotificationsPath(path) || this.isMessageriePath(path)) {
       return of(true);
     }
     if (!this.activeSchool.shouldLoadSchoolsForPicker()) {
@@ -77,13 +76,21 @@ export class PortalSchoolAccessGuard implements CanActivateChild {
     return path;
   }
 
-  /** Quand aucun établissement accessible : page dédiée + centre de notifications. */
+  /** Quand aucun établissement accessible : page dédiée + notifications + messagerie. */
   private isAllowedWhenBlocked(url: string): boolean {
     const path = url.startsWith('/') ? url : `/${url}`;
     if (this.isAccesIndisponiblePath(path)) {
       return true;
     }
-    return this.isNotificationsPath(path);
+    return this.isNotificationsPath(path) || this.isMessageriePath(path);
+  }
+
+  private isAllowedWhenTenantDisabled(normalizedPath: string): boolean {
+    return (
+      this.isAccesIndisponiblePath(normalizedPath) ||
+      this.isNotificationsPath(normalizedPath) ||
+      this.isMessageriePath(normalizedPath)
+    );
   }
 
   private isAccesIndisponiblePath(normalizedPath: string): boolean {
@@ -94,5 +101,10 @@ export class PortalSchoolAccessGuard implements CanActivateChild {
   private isNotificationsPath(normalizedPath: string): boolean {
     const path = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
     return path === '/notifications' || path.startsWith('/notifications/');
+  }
+
+  private isMessageriePath(normalizedPath: string): boolean {
+    const path = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
+    return path === '/messagerie' || path.startsWith('/messagerie/');
   }
 }

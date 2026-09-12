@@ -83,7 +83,7 @@ export class ActivateComponent implements OnInit {
         next: (res) => {
           this.authService.saveTokens(res.bearer, res.refresh);
           this.submitting = false;
-          void this.router.navigate(this.authService.getPostLoginCommands());
+          this.authService.navigateAfterLogin(this.router);
         },
         error: () => {
           this.submitting = false;

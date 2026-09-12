@@ -353,16 +353,20 @@ export class ActiveSchoolService {
   }
 
   /**
-   * L’utilisateur peut consulter {@code /notifications} sans école active : ne pas lui imposer
-   * une navigation vers {@code /acces-indisponible} depuis l’alignement JWT (ex. après {@code NavigationEnd}
-   * qui relance {@link refreshSchools}).
+   * L’utilisateur peut consulter {@code /notifications} ou {@code /messagerie} sans école active :
+   * ne pas lui imposer une navigation vers {@code /acces-indisponible} depuis l’alignement JWT.
    */
   private isCurrentUrlNotificationsShell(): boolean {
     let path = this.router.url.split('?')[0].split('#')[0];
     if (path.length > 1 && path.endsWith('/')) {
       path = path.slice(0, -1);
     }
-    return path === '/notifications' || path.startsWith('/notifications/');
+    return (
+      path === '/notifications' ||
+      path.startsWith('/notifications/') ||
+      path === '/messagerie' ||
+      path.startsWith('/messagerie/')
+    );
   }
 
   clear(): void {

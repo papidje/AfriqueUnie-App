@@ -17,8 +17,8 @@
           L’accès au portail et aux pages de ses établissements est suspendu.
         </p>
         <p>
-          Contactez le support ou l’opérateur de la plateforme. Vous pouvez vous déconnecter et réessayer plus tard
-          si l’organisation est réactivée.
+          Vous pouvez consulter vos <strong>notifications</strong> et la <strong>messagerie</strong>.
+          Pour le reste, contactez le support ou l’opérateur de la plateforme.
         </p>
       </ng-container>
       <ng-template #compteOuSansEcole>
@@ -41,12 +41,8 @@
       </ng-template>
     </mat-card-content>
     <mat-card-actions align="end">
-      <a
-        *ngIf="!tenantDesactive"
-        mat-flat-button
-        color="primary"
-        routerLink="/notifications"
-      >Ouvrir les notifications</a>
+      <a mat-flat-button color="primary" routerLink="/notifications">Ouvrir les notifications</a>
+      <a mat-stroked-button routerLink="/messagerie">Messagerie</a>
       <button mat-stroked-button type="button" (click)="logout()">Se déconnecter</button>
     </mat-card-actions>
   </mat-card>

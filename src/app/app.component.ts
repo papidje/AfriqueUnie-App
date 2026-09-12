@@ -111,8 +111,10 @@ export class AppComponent implements OnInit, OnDestroy {
   private isSchoolDirectoryDeferredRoute(url: string): boolean {
     return (
       url === '/notifications' ||
+      url === '/messagerie' ||
       url === '/acces-indisponible' ||
       url.startsWith('/notifications/') ||
+      url.startsWith('/messagerie/') ||
       url.startsWith('/acces-indisponible/')
     );
   }

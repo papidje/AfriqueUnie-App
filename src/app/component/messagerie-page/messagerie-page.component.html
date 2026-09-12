@@ -1,0 +1,26 @@
+<section class="messagerie-page">
+  <mat-card *ngIf="tenantDesactive" class="restriction-banner restriction-banner--warn" role="status">
+    <mat-card-content>
+      <p class="restriction-banner-title">Organisation désactivée</p>
+      <p>
+        Votre organisation est temporairement désactivée. La messagerie restera consultable ici ; le reste du portail
+        école n’est pas disponible.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="page-head">
+    <h1>Messagerie</h1>
+    <p class="sub">Échanges avec l’administration et votre organisation.</p>
+  </div>
+
+  <mat-card class="placeholder-card">
+    <mat-card-content>
+      <p class="lead">Cette page sera bientôt disponible.</p>
+      <p class="muted">
+        Vous pourrez y consulter et envoyer des messages liés à votre compte. En attendant, utilisez le centre de
+        <a routerLink="/notifications">notifications</a>.
+      </p>
+    </mat-card-content>
+  </mat-card>
+</section>

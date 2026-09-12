@@ -36,6 +36,9 @@ export class AccesIndisponiblePageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.applyRouteParams(this.route.snapshot.queryParamMap);
     this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((q) => this.applyRouteParams(q));
+    if (this.tenantDesactive) {
+      this.activeSchool.applyTenantDisabledPortalState();
+    }
     this.startReactivationPolling();
   }
 

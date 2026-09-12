@@ -15,7 +15,7 @@ export class LandingPageComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.auth.isAccessTokenValid()) {
-      void this.router.navigate(this.auth.getPostLoginCommands());
+      this.auth.navigateAfterLogin(this.router);
     }
   }
 }

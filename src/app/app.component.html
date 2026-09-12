@@ -51,6 +51,10 @@
             <mat-icon>notifications</mat-icon>
             <span>Notifications</span>
           </button>
+          <button mat-menu-item type="button" routerLink="/messagerie" (click)="userMenuTrigger.closeMenu()">
+            <mat-icon>mail_outline</mat-icon>
+            <span>Messagerie</span>
+          </button>
           <mat-divider></mat-divider>
           <button mat-menu-item type="button" class="user-menu-logout" (click)="logoutFromMenu()">
             <mat-icon>logout</mat-icon>

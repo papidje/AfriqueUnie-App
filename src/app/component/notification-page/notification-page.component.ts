@@ -17,8 +17,8 @@ import { formatNotificationDateTime } from '../../shared/util/display-date.util'
 export class NotificationPageComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
-  /** Bandeau : seule vue utile quand aucune école ou compte désactivé. */
-  restrictionBanner: 'none' | 'compte' | 'sans-ecole' = 'none';
+  /** Bandeau : seule vue utile quand aucune école, compte ou organisation désactivée. */
+  restrictionBanner: 'none' | 'compte' | 'tenant' | 'sans-ecole' = 'none';
 
   loading = true;
   /** Échec réseau / HTTP hors 200 sur le chargement initial ou reload. */
@@ -216,6 +216,13 @@ export class NotificationPageComponent implements OnInit, OnDestroy {
       this.restrictionBanner = 'compte';
       return;
     }
+    if (
+      this.authService.isTenantDisabledSession() ||
+      this.route.snapshot.queryParamMap.get('raison') === 'tenant'
+    ) {
+      this.restrictionBanner = 'tenant';
+      return;
+    }
     if (this.activeSchool.isPortalAccessBlocked()) {
       this.restrictionBanner = 'sans-ecole';
       return;
@@ -245,7 +252,7 @@ export class NotificationPageComponent implements OnInit, OnDestroy {
         if (!this.activeSchool.shouldLoadSchoolsForPicker()) {
           return;
         }
-        if (this.authService.isAccountDisabledSession()) {
+        if (this.authService.isAccountDisabledSession() || this.authService.isTenantDisabledSession()) {
           return;
         }
         if (schools.length > 0) {

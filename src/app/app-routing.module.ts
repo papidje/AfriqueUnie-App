@@ -50,6 +50,7 @@ import { ClassHubShellComponent } from "./component/class-hub-shell/class-hub-sh
 import { CommunicationCenterPageComponent } from "./component/communication-center-page/communication-center-page.component";
 import { NotificationPageComponent } from "./component/notification-page/notification-page.component";
 import { AccesIndisponiblePageComponent } from "./component/acces-indisponible-page/acces-indisponible-page.component";
+import { MessageriePageComponent } from "./component/messagerie-page/messagerie-page.component";
 import { PortalSchoolAccessGuard } from "./guards/portal-school-access.guard";
 import { AccesIndisponibleGuard } from "./guards/acces-indisponible.guard";
 import { MarketingLayoutComponent } from "./component/marketing/marketing-layout/marketing-layout.component";
@@ -102,6 +103,11 @@ const routes: Routes = [
       {
         path: 'notifications',
         component: NotificationPageComponent,
+        canActivate: [AuthGuard]
+      },
+      {
+        path: 'messagerie',
+        component: MessageriePageComponent,
         canActivate: [AuthGuard]
       },
 

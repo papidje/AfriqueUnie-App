@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse} from "@angular/common/http";
+import {Router} from '@angular/router';
 import {Observable, of, tap, catchError, throwError, finalize} from "rxjs";
 import {jwtDecode} from "jwt-decode";
 import {AppRoles} from "../core/app-roles";
@@ -152,6 +153,9 @@ export class AuthService {
   }
 
   getPostLoginCommands(): string[] {
+    if (this.isTenantDisabledSession()) {
+      return ['/acces-indisponible'];
+    }
     const token = this.getToken();
     if (token) {
       try {
@@ -171,6 +175,20 @@ export class AuthService {
       return ['/super-admin/tenants'];
     }
     return ['/dashboard'];
+  }
+
+  /** Query params post-login (ex. organisation désactivée). */
+  getPostLoginQueryParams(): Record<string, string> | undefined {
+    if (this.isTenantDisabledSession()) {
+      return { raison: 'tenant' };
+    }
+    return undefined;
+  }
+
+  /** Navigation après login / activation (inclut query params si organisation désactivée). */
+  navigateAfterLogin(router: Router): void {
+    const queryParams = this.getPostLoginQueryParams();
+    void router.navigate(this.getPostLoginCommands(), queryParams ? { queryParams } : undefined);
   }
 
   /** JWT encore valide (exp > maintenant). */
@@ -360,6 +378,9 @@ export class AuthService {
         localStorage.setItem(this.HEADER_TITLE_KEY, ht.trim());
       } else {
         localStorage.removeItem(this.HEADER_TITLE_KEY);
+      }
+      if (decoded?.tenant_disabled === true) {
+        this.tenantDisabledSession = true;
       }
     } catch {
       localStorage.removeItem(this.ROLE_KEY);
