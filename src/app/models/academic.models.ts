@@ -31,6 +31,9 @@ export interface CreateSchoolYearPayload {
 /** Aligné sur {@code PeriodType} côté API. */
 export type SchoolClassPeriodType = 'TRIMESTER' | 'SEMESTER';
 
+/** Filière lycée (Baccalauréat Unique). */
+export type AcademicStream = 'SE' | 'SM' | 'SS';
+
 export interface SchoolClassDto {
   id: number;
   name: string;
@@ -38,6 +41,8 @@ export interface SchoolClassDto {
   capacity?: number;
   /** 3 trimestres ou 2 semestres (périodes générées à la création). */
   periodType?: SchoolClassPeriodType;
+  /** Filière lycée ; absente hors groupe LYC. */
+  stream?: AcademicStream | null;
   enrolledStudentCount?: number;
   subjectCount?: number;
   year?: { id: number; label?: string; startDate?: string; endDate?: string };

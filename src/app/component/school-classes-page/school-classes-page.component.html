@@ -54,7 +54,10 @@
             </ng-container>
             <ng-container matColumnDef="level">
               <th mat-header-cell *matHeaderCellDef>Niveau</th>
-              <td mat-cell *matCellDef="let row">{{ row.level?.name ?? '—' }}</td>
+              <td mat-cell *matCellDef="let row">
+                {{ row.level?.name ?? '—' }}
+                <span *ngIf="row.stream" class="stream-badge">{{ row.stream }}</span>
+              </td>
             </ng-container>
             <ng-container matColumnDef="periods">
               <th mat-header-cell *matHeaderCellDef>Périodes</th>

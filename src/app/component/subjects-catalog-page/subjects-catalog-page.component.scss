@@ -102,3 +102,29 @@ h1 {
   color: var(--app-primary-dark);
   font-weight: 500;
 }
+
+.requests-card {
+  margin-bottom: var(--sp-4);
+}
+
+.cycle-block {
+  margin-bottom: var(--sp-5);
+
+  h2 {
+    margin: 0 0 var(--sp-2);
+    font-size: var(--fs-md);
+    font-weight: 600;
+  }
+}
+
+.hint {
+  margin: 0 0 var(--sp-2);
+  color: var(--app-text-muted);
+  font-size: var(--fs-sm);
+}
+
+mat-card-content h2 {
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-md);
+  font-weight: 600;
+}

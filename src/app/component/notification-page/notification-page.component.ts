@@ -5,6 +5,7 @@ import { Subject, of, timer } from 'rxjs';
 import { catchError, finalize, switchMap, takeUntil } from 'rxjs/operators';
 import { ActiveSchoolService } from '../../service/active-school.service';
 import { AuthService } from '../../service/auth.service';
+import { AuthUtilsService } from '../../service/auth-utils.service';
 import { InAppNotificationApiService, NotificationVm } from '../../service/in-app-notification-api.service';
 import { School } from '../../modules/admin/school/school-list/school-list.component';
 import { formatNotificationDateTime } from '../../shared/util/display-date.util';
@@ -31,6 +32,7 @@ export class NotificationPageComponent implements OnInit, OnDestroy {
   constructor(
     private readonly notificationsApi: InAppNotificationApiService,
     private readonly authService: AuthService,
+    private readonly authUtils: AuthUtilsService,
     private readonly activeSchool: ActiveSchoolService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -61,6 +63,27 @@ export class NotificationPageComponent implements OnInit, OnDestroy {
 
   isUserTargeted(n: NotificationVm): boolean {
     return (n.type || '').toUpperCase() === 'USER_TARGETED';
+  }
+
+  /** Demande d’ajout de matière (linkId = id de demande). */
+  isSubjectAdditionRequest(n: NotificationVm): boolean {
+    if (!this.isUserTargeted(n) || n.linkId == null) {
+      return false;
+    }
+    const t = (n.title || '').toLowerCase();
+    return t.includes('matière') || t.includes('matiere');
+  }
+
+  openSubjectAdditionRequest(n: NotificationVm): void {
+    if (!this.isSubjectAdditionRequest(n) || n.linkId == null) {
+      return;
+    }
+    const queryParams = { requestId: n.linkId };
+    if (this.authUtils.isSuperAdmin()) {
+      void this.router.navigate(['/super-admin/matieres'], { queryParams });
+    } else {
+      void this.router.navigate(['/matieres'], { queryParams });
+    }
   }
 
   invitationClosureNorm(n: NotificationVm): string {

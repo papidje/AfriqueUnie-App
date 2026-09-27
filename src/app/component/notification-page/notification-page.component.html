@@ -87,6 +87,12 @@
         <span>{{ n.schoolName }}</span>
       </div>
 
+      <div *ngIf="isSubjectAdditionRequest(n)" class="actions" style="margin-top: 0.75rem">
+        <button mat-stroked-button color="primary" type="button" (click)="openSubjectAdditionRequest(n)">
+          Voir la demande
+        </button>
+      </div>
+
       <div *ngIf="isInvitation(n)" class="invitation-block">
         <div class="school-line">
           <mat-icon aria-hidden="true">apartment</mat-icon>

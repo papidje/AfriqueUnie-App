@@ -10,12 +10,20 @@ export class SubjectService {
 
   constructor(private readonly http: HttpClient) {}
 
-  private schoolParams(schoolId: number): HttpParams {
-    return new HttpParams().set('schoolId', String(schoolId));
+  private schoolParams(schoolId: number, classId?: number): HttpParams {
+    let params = new HttpParams().set('schoolId', String(schoolId));
+    if (classId != null) {
+      params = params.set('classId', String(classId));
+    }
+    return params;
   }
 
-  list(schoolId: number): Observable<SchoolSubject[]> {
-    return this.http.get<SchoolSubject[]>(this.base, { params: this.schoolParams(schoolId) });
+  /**
+   * Catalogue école. Si {@code classId} est fourni, uniquement les matières compatibles
+   * avec le cycle de la classe.
+   */
+  list(schoolId: number, classId?: number): Observable<SchoolSubject[]> {
+    return this.http.get<SchoolSubject[]>(this.base, { params: this.schoolParams(schoolId, classId) });
   }
 
   getById(schoolId: number, id: number): Observable<SchoolSubject> {

@@ -1,0 +1,64 @@
+<h2 mat-dialog-title>Demande — {{ detail?.subjectName || '…' }}</h2>
+
+<mat-dialog-content>
+  <div *ngIf="loading" class="muted">Chargement…</div>
+
+  <ng-container *ngIf="!loading && detail as d">
+    <div class="meta">
+      <span class="badge" [class.open]="d.status === 'OPEN'" [class.ok]="d.status === 'ACCEPTED'" [class.ko]="d.status === 'REFUSED'">
+        {{ statusLabel(d.status) }}
+      </span>
+      <span class="muted">{{ d.levelGroupName }} · {{ d.classLevelName }}</span>
+      <span class="muted" *ngIf="asSuperAdmin">{{ d.schoolName }} — {{ d.requestedByFullName }}</span>
+      <span class="muted">Créée le {{ formatDt(d.createdAt) }}</span>
+      <span class="muted" *ngIf="d.closedAt">Fermée le {{ formatDt(d.closedAt) }}</span>
+      <span class="muted" *ngIf="d.createdSubjectCode">Matière créée : {{ d.createdSubjectCode }}</span>
+    </div>
+
+    <div class="thread">
+      <div class="comment" *ngFor="let c of d.comments" [class.sa]="c.authorIsSuperAdmin">
+        <div class="comment__head">
+          <strong>{{ c.authorFullName }}</strong>
+          <span class="pill" *ngIf="c.authorIsSuperAdmin">Super admin</span>
+          <span class="muted">{{ formatDt(c.createdAt) }}</span>
+        </div>
+        <p class="comment__body">{{ c.body }}</p>
+      </div>
+      <p class="muted" *ngIf="!d.comments?.length">Aucun commentaire.</p>
+    </div>
+
+    <form *ngIf="isOpen" [formGroup]="commentForm" class="comment-form" (ngSubmit)="sendComment()">
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Nouveau commentaire</mat-label>
+        <textarea matInput formControlName="body" rows="3"></textarea>
+      </mat-form-field>
+      <button mat-stroked-button color="primary" type="submit" [disabled]="saving || commentForm.invalid">
+        Publier
+      </button>
+    </form>
+
+    <div *ngIf="asSuperAdmin && isOpen" class="accept-box" [formGroup]="acceptForm">
+      <h3>Accepter et créer la matière</h3>
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Code</mat-label>
+        <input matInput formControlName="code" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Nom (optionnel)</mat-label>
+        <input matInput formControlName="name" />
+      </mat-form-field>
+    </div>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()" [disabled]="saving">Fermer</button>
+  <ng-container *ngIf="asSuperAdmin && isOpen">
+    <button mat-stroked-button color="warn" type="button" (click)="refuse()" [disabled]="saving">
+      Refuser
+    </button>
+    <button mat-raised-button color="primary" type="button" (click)="accept()" [disabled]="saving || acceptForm.invalid">
+      Accepter
+    </button>
+  </ng-container>
+</mat-dialog-actions>

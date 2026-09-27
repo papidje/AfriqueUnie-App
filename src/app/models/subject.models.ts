@@ -5,6 +5,8 @@ export interface SchoolSubject {
   name: string;
   /** Absent ou `null` = référentiel global ; sinon matière propre à l’établissement. */
   schoolId?: number | null;
+  /** Cycles où la matière est assignable (PRE, MAT, PRI, COL, LYC). */
+  levelGroupCodes?: string[];
 }
 
 export interface ClassSubjectRow {

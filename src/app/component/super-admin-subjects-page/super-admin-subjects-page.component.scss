@@ -75,3 +75,38 @@ h1 {
   margin-top: 1rem;
   color: var(--app-text-muted);
 }
+
+.requests-card {
+  margin-bottom: 1.5rem;
+}
+
+.requests-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+
+  button.active {
+    border-color: var(--app-primary);
+    color: var(--app-primary);
+  }
+}
+
+.section-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}

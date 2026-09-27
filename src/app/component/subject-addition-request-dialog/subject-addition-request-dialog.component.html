@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>Demander une nouvelle matière</h2>
+
+<mat-dialog-content>
+  <p class="dialog-sub">
+    La matière sera proposée au référentiel commun. Un super administrateur traitera votre demande.
+  </p>
+
+  <form [formGroup]="form" class="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Nom de la matière</mat-label>
+      <input matInput formControlName="subjectName" autocomplete="off" />
+      <mat-error *ngIf="form.controls.subjectName.hasError('required')">Nom requis.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Niveau concerné</mat-label>
+      <mat-select formControlName="classLevelId" [disabled]="loadingLevels">
+        <mat-optgroup *ngFor="let g of levelGroups" [label]="g.groupLabel">
+          <mat-option *ngFor="let lv of g.levels" [value]="lv.id">{{ lv.name }}</mat-option>
+        </mat-optgroup>
+      </mat-select>
+      <mat-hint>Indique le cycle / niveau où cette matière doit être enseignée.</mat-hint>
+      <mat-error *ngIf="form.controls.classLevelId.hasError('required')">Choisissez un niveau.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Justification (obligatoire)</mat-label>
+      <textarea matInput formControlName="comment" rows="4"></textarea>
+      <mat-hint>Expliquez pourquoi cette matière doit être ajoutée (min. 10 caractères).</mat-hint>
+      <mat-error *ngIf="form.controls.comment.hasError('required')">Commentaire requis.</mat-error>
+      <mat-error *ngIf="form.controls.comment.hasError('minlength')">Au moins 10 caractères.</mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="saving">Annuler</button>
+  <button
+    mat-raised-button
+    color="primary"
+    type="button"
+    (click)="submit()"
+    [disabled]="saving || form.invalid || loadingLevels"
+  >
+    {{ saving ? 'Envoi…' : 'Envoyer la demande' }}
+  </button>
+</mat-dialog-actions>

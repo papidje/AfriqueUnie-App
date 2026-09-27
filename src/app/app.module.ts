@@ -65,6 +65,8 @@ import { ClassFormDialogComponent } from './component/class-form-dialog/class-fo
 import { SchoolYearCreatePageComponent } from './component/school-year-create-page/school-year-create-page.component';
 import { SubjectsCatalogPageComponent } from './component/subjects-catalog-page/subjects-catalog-page.component';
 import { SubjectFormDialogComponent } from './component/subject-form-dialog/subject-form-dialog.component';
+import { SubjectAdditionRequestDialogComponent } from './component/subject-addition-request-dialog/subject-addition-request-dialog.component';
+import { SubjectAdditionRequestDetailDialogComponent } from './component/subject-addition-request-detail-dialog/subject-addition-request-detail-dialog.component';
 import { ClassSubjectsPageComponent } from './component/class-subjects-page/class-subjects-page.component';
 import { ClassSubjectFormDialogComponent } from './component/class-subject-form-dialog/class-subject-form-dialog.component';
 import { ClassPlanningPageComponent } from './component/class-planning-page/class-planning-page.component';
@@ -136,6 +138,8 @@ export function initializeAuthFactory(authService: AuthService) {
     SchoolYearCreatePageComponent,
     SubjectsCatalogPageComponent,
     SubjectFormDialogComponent,
+    SubjectAdditionRequestDialogComponent,
+    SubjectAdditionRequestDetailDialogComponent,
     ClassSubjectsPageComponent,
     ClassSubjectFormDialogComponent,
     ClassPlanningPageComponent,

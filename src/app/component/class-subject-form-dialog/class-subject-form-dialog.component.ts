@@ -141,9 +141,13 @@ export class ClassSubjectFormDialogComponent implements OnInit {
         this.snackBar.open('Matière ajoutée à la classe.', 'Fermer', { duration: 3000 });
         this.dialogRef.close(true);
       },
-      error: () => {
+      error: (err) => {
         this.saving = false;
-        this.snackBar.open('Ajout impossible (déjà affectée ?).', 'Fermer', { duration: 5000 });
+        const msg =
+          err?.error?.message ||
+          err?.error?.detail ||
+          'Ajout impossible (matière incompatible ou déjà affectée).';
+        this.snackBar.open(msg, 'Fermer', { duration: 5000 });
       }
     });
   }

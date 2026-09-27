@@ -2,13 +2,67 @@
   <div class="page-head">
     <div>
       <h1>Référentiel des matières</h1>
-      <p class="subtitle">Matières globales partagées par tous les établissements (school_id null).</p>
+      <p class="subtitle">Matières globales et demandes d’ajout provenant des établissements.</p>
     </div>
     <button mat-raised-button color="primary" type="button" (click)="startCreate()">
       <mat-icon>add</mat-icon>
       Nouvelle matière
     </button>
   </div>
+
+  <mat-card class="requests-card">
+    <mat-card-content>
+      <div class="requests-head">
+        <h2>Demandes d’ajout</h2>
+        <div class="filters">
+          <button mat-stroked-button type="button" [class.active]="requestFilter === 'OPEN'" (click)="setRequestFilter('OPEN')">
+            Ouvertes
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            [class.active]="requestFilter === 'CLOSED'"
+            (click)="setRequestFilter('CLOSED')"
+          >
+            Fermées
+          </button>
+          <button mat-stroked-button type="button" [class.active]="requestFilter === 'ALL'" (click)="setRequestFilter('ALL')">
+            Toutes
+          </button>
+        </div>
+      </div>
+      <div *ngIf="loadingRequests" class="state">Chargement des demandes…</div>
+      <div class="table-wrap" *ngIf="!loadingRequests && requests.length">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Matière</th>
+              <th>École</th>
+              <th>Niveau</th>
+              <th>Demandeur</th>
+              <th>Statut</th>
+              <th>Créée le</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of requests">
+              <td>{{ r.subjectName }}</td>
+              <td>{{ r.schoolName }}</td>
+              <td>{{ r.levelGroupName }} · {{ r.classLevelName }}</td>
+              <td>{{ r.requestedByFullName }}</td>
+              <td>{{ statusLabel(r.status) }}</td>
+              <td>{{ formatDt(r.createdAt) }}</td>
+              <td class="actions">
+                <button mat-button color="primary" type="button" (click)="openRequest(r.id)">Ouvrir</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p *ngIf="!loadingRequests && !requests.length" class="empty">Aucune demande pour ce filtre.</p>
+    </mat-card-content>
+  </mat-card>
 
   <mat-card class="form-card" *ngIf="formOpen">
     <mat-card-title>{{ editingId != null ? 'Modifier la matière' : 'Ajouter une matière' }}</mat-card-title>
@@ -32,6 +86,7 @@
     </mat-card-content>
   </mat-card>
 
+  <h2 class="section-title">Catalogue global</h2>
   <div *ngIf="loading" class="state">Chargement…</div>
 
   <div class="table-wrap" *ngIf="!loading">
@@ -40,6 +95,7 @@
         <tr>
           <th>Code</th>
           <th>Nom</th>
+          <th>Cycles</th>
           <th class="actions">Actions</th>
         </tr>
       </thead>
@@ -47,6 +103,7 @@
         <tr *ngFor="let s of subjects">
           <td>{{ s.code }}</td>
           <td>{{ s.name }}</td>
+          <td>{{ (s.levelGroupCodes || []).join(', ') || '—' }}</td>
           <td class="actions">
             <button mat-icon-button type="button" (click)="startEdit(s)" aria-label="Modifier">
               <mat-icon>edit</mat-icon>

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../core/api-base';
-import { SchoolClassDto, SchoolClassPeriodType } from '../models/academic.models';
+import { AcademicStream, SchoolClassDto, SchoolClassPeriodType } from '../models/academic.models';
 
 export interface CreateSchoolClassRequest {
   name: string;
@@ -10,12 +10,15 @@ export interface CreateSchoolClassRequest {
   level: { id: number };
   capacity?: number;
   periodType?: SchoolClassPeriodType;
+  /** Obligatoire si niveau lycée. */
+  stream?: AcademicStream | null;
 }
 
 export interface UpdateSchoolClassRequest {
   name: string;
   levelId: number;
   capacity: number;
+  stream?: AcademicStream | null;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -97,7 +97,7 @@ export class ClassSubjectsPageComponent implements OnInit, OnDestroy {
           }
           return forkJoin({
             rows: this.classSubjectService.listForClass(id),
-            catalog: this.subjectService.list(sid)
+            catalog: this.subjectService.list(sid, id)
           });
         }),
         takeUntil(this.destroy$)

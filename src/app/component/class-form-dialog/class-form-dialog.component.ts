@@ -3,7 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SchoolClassService } from '../../service/school-class.service';
-import { SchoolClassDto, SchoolYearDto } from '../../models/academic.models';
+import { AcademicStream, SchoolClassDto, SchoolYearDto } from '../../models/academic.models';
 import type { ClassLevelGroupOption } from '../school-classes-page/school-classes-page.component';
 
 export interface ClassFormDialogData {
@@ -22,8 +22,15 @@ export interface ClassFormDialogData {
 export class ClassFormDialogComponent implements OnInit {
   saving = false;
 
+  readonly streamOptions: { value: AcademicStream; label: string }[] = [
+    { value: 'SE', label: 'SE — Sciences expérimentales' },
+    { value: 'SM', label: 'SM — Sciences mathématiques' },
+    { value: 'SS', label: 'SS — Sciences sociales' }
+  ];
+
   readonly form = this.fb.group({
     levelId: [null as number | null, Validators.required],
+    stream: [null as AcademicStream | null],
     name: ['', [Validators.required, Validators.maxLength(50)]],
     capacity: [40, [Validators.required, Validators.min(1), Validators.max(200)]],
     periodType: ['TRIMESTER' as 'TRIMESTER' | 'SEMESTER', Validators.required]
@@ -52,12 +59,31 @@ export class ClassFormDialogComponent implements OnInit {
     return Math.max(1, this.data.schoolClass?.enrolledStudentCount ?? 0);
   }
 
+  get isLycLevel(): boolean {
+    const levelId = this.form.controls.levelId.value;
+    if (levelId == null) {
+      return false;
+    }
+    for (const g of this.levelGroups) {
+      if (g.groupCode !== 'LYC') {
+        continue;
+      }
+      if (g.levels.some((lv) => lv.id === levelId)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   ngOnInit(): void {
+    this.form.controls.levelId.valueChanges.subscribe(() => this.syncStreamValidators());
+
     if (this.isEdit && this.data.schoolClass) {
       const enrolled = this.data.schoolClass.enrolledStudentCount ?? 0;
       const capacity = this.data.schoolClass.capacity ?? 40;
       this.form.reset({
         levelId: this.data.schoolClass.level?.id ?? null,
+        stream: this.data.schoolClass.stream ?? null,
         name: this.data.schoolClass.name ?? '',
         capacity: Math.max(capacity, enrolled || 1),
         periodType: this.data.schoolClass.periodType === 'SEMESTER' ? 'SEMESTER' : 'TRIMESTER'
@@ -71,6 +97,7 @@ export class ClassFormDialogComponent implements OnInit {
       this.form.controls.periodType.clearValidators();
       this.form.controls.periodType.updateValueAndValidity();
     }
+    this.syncStreamValidators();
   }
 
   cancel(): void {
@@ -88,6 +115,12 @@ export class ClassFormDialogComponent implements OnInit {
     if (!name || levelId == null) {
       return;
     }
+    const stream = this.isLycLevel ? (this.form.value.stream as AcademicStream | null) : null;
+    if (this.isLycLevel && !stream) {
+      this.form.controls.stream.setErrors({ required: true });
+      this.form.controls.stream.markAsTouched();
+      return;
+    }
 
     this.saving = true;
 
@@ -96,7 +129,8 @@ export class ClassFormDialogComponent implements OnInit {
         .update(this.data.schoolClass.id, {
           name,
           levelId,
-          capacity: Number.isFinite(capacity) && capacity > 0 ? capacity : this.minCapacity
+          capacity: Number.isFinite(capacity) && capacity > 0 ? capacity : this.minCapacity,
+          stream
         })
         .subscribe({
           next: () => {
@@ -109,7 +143,7 @@ export class ClassFormDialogComponent implements OnInit {
             const msg =
               err?.error?.message ||
               err?.error?.detail ||
-              'Mise à jour impossible (nom ou niveau déjà utilisé ?).';
+              'Mise à jour impossible (nom, niveau ou filière ?).';
             this.snackBar.open(msg, 'Fermer', { duration: 5000 });
           }
         });
@@ -123,7 +157,8 @@ export class ClassFormDialogComponent implements OnInit {
         year: { id: this.data.activeYear.id },
         level: { id: levelId },
         capacity: Number.isFinite(capacity) && capacity > 0 ? capacity : 40,
-        periodType: periodType === 'SEMESTER' ? 'SEMESTER' : 'TRIMESTER'
+        periodType: periodType === 'SEMESTER' ? 'SEMESTER' : 'TRIMESTER',
+        stream
       })
       .subscribe({
         next: () => {
@@ -131,12 +166,28 @@ export class ClassFormDialogComponent implements OnInit {
           this.snackBar.open('Classe ouverte avec succès.', 'Fermer', { duration: 3500 });
           this.dialogRef.close(true);
         },
-        error: () => {
+        error: (err) => {
           this.saving = false;
-          this.snackBar.open('Création impossible (nom ou niveau déjà utilisé ?).', 'Fermer', {
-            duration: 5000
-          });
+          const msg =
+            err?.error?.message ||
+            err?.error?.detail ||
+            'Création impossible (nom, niveau ou filière ?).';
+          this.snackBar.open(msg, 'Fermer', { duration: 5000 });
         }
       });
+  }
+
+  private syncStreamValidators(): void {
+    const ctrl = this.form.controls.stream;
+    if (this.isLycLevel) {
+      ctrl.setValidators([Validators.required]);
+      if (!ctrl.value) {
+        ctrl.setValue('SE', { emitEvent: false });
+      }
+    } else {
+      ctrl.clearValidators();
+      ctrl.setValue(null, { emitEvent: false });
+    }
+    ctrl.updateValueAndValidity({ emitEvent: false });
   }
 }

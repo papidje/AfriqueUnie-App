@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../core/api-base';
 import { SchoolSubject } from '../models/subject.models';
+import {
+  SubjectAdditionRequestComment,
+  SubjectAdditionRequestDetail,
+  SubjectAdditionRequestSummary
+} from '../models/subject-addition-request.models';
 
 export interface TenantSchoolSummary {
   id: number;
@@ -130,5 +135,48 @@ export class SuperAdminService {
 
   deleteGlobalSubject(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/super-admin/subjects/${id}`);
+  }
+
+  listSubjectAdditionRequests(
+    status: 'ALL' | 'OPEN' | 'CLOSED' = 'OPEN'
+  ): Observable<SubjectAdditionRequestSummary[]> {
+    const params = new HttpParams().set('status', status);
+    return this.http.get<SubjectAdditionRequestSummary[]>(
+      `${this.apiUrl}/super-admin/subject-addition-requests`,
+      { params }
+    );
+  }
+
+  getSubjectAdditionRequest(id: number): Observable<SubjectAdditionRequestDetail> {
+    return this.http.get<SubjectAdditionRequestDetail>(
+      `${this.apiUrl}/super-admin/subject-addition-requests/${id}`
+    );
+  }
+
+  commentSubjectAdditionRequest(id: number, body: string): Observable<SubjectAdditionRequestComment> {
+    return this.http.post<SubjectAdditionRequestComment>(
+      `${this.apiUrl}/super-admin/subject-addition-requests/${id}/comments`,
+      { body }
+    );
+  }
+
+  acceptSubjectAdditionRequest(
+    id: number,
+    body: { code: string; name?: string; levelGroupCodes?: string[] }
+  ): Observable<SubjectAdditionRequestDetail> {
+    return this.http.post<SubjectAdditionRequestDetail>(
+      `${this.apiUrl}/super-admin/subject-addition-requests/${id}/accept`,
+      body
+    );
+  }
+
+  refuseSubjectAdditionRequest(
+    id: number,
+    comment?: string
+  ): Observable<SubjectAdditionRequestDetail> {
+    return this.http.post<SubjectAdditionRequestDetail>(
+      `${this.apiUrl}/super-admin/subject-addition-requests/${id}/refuse`,
+      { comment: comment ?? null }
+    );
   }
 }
