@@ -21,27 +21,6 @@
   <ng-container *ngIf="!loading && summary as data">
     <section class="kpi-section">
       <div class="kpi-grid">
-        <mat-card class="kpi-card kpi-card--wide">
-          <div class="kpi-icon students">
-            <mat-icon>groups</mat-icon>
-          </div>
-          <div class="kpi-body">
-            <p class="kpi-label">Élèves inscrits / capacité totale</p>
-            <h2>{{ data.studentsEnrolled }} <span class="kpi-sep">/</span> {{ data.totalCapacity }}</h2>
-            <div class="kpi-progress" *ngIf="data.totalCapacity">
-              <span class="kpi-progress__track">
-                <span
-                  class="kpi-progress__fill"
-                  [style.width.%]="data.studentsEnrolled * 100 / data.totalCapacity"></span>
-              </span>
-              <span class="kpi-progress__pct">
-                {{ data.studentsEnrolled * 100 / data.totalCapacity | number: '1.0-0' }} %
-              </span>
-            </div>
-            <p class="kpi-hint" *ngIf="!data.totalCapacity">Capacité non renseignée sur les classes.</p>
-          </div>
-        </mat-card>
-
         <mat-card class="kpi-card">
           <div class="kpi-icon classes">
             <mat-icon>class</mat-icon>
@@ -64,11 +43,13 @@
       </div>
     </section>
 
-    <section class="charts-grid">
+    <section class="charts-stack">
       <mat-card class="chart-card">
         <div class="chart-card__head">
-          <h3>Remplissage des classes</h3>
-          <p class="chart-card__sub">Inscrits par rapport à la capacité de chaque classe.</p>
+          <h3>
+            Remplissage des classes
+            <span class="chart-card__stat">{{ data.studentsEnrolled }}/{{ data.totalCapacity }}</span>
+          </h3>
         </div>
 
         <div class="chart-legend">
@@ -82,22 +63,40 @@
           </span>
         </div>
 
-        <div class="chart-scroll" *ngIf="data.classFill?.length; else emptyFill">
-          <div class="bar-chart" role="img" aria-label="Remplissage des classes">
-            <div class="bar-col" *ngFor="let row of data.classFill" [matTooltip]="fillTooltip(row)">
-              <div
-                class="bar-col__stack"
-                [style.height.%]="barHeightPct(row.capacity || row.enrolled, maxFillCapacity(data))">
+        <div class="chart-plot" *ngIf="data.classFill?.length; else emptyFill">
+          <div class="chart-y-axis" aria-hidden="true">
+            <span
+              class="chart-y-tick"
+              *ngFor="let tick of yTicks(maxFillCapacity(data))"
+              [style.bottom.%]="tick.pct"
+            >{{ tick.label }}</span>
+          </div>
+          <div class="chart-scroll">
+            <div class="bar-chart" role="img" aria-label="Remplissage des classes">
+              <div class="chart-grid" aria-hidden="true">
                 <span
-                  class="bar-seg bar-seg--enrolled"
-                  [style.flex-grow]="fillEnrolledPct(row) || 0.01"></span>
-                <span
-                  class="bar-seg bar-seg--free"
-                  [style.flex-grow]="fillFreePct(row)"
-                  *ngIf="fillFreePct(row) > 0"></span>
+                  class="chart-grid__line"
+                  *ngFor="let tick of yTicks(maxFillCapacity(data))"
+                  [style.bottom.%]="tick.pct"
+                ></span>
               </div>
-              <div class="bar-col__value">{{ row.enrolled }}/{{ row.capacity }}</div>
-              <div class="bar-col__label">{{ classLabel(row) }}</div>
+              <div class="bar-col" *ngFor="let row of data.classFill" [matTooltip]="fillTooltip(row)">
+                <div class="bar-col__value">{{ row.enrolled }}/{{ row.capacity }}</div>
+                <div class="bar-col__track">
+                  <div
+                    class="bar-col__stack"
+                    [style.height.%]="barHeightPct(row.capacity || row.enrolled, maxFillCapacity(data))">
+                    <span
+                      class="bar-seg bar-seg--enrolled"
+                      [style.flex-grow]="fillEnrolledPct(row) || 0.01"></span>
+                    <span
+                      class="bar-seg bar-seg--free"
+                      [style.flex-grow]="fillFreePct(row)"
+                      *ngIf="fillFreePct(row) > 0"></span>
+                  </div>
+                </div>
+                <div class="bar-col__label">{{ classLabel(row) }}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -123,30 +122,48 @@
           </span>
         </div>
 
-        <div class="chart-scroll" *ngIf="data.classPaymentStatus?.length; else emptyPay">
-          <div class="bar-chart" role="img" aria-label="État des paiements par classe">
-            <div
-              class="bar-col"
-              *ngFor="let row of data.classPaymentStatus"
-              [matTooltip]="payTooltip(row)">
+        <div class="chart-plot" *ngIf="data.classPaymentStatus?.length; else emptyPay">
+          <div class="chart-y-axis" aria-hidden="true">
+            <span
+              class="chart-y-tick"
+              *ngFor="let tick of yTicks(maxPayHeadcount(data))"
+              [style.bottom.%]="tick.pct"
+            >{{ tick.label }}</span>
+          </div>
+          <div class="chart-scroll">
+            <div class="bar-chart" role="img" aria-label="État des paiements par classe">
+              <div class="chart-grid" aria-hidden="true">
+                <span
+                  class="chart-grid__line"
+                  *ngFor="let tick of yTicks(maxPayHeadcount(data))"
+                  [style.bottom.%]="tick.pct"
+                ></span>
+              </div>
               <div
-                class="bar-col__stack"
-                [style.height.%]="barHeightPct(
-                  (row.upToDateCount || 0) + (row.lateCount || 0),
-                  maxPayHeadcount(data)
-                )">
-                <span
-                  class="bar-seg bar-seg--ok"
-                  [style.flex-grow]="payUpToDatePct(row) || 0.01"></span>
-                <span
-                  class="bar-seg bar-seg--late"
-                  [style.flex-grow]="payLatePct(row)"
-                  *ngIf="payLatePct(row) > 0"></span>
+                class="bar-col"
+                *ngFor="let row of data.classPaymentStatus"
+                [matTooltip]="payTooltip(row)">
+                <div class="bar-col__value">
+                  {{ row.upToDateCount }}<span class="bar-col__sep">/</span>{{ row.lateCount }}
+                </div>
+                <div class="bar-col__track">
+                  <div
+                    class="bar-col__stack"
+                    [style.height.%]="barHeightPct(
+                      (row.upToDateCount || 0) + (row.lateCount || 0),
+                      maxPayHeadcount(data)
+                    )">
+                    <span
+                      class="bar-seg bar-seg--ok"
+                      [style.flex-grow]="payUpToDatePct(row) || 0.01"></span>
+                    <span
+                      class="bar-seg bar-seg--late"
+                      [style.flex-grow]="payLatePct(row)"
+                      *ngIf="payLatePct(row) > 0"></span>
+                  </div>
+                </div>
+                <div class="bar-col__label">{{ classLabel(row) }}</div>
               </div>
-              <div class="bar-col__value">
-                {{ row.upToDateCount }}<span class="bar-col__sep">/</span>{{ row.lateCount }}
-              </div>
-              <div class="bar-col__label">{{ classLabel(row) }}</div>
             </div>
           </div>
         </div>

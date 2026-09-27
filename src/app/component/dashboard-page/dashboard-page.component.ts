@@ -167,11 +167,55 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
     return totals.length ? Math.max(...totals, 1) : 1;
   }
 
-  /** Hauteur relative de la barre (capacité / effectif) pour comparer les classes. */
+  /**
+   * Graduations Y (0 → max), environ 4 paliers pour lire les écarts entre classes.
+   */
+  yTicks(max: number): { label: number; pct: number }[] {
+    const ceiling = this.niceCeiling(max);
+    if (ceiling <= 0) {
+      return [{ label: 0, pct: 0 }];
+    }
+    const steps = 4;
+    const step = ceiling / steps;
+    const ticks: { label: number; pct: number }[] = [];
+    for (let i = 0; i <= steps; i++) {
+      const value = Math.round(step * i);
+      ticks.push({
+        label: value,
+        pct: (value * 100) / ceiling
+      });
+    }
+    return ticks;
+  }
+
+  /** Hauteur relative de la barre sur l’échelle 0 → niceCeiling(max). */
   barHeightPct(value: number, max: number): number {
-    if (!max || max <= 0) {
+    const ceiling = this.niceCeiling(max);
+    if (!ceiling || ceiling <= 0 || !value || value <= 0) {
       return 0;
     }
-    return Math.max(4, Math.min(100, (value * 100) / max));
+    return Math.min(100, (value * 100) / ceiling);
+  }
+
+  private niceCeiling(max: number): number {
+    const n = Math.max(1, Math.ceil(max || 1));
+    if (n <= 10) {
+      return n;
+    }
+    const magnitude = Math.pow(10, Math.floor(Math.log10(n)));
+    const normalized = n / magnitude;
+    let nice: number;
+    if (normalized <= 1.5) {
+      nice = 1.5;
+    } else if (normalized <= 2) {
+      nice = 2;
+    } else if (normalized <= 3) {
+      nice = 3;
+    } else if (normalized <= 5) {
+      nice = 5;
+    } else {
+      nice = 10;
+    }
+    return Math.ceil(nice * magnitude);
   }
 }

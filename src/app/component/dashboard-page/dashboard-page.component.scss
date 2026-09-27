@@ -54,9 +54,15 @@
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--sp-3);
   align-items: stretch;
+}
+
+@include ds.lt(640) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .kpi-card.mat-mdc-card {
@@ -90,66 +96,10 @@
   }
 }
 
-.kpi-card--wide {
-  grid-column: span 2;
-}
-
-@include ds.lt(960) {
-  .kpi-card--wide {
-    grid-column: auto;
-  }
-}
-
 .kpi-body {
   flex: 1 1 auto;
   min-width: 0;
   text-align: center;
-}
-
-.kpi-progress {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  margin-top: var(--sp-2);
-}
-
-.kpi-progress__track {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 6px;
-  border-radius: var(--radius-pill);
-  background: var(--app-surface-2);
-  border: 1px solid var(--app-border);
-  overflow: hidden;
-}
-
-.kpi-progress__fill {
-  display: block;
-  height: 100%;
-  max-width: 100%;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, var(--app-primary-light), var(--app-primary));
-}
-
-.kpi-progress__pct {
-  flex: 0 0 auto;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--app-text-secondary);
-  font-variant-numeric: tabular-nums;
-}
-
-.kpi-sep {
-  font-weight: 500;
-  color: var(--app-text-muted);
-  margin: 0 0.1em;
-}
-
-.kpi-hint {
-  margin: 0.3rem 0 0;
-  font-size: var(--fs-xs);
-  color: var(--app-text-muted);
-  line-height: 1.35;
 }
 
 .kpi-label {
@@ -175,10 +125,6 @@
     height: 30px;
   }
 
-  &.students {
-    background: linear-gradient(120deg, #2563eb, #3b82f6);
-  }
-
   &.classes {
     background: linear-gradient(120deg, #7c3aed, #a78bfa);
   }
@@ -188,17 +134,10 @@
   }
 }
 
-.charts-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.charts-stack {
+  display: flex;
+  flex-direction: column;
   gap: var(--sp-4);
-  align-items: stretch;
-}
-
-@include ds.lt(960) {
-  .charts-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .chart-card.mat-mdc-card {
@@ -214,15 +153,25 @@
 
 .chart-card__head {
   h3 {
-    margin: 0 0 var(--sp-1);
+    margin: 0;
     font-size: var(--fs-md);
     font-weight: 600;
     color: var(--app-text-strong);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sp-2);
   }
 }
 
+.chart-card__stat {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--app-primary);
+}
+
 .chart-card__sub {
-  margin: 0;
+  margin: var(--sp-1) 0 0;
   font-size: var(--fs-sm);
   color: var(--app-text-muted);
   line-height: 1.4;
@@ -266,44 +215,121 @@
   }
 }
 
+/* Plot = axe Y + zone scrollable ; track fixe pour aligner les bases des barres. */
+$chart-plot-h: 280px;
+$chart-value-h: 1.4rem;
+$chart-label-h: 2.4rem;
+$chart-col-w: 64px;
+$chart-bar-w: 36px;
+
+.chart-plot {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: var(--sp-2);
+  align-items: stretch;
+  min-height: calc(#{$chart-plot-h} + #{$chart-value-h} + #{$chart-label-h} + var(--sp-4));
+}
+
+.chart-y-axis {
+  position: relative;
+  height: $chart-plot-h;
+  margin-top: calc(#{$chart-value-h} + var(--sp-2));
+  margin-bottom: calc(#{$chart-label-h} + var(--sp-2));
+}
+
+.chart-y-tick {
+  position: absolute;
+  right: 0;
+  transform: translateY(50%);
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--app-text-muted);
+  line-height: 1;
+  pointer-events: none;
+}
+
 .chart-scroll {
   overflow-x: auto;
   overflow-y: hidden;
-  margin-inline: calc(var(--sp-1) * -1);
-  padding-inline: var(--sp-1);
+  min-width: 0;
 }
 
 .bar-chart {
+  position: relative;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   gap: var(--sp-3);
-  min-height: 220px;
-  padding-top: var(--sp-2);
   min-width: min-content;
+  padding-inline: var(--sp-1);
+}
+
+.chart-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(#{$chart-value-h} + var(--sp-2));
+  height: $chart-plot-h;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.chart-grid__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--app-border);
+  opacity: 0.85;
 }
 
 .bar-col {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--sp-2);
   flex: 0 0 auto;
-  width: 56px;
-  min-height: 200px;
+  width: $chart-col-w;
+  gap: var(--sp-2);
+}
+
+.bar-col__value {
+  height: $chart-value-h;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--app-text-secondary);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.bar-col__track {
+  width: $chart-bar-w;
+  height: $chart-plot-h;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  border-bottom: 1px solid var(--app-border);
+  box-sizing: border-box;
 }
 
 .bar-col__stack {
   width: 100%;
-  max-width: 40px;
-  margin-top: auto;
   display: flex;
   flex-direction: column-reverse;
   justify-content: flex-start;
   border-radius: var(--radius-md) var(--radius-md) 0 0;
   overflow: hidden;
   border: 1px solid var(--app-border);
+  border-bottom: none;
   background: var(--app-surface-2);
-  min-height: 8px;
+  min-height: 0;
+  box-sizing: border-box;
 }
 
 .bar-seg {
@@ -329,15 +355,6 @@
   }
 }
 
-.bar-col__value {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--app-text-secondary);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-  line-height: 1.2;
-}
-
 .bar-col__sep {
   color: var(--app-text-muted);
   font-weight: 500;
@@ -345,11 +362,12 @@
 }
 
 .bar-col__label {
+  height: $chart-label-h;
+  width: 100%;
   font-size: 0.7rem;
   color: var(--app-text-muted);
   text-align: center;
-  line-height: 1.25;
-  max-width: 64px;
+  line-height: 1.2;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
