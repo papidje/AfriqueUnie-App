@@ -1,29 +1,37 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../service/auth.service';
+import { CityDto, CityService, cityRegionLabel } from '../../service/city.service';
 
 @Component({
   selector: 'app-register-school',
   templateUrl: './register-school.component.html',
   styleUrls: ['./register-school.component.scss']
 })
-export class RegisterSchoolComponent {
+export class RegisterSchoolComponent implements OnInit {
   step = 1;
   loading = false;
   errorMessage = '';
+  citiesLoading = false;
+  citiesError = '';
+  cities: CityDto[] = [];
   schoolForm: FormGroup;
   adminForm: FormGroup;
+
+  readonly cityRegionLabel = cityRegionLabel;
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly authService: AuthService,
+    private readonly cityService: CityService,
     private readonly router: Router
   ) {
     this.schoolForm = this.fb.group({
       schoolName: ['', Validators.required],
       tenantName: [''],
       schoolAddress: ['', Validators.required],
+      cityId: [null as number | null, Validators.required],
       schoolContact: ['', Validators.required]
     });
 
@@ -31,6 +39,25 @@ export class RegisterSchoolComponent {
       adminFirstName: ['', Validators.required],
       adminLastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]]
+    });
+  }
+
+  ngOnInit(): void {
+    this.citiesLoading = true;
+    this.citiesError = '';
+    this.cityService.listActive().subscribe({
+      next: (list) => {
+        this.cities = list || [];
+        this.citiesLoading = false;
+        if (!this.cities.length) {
+          this.citiesError = 'Aucune ville disponible pour le moment.';
+        }
+      },
+      error: () => {
+        this.cities = [];
+        this.citiesLoading = false;
+        this.citiesError = 'Impossible de charger les villes.';
+      }
     });
   }
 
@@ -78,7 +105,8 @@ export class RegisterSchoolComponent {
         schoolName: establishmentName,
         schoolAddress: (schoolValues.schoolAddress ?? '').trim(),
         tenantLogo: '',
-        schoolContact: (schoolValues.schoolContact ?? '').trim()
+        schoolContact: (schoolValues.schoolContact ?? '').trim(),
+        cityId: schoolValues.cityId as number
       })
       .subscribe({
         next: () => {

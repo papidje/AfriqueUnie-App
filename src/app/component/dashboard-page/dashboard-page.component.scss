@@ -1,3 +1,5 @@
+@use '../../../styles/design-system' as ds;
+
 .dashboard-wrapper {
   padding: var(--sp-6);
   display: flex;
@@ -5,7 +7,6 @@
   gap: var(--sp-5);
   background: var(--app-bg);
   min-height: 100%;
-  /* Full HD : borne la largeur pour préserver la longueur de lecture */
   max-width: var(--container-xl);
   margin-inline: auto;
   width: 100%;
@@ -38,15 +39,6 @@
   min-width: 0;
 }
 
-.dashboard-school-picker {
-  flex: 0 1 min(320px, 100%);
-  width: min(320px, 100%);
-}
-
-.dashboard-school-picker ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-  display: none;
-}
-
 .loading-state {
   display: flex;
   align-items: center;
@@ -54,28 +46,12 @@
   color: var(--app-text-secondary);
 }
 
-/* Regroupement des indicateurs par thème pour une lecture immédiate. */
 .kpi-section {
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
 }
 
-.kpi-section + .kpi-section {
-  margin-top: var(--sp-1);
-}
-
-.kpi-section__title {
-  margin: 0;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--app-text-muted);
-}
-
-/* Tuiles KPI : compactes, alignées sur une ligne du laptop au Full HD,
-   repli propre en tablette. min réduit → les tuiles tiennent dès ~1180px de contenu. */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -118,8 +94,7 @@
   grid-column: span 2;
 }
 
-/* En tablette portrait, la tuile large reprend une largeur normale. */
-@media (max-width: 959.98px) {
+@include ds.lt(960) {
   .kpi-card--wide {
     grid-column: auto;
   }
@@ -131,7 +106,6 @@
   text-align: center;
 }
 
-/* Barre d'occupation (élèves / capacité) : lecture instantanée du taux. */
 .kpi-progress {
   display: flex;
   align-items: center;
@@ -205,16 +179,8 @@
     background: linear-gradient(120deg, #2563eb, #3b82f6);
   }
 
-  &.revenue {
-    background: linear-gradient(120deg, #059669, #10b981);
-  }
-
   &.classes {
     background: linear-gradient(120deg, #7c3aed, #a78bfa);
-  }
-
-  &.subjects {
-    background: linear-gradient(120deg, #d97706, #f59e0b);
   }
 
   &.revenue-year {
@@ -222,90 +188,177 @@
   }
 }
 
-.recent-card.mat-mdc-card {
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-4);
+  align-items: stretch;
+}
+
+@include ds.lt(960) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card.mat-mdc-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--app-border);
-  padding: var(--sp-5) var(--sp-6);
+  padding: var(--sp-5);
 }
 
-.recent-header h3 {
-  margin: 0 0 0.25rem;
+.chart-card__head {
+  h3 {
+    margin: 0 0 var(--sp-1);
+    font-size: var(--fs-md);
+    font-weight: 600;
+    color: var(--app-text-strong);
+  }
 }
 
-.recent-sub {
-  margin: 0 0 0.75rem;
-  font-size: 0.85rem;
+.chart-card__sub {
+  margin: 0;
+  font-size: var(--fs-sm);
   color: var(--app-text-muted);
+  line-height: 1.4;
 }
 
-.recent-list {
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
+.chart-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+  color: var(--app-text-secondary);
+}
+
+.chart-legend__swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-sm);
+  flex: 0 0 auto;
+
+  &--enrolled {
+    background: var(--app-primary);
+  }
+
+  &--free {
+    background: var(--app-surface-2);
+    border: 1px solid var(--app-border);
+  }
+
+  &--ok {
+    background: #059669;
+  }
+
+  &--late {
+    background: #d97706;
+  }
+}
+
+.chart-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin-inline: calc(var(--sp-1) * -1);
+  padding-inline: var(--sp-1);
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-3);
+  min-height: 220px;
+  padding-top: var(--sp-2);
+  min-width: min-content;
+}
+
+.bar-col {
   display: flex;
   flex-direction: column;
-}
-
-.recent-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.65rem 0;
-  border-bottom: 1px solid var(--app-border);
-}
-
-.recent-item:last-child {
-  border-bottom: none;
-}
-
-.recent-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: var(--info-bg);
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-}
-
-.recent-icon mat-icon {
-  color: var(--info-fg);
-  font-size: var(--icon-md);
-  width: var(--icon-md);
-  height: var(--icon-md);
-}
-
-.recent-body {
-  min-width: 0;
-}
-
-.student-name {
-  font-weight: 600;
-  color: var(--app-text-strong);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.student-meta {
-  margin-top: 2px;
-  color: var(--app-text-muted);
-  font-size: 0.85rem;
-  display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--sp-2);
+  flex: 0 0 auto;
+  width: 56px;
+  min-height: 200px;
 }
 
-.class-name {
-  max-width: 280px;
-  white-space: nowrap;
+.bar-col__stack {
+  width: 100%;
+  max-width: 40px;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   overflow: hidden;
-  text-overflow: ellipsis;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-2);
+  min-height: 8px;
 }
 
-.dot {
-  color: var(--app-text-muted);
+.bar-seg {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  flex-basis: 0;
+
+  &--enrolled {
+    background: linear-gradient(180deg, var(--app-primary-light), var(--app-primary));
+  }
+
+  &--free {
+    background: var(--app-surface-2);
+  }
+
+  &--ok {
+    background: linear-gradient(180deg, #34d399, #059669);
+  }
+
+  &--late {
+    background: linear-gradient(180deg, #fbbf24, #d97706);
+  }
 }
 
-.empty-recent {
-  margin: 0.25rem 0 0;
+.bar-col__value {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--app-text-secondary);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.bar-col__sep {
   color: var(--app-text-muted);
+  font-weight: 500;
+  margin: 0 1px;
+}
+
+.bar-col__label {
+  font-size: 0.7rem;
+  color: var(--app-text-muted);
+  text-align: center;
+  line-height: 1.25;
+  max-width: 64px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+.chart-empty {
+  margin: var(--sp-4) 0 0;
+  color: var(--app-text-muted);
+  font-size: var(--fs-sm);
 }

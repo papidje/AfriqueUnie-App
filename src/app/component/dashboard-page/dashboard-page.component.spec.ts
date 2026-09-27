@@ -22,10 +22,19 @@ describe('DashboardPageComponent', () => {
                 studentsEnrolled: 80,
                 totalCapacity: 120,
                 classesCount: 4,
-                taughtSubjectsCount: 32,
-                monthlyTuitionCollected: 500000,
                 schoolYearTuitionCollected: 4_000_000,
-                recentEnrollments: []
+                classFill: [
+                  { classId: 1, className: 'PS', levelCode: 'PS', enrolled: 20, capacity: 40 }
+                ],
+                classPaymentStatus: [
+                  {
+                    classId: 1,
+                    className: 'PS',
+                    levelCode: 'PS',
+                    upToDateCount: 15,
+                    lateCount: 5
+                  }
+                ]
               })
           }
         },

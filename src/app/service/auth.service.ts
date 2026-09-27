@@ -255,6 +255,7 @@ export class AuthService {
     schoolAddress: string;
     tenantLogo: string;
     schoolContact: string;
+    cityId: number;
   }): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/register-school-admin`, data);
   }

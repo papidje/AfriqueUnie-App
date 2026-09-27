@@ -1,0 +1,38 @@
+.person-identity {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+  max-width: 100%;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+a.person-identity:hover .person-identity__name {
+  text-decoration: underline;
+}
+
+.person-identity__icon {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  font-size: 22px;
+  color: var(--app-text-muted);
+
+  &.boy {
+    color: #2563eb;
+  }
+
+  &.girl {
+    color: #db2777;
+  }
+}
+
+.person-identity__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

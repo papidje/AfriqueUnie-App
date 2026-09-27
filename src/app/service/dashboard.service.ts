@@ -3,11 +3,20 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../core/api-base';
 
-export interface DashboardStudent {
-  id: number;
-  fullName: string;
+export interface DashboardClassFill {
+  classId: number;
   className: string;
-  enrolledAt: string;
+  levelCode: string | null;
+  enrolled: number;
+  capacity: number;
+}
+
+export interface DashboardClassPaymentStatus {
+  classId: number;
+  className: string;
+  levelCode: string | null;
+  upToDateCount: number;
+  lateCount: number;
 }
 
 /** Réponse `/dashboard/summary` — indicateurs pour l’année scolaire active de l’établissement. */
@@ -15,10 +24,9 @@ export interface DashboardSummary {
   studentsEnrolled: number;
   totalCapacity: number;
   classesCount: number;
-  taughtSubjectsCount: number;
-  monthlyTuitionCollected: number;
   schoolYearTuitionCollected: number;
-  recentEnrollments: DashboardStudent[];
+  classFill: DashboardClassFill[];
+  classPaymentStatus: DashboardClassPaymentStatus[];
 }
 
 @Injectable({

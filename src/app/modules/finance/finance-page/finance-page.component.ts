@@ -1,5 +1,7 @@
 import { Location } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { NavigationEnd, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, of } from 'rxjs';
@@ -7,11 +9,17 @@ import { catchError, distinctUntilChanged, filter, switchMap, takeUntil, tap } f
 import { ActiveSchoolService } from '../../../service/active-school.service';
 import { SchoolClassService } from '../../../service/school-class.service';
 import { FinanceApiService } from '../../../service/finance-api.service';
+import { FeeStructureService } from '../../../service/fee-structure.service';
 import { SchoolClassDto } from '../../../models/academic.models';
+import { FeeStructureWritePayload } from '../../../models/fee-structure.models';
 import { sortSchoolClassesByLevel } from '../../../core/class-level-group-order';
 import { StudentPaymentStatusDto } from '../../../models/finance.models';
 import { AuthUtilsService } from '../../../service/auth-utils.service';
 import { ROLES_FEE_SETTINGS_NAV } from '../../../core/app-roles';
+import {
+  FeeStructureDialogComponent,
+  FeeStructureDialogResult
+} from '../../../component/financial-settings-page/fee-structure-dialog/fee-structure-dialog.component';
 
 @Component({
   selector: 'app-finance-page',
@@ -31,6 +39,8 @@ export class FinancePageComponent implements OnInit, OnDestroy {
 
   readonly rowsByClassId = new Map<number, StudentPaymentStatusDto[]>();
   readonly loadingByClassId = new Set<number>();
+  /** Classes dont le barème (niveau / année) n’est pas encore configuré. */
+  readonly missingFeeByClassId = new Set<number>();
 
   readonly months = ['OCT', 'NOV', 'DEC', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN'];
   readonly baseColumns = ['index', 'fullName', 'matricule', 'phone', 'insReins'];
@@ -39,6 +49,8 @@ export class FinancePageComponent implements OnInit, OnDestroy {
     private readonly activeSchool: ActiveSchoolService,
     private readonly schoolClassService: SchoolClassService,
     private readonly financeApi: FinanceApiService,
+    private readonly feeStructureService: FeeStructureService,
+    private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
     private readonly router: Router,
     private readonly cdr: ChangeDetectorRef,
@@ -48,6 +60,10 @@ export class FinancePageComponent implements OnInit, OnDestroy {
 
   canAccessFeeSettings(): boolean {
     return this.authUtils.hasAnyRole([...ROLES_FEE_SETTINGS_NAV]);
+  }
+
+  isMissingFeeStructure(classId: number): boolean {
+    return this.missingFeeByClassId.has(classId);
   }
 
   ngOnInit(): void {
@@ -60,6 +76,7 @@ export class FinancePageComponent implements OnInit, OnDestroy {
           this.selectedIndex = 0;
           this.rowsByClassId.clear();
           this.loadingByClassId.clear();
+          this.missingFeeByClassId.clear();
           this.sortedClasses = [];
         }),
         switchMap((id) => {
@@ -119,10 +136,6 @@ export class FinancePageComponent implements OnInit, OnDestroy {
 
   rowIndex(i: number): number {
     return i + 1;
-  }
-
-  fullName(row: StudentPaymentStatusDto): string {
-    return `${row.lastName || ''} ${row.firstName || ''}`.trim();
   }
 
   formatInsReins(row: StudentPaymentStatusDto): string {
@@ -236,17 +249,27 @@ export class FinancePageComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Reliquat affiché côté liste (total attendu − paiements enregistrés ; fournitures soldées au flag sans ligne Payment).
+   * Reliquat dû : inscription + fournitures (si non soldées) + scolarité.
+   * Calcul par poste pour éviter de soustraire deux fois les fournitures
+   * (déjà incluses dans {@code totalPaid} quand une ligne FOURNITURES existe).
    */
   remainingToPay(row: StudentPaymentStatusDto): number {
-    const total = Number(row.totalExpected ?? 0);
-    const paid = Number(row.totalPaid ?? 0);
-    const suppliesCovered =
-      row.suppliesColumnEnabled && row.hasPaidSupplies ? Number(row.suppliesExpected ?? 0) : 0;
-    return Math.max(0, total - paid - suppliesCovered);
+    const insRemaining = Math.max(
+      0,
+      Number(row.insReinsExpected ?? 0) - Number(row.insReinsPaid ?? 0)
+    );
+    const suppliesRemaining =
+      row.suppliesColumnEnabled && !row.hasPaidSupplies
+        ? Math.max(0, Number(row.suppliesExpected ?? 0))
+        : 0;
+    const tuitionRemaining = Math.max(
+      0,
+      Number(row.tuitionExpected ?? 0) - Number(row.tuitionPaid ?? 0)
+    );
+    return insRemaining + suppliesRemaining + tuitionRemaining;
   }
 
-  /** Tout est soldé : on masque l’action Encaisser. */
+  /** Tout est soldé (encaissé ≥ total dû) : on masque l’action Encaisser. */
   isFullySettled(row: StudentPaymentStatusDto): boolean {
     return this.remainingToPay(row) < 1;
   }
@@ -268,6 +291,70 @@ export class FinancePageComponent implements OnInit, OnDestroy {
       return;
     }
     void this.router.navigate(['/finance/settings']);
+  }
+
+  /** Ouvre la popup de configuration des frais pour la classe active (même dialogue que Paramètres tarifs). */
+  openConfigureFees(clazz: SchoolClassDto): void {
+    if (!this.canAccessFeeSettings()) {
+      this.snackBar.open(
+        'La configuration des frais est réservée aux administrateurs d\'établissement et aux directeurs.',
+        'Fermer',
+        { duration: 5000 }
+      );
+      return;
+    }
+    const level = clazz.level;
+    const year = clazz.year;
+    if (!level?.id || !year?.id) {
+      this.snackBar.open('Niveau ou année scolaire introuvable pour cette classe.', 'Fermer', {
+        duration: 5000
+      });
+      return;
+    }
+
+    const ref = this.dialog.open(FeeStructureDialogComponent, {
+      width: '560px',
+      disableClose: true,
+      data: {
+        schoolYearId: year.id,
+        schoolYearLabel: year.label || String(year.id),
+        classLevelId: level.id,
+        classLevelCode: level.code,
+        classLevelName: level.name,
+        existing: undefined,
+        readOnly: false
+      }
+    });
+
+    ref.afterClosed().subscribe((result?: FeeStructureDialogResult) => {
+      if (!result) {
+        return;
+      }
+      const payload: FeeStructureWritePayload = {
+        classLevelId: result.classLevelId,
+        schoolYearId: result.schoolYearId,
+        registrationFee: result.registrationFee,
+        reRegistrationFee: result.reRegistrationFee,
+        monthlyTuitionFee: result.monthlyTuitionFee,
+        annualTuitionFee: result.annualTuitionFee,
+        suppliesFee: result.suppliesFee,
+        suppliesColumnEnabled: result.suppliesColumnEnabled,
+        currency: result.currency || 'GNF'
+      };
+      this.feeStructureService.create(payload).subscribe({
+        next: () => {
+          this.snackBar.open('Configuration des frais enregistrée.', 'Fermer', { duration: 3500 });
+          this.missingFeeByClassId.delete(clazz.id);
+          this.rowsByClassId.delete(clazz.id);
+          this.loadRows(clazz.id, true);
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          const msg = err?.error?.message || 'Impossible d’enregistrer cette configuration.';
+          this.snackBar.open(msg, 'Fermer', { duration: 5000 });
+        }
+      });
+    });
   }
 
   /** Lit `classId` sur une URL déjà normalisée (router.url ou NavigationEnd.urlAfterRedirects). */
@@ -344,20 +431,56 @@ export class FinancePageComponent implements OnInit, OnDestroy {
     this.location.replaceState(next ? `${path}?${next}` : path);
   }
 
-  private loadRows(classId: number): void {
-    if (this.rowsByClassId.has(classId) || this.loadingByClassId.has(classId)) return;
+  private loadRows(classId: number, force = false): void {
+    if (!force && (this.rowsByClassId.has(classId) || this.loadingByClassId.has(classId))) {
+      return;
+    }
+    if (force) {
+      this.rowsByClassId.delete(classId);
+      this.loadingByClassId.delete(classId);
+    }
 
     this.loadingByClassId.add(classId);
-    this.financeApi.getStatusByClass(classId).pipe(
-      takeUntil(this.destroy$),
-      catchError(() => {
-        this.snackBar.open('Impossible de charger le suivi financier pour cette classe.', 'Fermer', { duration: 5000 });
-        return of<StudentPaymentStatusDto[]>([]);
-      })
-    ).subscribe((rows) => {
-      this.rowsByClassId.set(classId, rows || []);
-      this.loadingByClassId.delete(classId);
-    });
+    this.financeApi
+      .getStatusByClass(classId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (rows) => {
+          this.missingFeeByClassId.delete(classId);
+          this.rowsByClassId.set(classId, rows || []);
+          this.loadingByClassId.delete(classId);
+          this.cdr.markForCheck();
+        },
+        error: (err: unknown) => {
+          this.loadingByClassId.delete(classId);
+          if (this.isMissingFeeStructureError(err)) {
+            this.missingFeeByClassId.add(classId);
+            this.rowsByClassId.set(classId, []);
+            this.cdr.markForCheck();
+            return;
+          }
+          this.missingFeeByClassId.delete(classId);
+          this.rowsByClassId.set(classId, []);
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  private isMissingFeeStructureError(err: unknown): boolean {
+    if (!(err instanceof HttpErrorResponse)) {
+      return false;
+    }
+    const body = err.error;
+    const msg = [
+      typeof body === 'string' ? body : '',
+      body?.message,
+      body?.detail,
+      body?.title,
+      err.message
+    ]
+      .filter(Boolean)
+      .join(' ');
+    return /structure de frais|frais trouv/i.test(msg);
   }
 
   private sortClasses(list: SchoolClassDto[]): SchoolClassDto[] {

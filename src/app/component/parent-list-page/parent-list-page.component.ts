@@ -4,7 +4,7 @@ import { Subject, of } from 'rxjs';
 import { catchError, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { ActiveSchoolService } from '../../service/active-school.service';
 import { ParentApiService } from '../../service/parent-api.service';
-import { ParentListRowDto } from '../../models/parent-list.models';
+import { ParentListRowDto, parentListGenderRole } from '../../models/parent-list.models';
 import { AuthUtilsService } from '../../service/auth-utils.service';
 import { ROLES_STUDENT_WRITE } from '../../core/app-roles';
 
@@ -22,8 +22,9 @@ export class ParentListPageComponent implements OnInit, OnDestroy {
   /** Filtrage local : nom, prénom, email ou téléphone. */
   filterText = '';
 
-  readonly displayedColumns = ['lastName', 'firstName', 'phone', 'email', 'enrolledChildrenCount', 'actions'];
+  readonly displayedColumns = ['index', 'fullName', 'phone', 'email', 'enrolledChildrenCount'];
   readonly canEditParent = this.authUtils.hasAnyRole([...ROLES_STUDENT_WRITE]);
+  readonly parentGenderRole = parentListGenderRole;
 
   constructor(
     private readonly activeSchool: ActiveSchoolService,
@@ -76,5 +77,9 @@ export class ParentListPageComponent implements OnInit, OnDestroy {
         .toLowerCase();
       return hay.includes(q);
     });
+  }
+
+  rowIndex(i: number): number {
+    return i + 1;
   }
 }

@@ -24,9 +24,24 @@
 
       <div class="form-group">
         <label for="schoolAddress">Adresse</label>
-        <input id="schoolAddress" type="text" formControlName="schoolAddress" placeholder="Commune, quartier…" />
+        <input id="schoolAddress" type="text" formControlName="schoolAddress" placeholder="Adresse" />
         <small class="error" *ngIf="schoolForm.get('schoolAddress')?.invalid && schoolForm.get('schoolAddress')?.touched">
           Ce champ est obligatoire.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="cityId">Ville</label>
+        <select id="cityId" formControlName="cityId">
+          <option [ngValue]="null" disabled>Sélectionner une ville</option>
+          <option *ngFor="let c of cities" [ngValue]="c.id">
+            {{ c.name }}<ng-container *ngIf="cityRegionLabel(c)"> ({{ cityRegionLabel(c) }})</ng-container>
+          </option>
+        </select>
+        <small class="hint" *ngIf="citiesLoading">Chargement des villes…</small>
+        <small class="error" *ngIf="citiesError">{{ citiesError }}</small>
+        <small class="error" *ngIf="!citiesError && schoolForm.get('cityId')?.invalid && schoolForm.get('cityId')?.touched">
+          La ville est obligatoire.
         </small>
       </div>
 

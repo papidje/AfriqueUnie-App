@@ -200,3 +200,47 @@ table {
   min-width: 64px;
 }
 
+.fee-missing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--sp-3);
+  padding: var(--sp-8) var(--sp-4);
+  border: 1px dashed var(--app-border);
+  border-radius: var(--radius-lg);
+  background: var(--app-surface-2);
+}
+
+.fee-missing__icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: var(--app-primary);
+}
+
+.fee-missing__title {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--app-text-strong);
+}
+
+.fee-missing__text {
+  margin: 0;
+  max-width: 36rem;
+  color: var(--app-text-secondary);
+  font-size: var(--fs-body);
+  line-height: 1.45;
+}
+
+.fee-missing__hint {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.fee-missing button mat-icon {
+  margin-right: var(--sp-1);
+}
+

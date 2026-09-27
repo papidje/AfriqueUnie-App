@@ -27,7 +27,7 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
   saving = false;
   parentId: number | null = null;
   children: ParentChildRowDto[] = [];
-  readonly childColumns = ['name', 'matricule', 'className', 'relation', 'status', 'actions'];
+  readonly childColumns = ['index', 'name', 'matricule', 'className', 'relation', 'status'];
 
   readonly form = this.fb.nonNullable.group({
     lastName: ['', Validators.required],
@@ -118,10 +118,6 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
       default:
         return status || '—';
     }
-  }
-
-  openStudent(childId: number): void {
-    void this.router.navigate(['/students', childId]);
   }
 
   save(): void {

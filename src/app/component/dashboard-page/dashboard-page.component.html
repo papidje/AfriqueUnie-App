@@ -20,7 +20,6 @@
 
   <ng-container *ngIf="!loading && summary as data">
     <section class="kpi-section">
-      <h3 class="kpi-section__title">Effectifs</h3>
       <div class="kpi-grid">
         <mat-card class="kpi-card kpi-card--wide">
           <div class="kpi-icon students">
@@ -54,68 +53,107 @@
         </mat-card>
 
         <mat-card class="kpi-card">
-          <div class="kpi-icon subjects">
-            <mat-icon>menu_book</mat-icon>
-          </div>
-          <div class="kpi-body">
-            <p class="kpi-label">Matières enseignées</p>
-            <h2>{{ data.taughtSubjectsCount }}</h2>
-          </div>
-        </mat-card>
-      </div>
-    </section>
-
-    <section class="kpi-section">
-      <h3 class="kpi-section__title">Finances</h3>
-      <div class="kpi-grid">
-        <mat-card class="kpi-card">
-          <div class="kpi-icon revenue">
-            <mat-icon>payments</mat-icon>
-          </div>
-          <div class="kpi-body">
-            <p class="kpi-label">Frais perçus — mois en cours</p>
-            <h2>{{ formatGnf(data.monthlyTuitionCollected) }}</h2>
-          </div>
-        </mat-card>
-
-        <mat-card class="kpi-card">
           <div class="kpi-icon revenue-year">
             <mat-icon>account_balance_wallet</mat-icon>
           </div>
           <div class="kpi-body">
             <p class="kpi-label">Frais perçus — année scolaire</p>
             <h2>{{ formatGnf(data.schoolYearTuitionCollected) }}</h2>
-            <p class="kpi-hint">Paiements liés aux comptes de l’année active.</p>
           </div>
         </mat-card>
       </div>
     </section>
 
-    <mat-card class="recent-card">
-      <div class="recent-header">
-        <h3>Derniers inscrits</h3>
-        <p class="recent-sub">Jusqu’à 10 élèves, par date d’inscription (année active).</p>
-      </div>
+    <section class="charts-grid">
+      <mat-card class="chart-card">
+        <div class="chart-card__head">
+          <h3>Remplissage des classes</h3>
+          <p class="chart-card__sub">Inscrits par rapport à la capacité de chaque classe.</p>
+        </div>
 
-      <div class="recent-list" *ngIf="data.recentEnrollments.length; else emptyRecent">
-        <div class="recent-item" *ngFor="let student of data.recentEnrollments">
-          <div class="recent-icon">
-            <mat-icon>person_add</mat-icon>
-          </div>
-          <div class="recent-body">
-            <div class="student-name">{{ student.fullName }}</div>
-            <div class="student-meta">
-              <span class="class-name">{{ student.className }}</span>
-              <span class="dot">•</span>
-              <span>{{ student.enrolledAt | displayDate }}</span>
+        <div class="chart-legend">
+          <span class="chart-legend__item">
+            <span class="chart-legend__swatch chart-legend__swatch--enrolled"></span>
+            Inscrits
+          </span>
+          <span class="chart-legend__item">
+            <span class="chart-legend__swatch chart-legend__swatch--free"></span>
+            Places libres
+          </span>
+        </div>
+
+        <div class="chart-scroll" *ngIf="data.classFill?.length; else emptyFill">
+          <div class="bar-chart" role="img" aria-label="Remplissage des classes">
+            <div class="bar-col" *ngFor="let row of data.classFill" [matTooltip]="fillTooltip(row)">
+              <div
+                class="bar-col__stack"
+                [style.height.%]="barHeightPct(row.capacity || row.enrolled, maxFillCapacity(data))">
+                <span
+                  class="bar-seg bar-seg--enrolled"
+                  [style.flex-grow]="fillEnrolledPct(row) || 0.01"></span>
+                <span
+                  class="bar-seg bar-seg--free"
+                  [style.flex-grow]="fillFreePct(row)"
+                  *ngIf="fillFreePct(row) > 0"></span>
+              </div>
+              <div class="bar-col__value">{{ row.enrolled }}/{{ row.capacity }}</div>
+              <div class="bar-col__label">{{ classLabel(row) }}</div>
             </div>
           </div>
         </div>
-      </div>
+        <ng-template #emptyFill>
+          <p class="chart-empty">Aucune classe pour l’année active.</p>
+        </ng-template>
+      </mat-card>
 
-      <ng-template #emptyRecent>
-        <p class="empty-recent">Aucune inscription récente pour cette année.</p>
-      </ng-template>
-    </mat-card>
+      <mat-card class="chart-card">
+        <div class="chart-card__head">
+          <h3>Paiements par classe</h3>
+          <p class="chart-card__sub">Élèves à jour vs en retard (dû à la date du jour).</p>
+        </div>
+
+        <div class="chart-legend">
+          <span class="chart-legend__item">
+            <span class="chart-legend__swatch chart-legend__swatch--ok"></span>
+            À jour
+          </span>
+          <span class="chart-legend__item">
+            <span class="chart-legend__swatch chart-legend__swatch--late"></span>
+            En retard
+          </span>
+        </div>
+
+        <div class="chart-scroll" *ngIf="data.classPaymentStatus?.length; else emptyPay">
+          <div class="bar-chart" role="img" aria-label="État des paiements par classe">
+            <div
+              class="bar-col"
+              *ngFor="let row of data.classPaymentStatus"
+              [matTooltip]="payTooltip(row)">
+              <div
+                class="bar-col__stack"
+                [style.height.%]="barHeightPct(
+                  (row.upToDateCount || 0) + (row.lateCount || 0),
+                  maxPayHeadcount(data)
+                )">
+                <span
+                  class="bar-seg bar-seg--ok"
+                  [style.flex-grow]="payUpToDatePct(row) || 0.01"></span>
+                <span
+                  class="bar-seg bar-seg--late"
+                  [style.flex-grow]="payLatePct(row)"
+                  *ngIf="payLatePct(row) > 0"></span>
+              </div>
+              <div class="bar-col__value">
+                {{ row.upToDateCount }}<span class="bar-col__sep">/</span>{{ row.lateCount }}
+              </div>
+              <div class="bar-col__label">{{ classLabel(row) }}</div>
+            </div>
+          </div>
+        </div>
+        <ng-template #emptyPay>
+          <p class="chart-empty">Aucune classe pour l’année active.</p>
+        </ng-template>
+      </mat-card>
+    </section>
   </ng-container>
 </section>

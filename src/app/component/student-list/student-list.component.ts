@@ -31,8 +31,8 @@ export class StudentListComponent implements OnInit, OnDestroy {
   unassignedStudents: StudentListRow[] = [];
   loadingUnassigned = false;
 
-  readonly displayedColumns = ['lastName', 'firstName', 'matricule', 'sex', 'birthDate', 'actions'];
-  readonly unassignedColumns = ['lastName', 'firstName', 'matricule', 'sex', 'birthDate', 'status', 'actions'];
+  readonly displayedColumns = ['index', 'fullName', 'matricule', 'phone', 'birthDate'];
+  readonly unassignedColumns = ['index', 'fullName', 'matricule', 'phone', 'birthDate', 'status'];
 
   readonly studentsByClassId = new Map<number, StudentListRow[]>();
   readonly loadingByClassId = new Set<number>();
@@ -185,10 +185,8 @@ export class StudentListComponent implements OnInit, OnDestroy {
       });
   }
 
-  sexLabel(civility: string): string {
-    if (civility === 'MONSIEUR') return 'Garçon';
-    if (civility === 'MADAME') return 'Fille';
-    return civility ?? '';
+  rowIndex(i: number): number {
+    return i + 1;
   }
 
   private sortClasses(list: SchoolClassDto[]): SchoolClassDto[] {

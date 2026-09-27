@@ -11,6 +11,8 @@ export interface PeriodNotesGridRow {
   studentId: number;
   lastName: string;
   firstName: string;
+  /** MONSIEUR / MADAME */
+  civility?: string | null;
   /** Une entrée par colonne, dans l’ordre de {@code columns} ; null si pas de moyenne. */
   averages: (number | null)[];
   generalAverage: number | null;

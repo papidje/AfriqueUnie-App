@@ -6,6 +6,7 @@ export interface StudentListRow {
   birthDate: string;
   matricule: string;
   enrollmentStatus?: string | null;
+  communicationPhone?: string | null;
 }
 
 export interface ParentDetailDto {
@@ -29,6 +30,8 @@ export interface ParentChildRowDto {
   enrollmentStatus?: string | null;
   /** PERE | MERE | PERE_ET_MERE */
   relation?: string | null;
+  /** MONSIEUR | MADAME */
+  civility?: string | null;
 }
 
 export interface StudentDetailDto {

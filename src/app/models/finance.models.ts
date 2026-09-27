@@ -4,6 +4,8 @@ export interface StudentPaymentStatusDto {
   firstName: string;
   matricule: string;
   phone: string;
+  /** MONSIEUR / MADAME */
+  civility?: string | null;
   insReinsLabel: string;
   insReinsPaid: number;
   insReinsExpected: number;

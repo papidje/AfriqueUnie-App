@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 
 import { RegisterSchoolComponent } from './register-school.component';
 import { AuthService } from '../../service/auth.service';
+import { CityService } from '../../service/city.service';
 
 describe('RegisterSchoolComponent', () => {
   let component: RegisterSchoolComponent;
@@ -20,6 +21,22 @@ describe('RegisterSchoolComponent', () => {
         {
           provide: AuthService,
           useValue: { registerSchoolAdmin: () => of({}) }
+        },
+        {
+          provide: CityService,
+          useValue: {
+            listActive: () =>
+              of([
+                {
+                  id: 1,
+                  code: 'CKY',
+                  name: 'Conakry',
+                  latitude: 0,
+                  longitude: 0,
+                  region: { id: 1, code: 'C', name: 'Conakry' }
+                }
+              ])
+          }
         }
       ],
       schemas: [NO_ERRORS_SCHEMA]
