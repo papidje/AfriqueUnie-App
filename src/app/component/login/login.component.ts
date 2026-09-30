@@ -25,9 +25,15 @@ export class LoginComponent implements OnInit {
       password: ['', Validators.required]
     });
     this.route.queryParamMap.subscribe((params) => {
-      this.activationSuccessMessage = params.get('activated') === 'success'
-        ? 'Compte activé avec succès. Vous pouvez maintenant vous connecter.'
-        : null;
+      if (params.get('activated') === 'success') {
+        this.activationSuccessMessage =
+          'Compte activé avec succès. Vous pouvez maintenant vous connecter.';
+      } else if (params.get('reset') === 'success') {
+        this.activationSuccessMessage =
+          'Mot de passe mis à jour. Vous pouvez maintenant vous connecter.';
+      } else {
+        this.activationSuccessMessage = null;
+      }
     });
   }
 

@@ -143,6 +143,17 @@ span {
   text-align: center;
 }
 
+.auth-error {
+  color: #b00020;
+  background: #fdecee;
+  border: 1px solid #f5c2c7;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.9rem;
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
 .auth-notice {
   color: var(--app-text-secondary, #3d4f45);
   background: color-mix(in srgb, var(--app-primary, #0f3d2e) 8%, #fff);
