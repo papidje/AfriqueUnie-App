@@ -55,11 +55,16 @@
         />
       </div>
 
-      <p *ngIf="activateForm.hasError('passwordMismatch') && activateForm.touched" style="color:#b00020; margin: 0;">
+      <p *ngIf="activateForm.hasError('passwordMismatch') && activateForm.touched" class="auth-error" role="alert">
         Les deux mots de passe ne correspondent pas.
       </p>
-      <p *ngIf="submitError" style="color:#b00020; margin: 0;">
+      <p *ngIf="submitError" class="auth-error" role="alert">
         {{ submitError }}
+      </p>
+      <p *ngIf="showResetHint" class="auth-notice" role="status">
+        Code expiré ou invalide ? Utilisez
+        <a routerLink="/resetPwd">Mot de passe oublié</a>
+        pour recevoir un nouveau code (cela active aussi le compte).
       </p>
 
       <button type="submit" class="btn-submit" [disabled]="activateForm.invalid || submitting">
@@ -68,6 +73,8 @@
 
       <div class="back-login">
         <a routerLink="/login">← Retour à la connexion</a>
+        <span> · </span>
+        <a routerLink="/resetPwd">Code expiré ?</a>
       </div>
     </form>
   </div>

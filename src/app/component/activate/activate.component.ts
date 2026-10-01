@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from "@angular/forms";
-import { AuthService } from "../../service/auth.service";
-import { ActivatedRoute, Router } from "@angular/router";
+import { HttpErrorResponse } from '@angular/common/http';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { AuthService } from '../../service/auth.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
@@ -13,6 +14,7 @@ import { switchMap } from 'rxjs/operators';
 export class ActivateComponent implements OnInit {
   activateForm: FormGroup;
   submitError: string | null = null;
+  showResetHint = false;
   submitting = false;
   /** Affiché après inscription école : invite à consulter la boîte mail. */
   showMailDisclaimer = false;
@@ -62,6 +64,7 @@ export class ActivateComponent implements OnInit {
 
   onSubmit() {
     this.submitError = null;
+    this.showResetHint = false;
     if (this.activateForm.invalid) {
       this.activateForm.markAllAsTouched();
       return;
@@ -75,7 +78,6 @@ export class ActivateComponent implements OnInit {
           if (res?.bearer && res?.refresh) {
             return of(res);
           }
-          // Compatibilité si un ancien backend renvoie encore un corps vide.
           return this.authService.login({ userName: email, password: newPassword });
         })
       )
@@ -85,10 +87,48 @@ export class ActivateComponent implements OnInit {
           this.submitting = false;
           this.authService.navigateAfterLogin(this.router);
         },
-        error: () => {
+        error: (err: HttpErrorResponse) => {
           this.submitting = false;
-          this.submitError = "Activation impossible. Vérifiez l'email, le code et le mot de passe.";
+          this.submitError = this.resolveErrorMessage(err);
+          const lower = this.submitError.toLowerCase();
+          this.showResetHint =
+            err.status === 400 ||
+            err.status === 404 ||
+            lower.includes('expir') ||
+            lower.includes('invalide');
         }
       });
+  }
+
+  private resolveErrorMessage(err: HttpErrorResponse): string {
+    const fromBody = this.extractErrorText(err.error);
+    if (fromBody.length > 0) {
+      return fromBody;
+    }
+    return "Activation impossible. Vérifiez l'email, le code et le mot de passe.";
+  }
+
+  private extractErrorText(body: unknown): string {
+    if (body == null) {
+      return '';
+    }
+    if (typeof body === 'string') {
+      const t = body.trim();
+      if (!t || t.startsWith('<')) {
+        return '';
+      }
+      return t;
+    }
+    if (typeof body !== 'object') {
+      return '';
+    }
+    const o = body as Record<string, unknown>;
+    for (const key of ['detail', 'message', 'error_description', 'error']) {
+      const v = o[key];
+      if (typeof v === 'string' && v.trim() && !v.trim().startsWith('<')) {
+        return v.trim();
+      }
+    }
+    return '';
   }
 }
