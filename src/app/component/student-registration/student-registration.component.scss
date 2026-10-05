@@ -1,177 +1,316 @@
-.success-panel {
-  text-align: center;
-  padding: 24px 16px 32px;
-  max-width: 520px;
-  margin: 0 auto;
-}
-
-.success-icon {
-  font-size: 64px;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 8px;
-}
-
-.success-panel h2 {
-  margin: 0 0 12px;
-  font-size: 1.35rem;
-}
-
-.success-lead {
-  margin: 0 0 24px;
-  color: var(--app-text-secondary);
-  font-size: 15px;
-  line-height: 1.5;
-  text-align: left;
-}
-
-.success-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-}
-
-.step-final-hint {
-  margin: 0 0 16px;
-  padding: 12px 14px;
-  background: var(--info-bg);
-  border-radius: 8px;
-  border: 1px solid var(--info-border);
-  font-size: 14px;
-  color: var(--info-fg);
-  line-height: 1.45;
-}
+@use 'design-system' as ds;
 
 .student-registration-page {
-  padding: var(--sp-2);
-  max-width: 1120px;
+  padding: var(--sp-4) var(--sp-5) var(--sp-8);
+  max-width: 1080px;
   margin-inline: auto;
   box-sizing: border-box;
+
+  // Champs moins « carrés » — scoped à cette page
+  --mdc-outlined-text-field-container-shape: 14px;
+  --mdc-outlined-text-field-outline-width: 1px;
+  --mdc-filled-button-container-shape: var(--radius-pill);
+  --mdc-protected-button-container-shape: var(--radius-pill);
+  --mdc-outlined-button-container-shape: var(--radius-pill);
+  --mat-form-field-container-height: 52px;
 }
 
-.head h1 {
-  margin: 0;
-  font-size: var(--fs-h1);
+.reg-shell.mat-mdc-card {
+  padding: var(--sp-6) var(--sp-6) var(--sp-8);
+  border: 1px solid color-mix(in srgb, var(--app-border) 80%, transparent);
+  border-radius: calc(var(--radius-lg) + 4px);
+  box-shadow: var(--shadow-sm);
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--app-primary) 5%, #fff) 0%,
+      var(--app-surface) 28%,
+      var(--app-surface) 100%
+    );
+  overflow: hidden;
+}
+
+/* —— En-tête —— */
+.reg-head {
+  margin-bottom: var(--sp-5);
+}
+
+.reg-kicker {
+  margin: 0 0 var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--app-primary);
+}
+
+.reg-head h1 {
+  margin: 0 0 var(--sp-2);
+  font-size: clamp(1.55rem, 2.2vw, 1.85rem);
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  color: var(--app-text-strong);
+  line-height: 1.2;
+}
+
+.reg-year {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0;
+  font-size: var(--fs-body);
+  color: var(--app-text-secondary);
+}
+
+.reg-year__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--app-primary) 12%, #fff);
+  color: var(--app-primary-dark, var(--app-primary));
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  border: 1px solid color-mix(in srgb, var(--app-primary) 22%, transparent);
 }
 
 .muted {
   color: var(--app-text-muted);
 }
 
-.loading {
+.loading,
+.family-loading {
   padding: var(--sp-4) 0;
   color: var(--app-text-secondary);
 }
 
-.stepper {
-  margin-top: 8px;
+/* —— Stepper —— */
+.reg-stepper {
+  margin-top: var(--sp-2);
+  background: transparent;
+
+  ::ng-deep {
+    .mat-horizontal-stepper-header-container {
+      margin-bottom: var(--sp-4);
+      padding: 0 4px;
+    }
+
+    .mat-step-header {
+      border-radius: var(--radius-pill);
+      padding: 8px 12px;
+      transition: background 0.2s ease;
+
+      &:hover:not([aria-selected='true']) {
+        background: color-mix(in srgb, var(--app-primary) 6%, transparent);
+      }
+    }
+
+    .mat-step-icon {
+      border-radius: 50%;
+    }
+
+    .mat-step-label {
+      font-weight: 500;
+    }
+
+    .mat-horizontal-content-container {
+      padding: 4px 2px 0;
+      overflow: visible;
+    }
+
+    .mat-stepper-horizontal-line {
+      border-top-width: 2px;
+      border-top-color: color-mix(in srgb, var(--app-primary) 18%, var(--app-border));
+      margin: 0 4px;
+    }
+  }
 }
 
+/* —— Corps d’étape —— */
+.step-body {
+  animation: reg-step-in 0.28s ease;
+}
+
+@keyframes reg-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.step-intro {
+  margin-bottom: var(--sp-4);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid color-mix(in srgb, var(--app-border) 90%, transparent);
+}
+
+.step-title {
+  margin: 0 0 var(--sp-1);
+  font-size: 1.15rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--app-text-strong);
+}
+
+.step-desc {
+  margin: 0;
+  max-width: 42rem;
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: var(--app-text-secondary);
+}
+
+.extras-toggle {
+  margin: var(--sp-3) 0 var(--sp-2);
+  color: var(--app-primary);
+  font-weight: 600;
+
+  mat-icon {
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+}
+
+.extras-panel {
+  margin-top: var(--sp-2);
+  padding: var(--sp-4);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--app-surface-2) 80%, #fff);
+  border: 1px dashed color-mix(in srgb, var(--app-border) 90%, transparent);
+}
+
+/* —— Grille champs —— */
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 12px;
+  gap: var(--sp-3) var(--sp-4);
+  margin-top: var(--sp-1);
 }
 
 .grid .full {
   grid-column: 1 / -1;
 }
 
-.photo-block {
+.grid mat-form-field {
+  width: 100%;
+}
+
+/* —— Cartes souples —— */
+.soft-card.mat-mdc-card {
+  padding: var(--sp-5);
+  border-radius: calc(var(--radius-lg) + 2px);
+  border: 1px solid color-mix(in srgb, var(--app-border) 85%, transparent);
+  background: color-mix(in srgb, var(--app-surface-2) 65%, #fff);
+  box-shadow: none;
+}
+
+.soft-card__head {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--app-border);
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
 }
 
-.photo-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.photo-actions button mat-icon {
-  margin-right: 4px;
-}
-
-.student-photo,
-.photo-placeholder {
-  width: 96px;
-  height: 96px;
-  border-radius: 8px;
-  object-fit: cover;
-  border: 1px solid var(--app-border);
-}
-
-.photo-placeholder {
-  display: flex;
+.soft-card__icon {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--app-text-muted);
-  font-size: 13px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--app-primary) 12%, #fff);
+  color: var(--app-primary);
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
 }
 
-.parents-wrap {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 12px;
+.soft-card__icon--alt {
+  background: color-mix(in srgb, var(--app-primary) 8%, #fce7f3);
+  color: color-mix(in srgb, var(--app-primary) 55%, #9d174d);
 }
 
+.soft-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: var(--app-text-strong);
+  letter-spacing: -0.01em;
+}
+
+.parents-wrap,
 .parents-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 12px;
+  gap: var(--sp-4);
 }
 
-.parent-card {
-  padding: 8px;
+.parent-card--summary {
+  .compact {
+    margin: 0;
+  }
 }
 
 .sibling-lists {
   display: grid;
-  gap: 12px;
-  margin-top: 14px;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
 }
 
 .sibling-card {
-  padding: 8px 12px;
+  ul {
+    margin: var(--sp-2) 0 0;
+    padding-left: 1.15rem;
+  }
+
+  li {
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .soft-card__title {
+    margin-bottom: 0;
+  }
 }
 
-.sibling-card ul {
-  margin: 8px 0 0;
-  padding-left: 18px;
-}
-
-.sibling-card li {
-  margin-bottom: 4px;
+.empty-siblings {
+  margin: var(--sp-3) 0 0;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--radius-lg);
+  background: var(--app-surface-2);
+  color: var(--app-text-muted);
+  font-size: var(--fs-sm);
 }
 
 .compact {
   margin: 4px 0 0;
   font-size: 13px;
+  color: var(--app-text-secondary);
 }
 
+/* —— Paiement —— */
 .payment-card {
-  margin-top: 16px;
-  padding: 12px 16px 16px;
+  margin-top: var(--sp-5);
 }
 
 .payable-bar {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
-  margin-top: 12px;
+  margin-top: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  border: 1px solid var(--app-border);
 }
 
 .bar-label {
@@ -182,115 +321,130 @@
 
 .payable-range {
   width: 100%;
-  accent-color: var(--app-primary, #1565c0);
-  /* Complet (100 %) à gauche → Exempté (0 %) à droite */
+  accent-color: var(--app-primary);
   direction: rtl;
+  height: 28px;
 }
 
 .payable-percent {
-  margin: 10px 0 0;
+  margin: var(--sp-3) 0 0;
   text-align: center;
+  color: var(--app-text-secondary);
 }
 
 .payable-amount {
-  margin: 6px 0 0;
+  margin: var(--sp-2) 0 0;
   text-align: center;
-  font-size: 1.05rem;
-}
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.notice {
-  margin-top: 12px;
-  background: var(--warning-bg);
-}
-
-.payment-row {
-  display: grid;
-  grid-template-columns: 1fr minmax(200px, 1fr) minmax(200px, 280px);
-  gap: 16px;
-  align-items: end;
-  margin-top: 14px;
-}
-
-.payment-row .payment-mode,
-.payment-row .amount {
-  width: 100%;
-}
-
-.expected .label {
-  color: var(--app-text-muted);
-  font-size: 13px;
-}
-
-.expected .value {
-  font-weight: 600;
-  font-size: 20px;
-}
-
-.sub-expected {
-  margin-top: 8px;
-  font-size: 13px;
-  color: var(--app-text-muted);
-  line-height: 1.35;
-}
-
-.allocation-preview {
-  margin-top: 20px;
-  padding: 12px 14px;
-  background: var(--info-bg);
-  border-radius: 8px;
-  border: 1px solid var(--app-border);
-}
-
-.alloc-title {
-  margin: 0 0 10px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 1.15rem;
   color: var(--app-text-strong);
 }
 
-.alloc-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
+/* —— Actions —— */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-top: var(--sp-6);
+  padding-top: var(--sp-4);
+  border-top: 1px solid color-mix(in srgb, var(--app-border) 90%, transparent);
 
-.alloc-table td {
-  padding: 6px 4px;
-  border-bottom: 1px dashed var(--app-border);
-}
-
-.alloc-table td.num {
-  text-align: right;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.alloc-table tr.alloc-total td {
-  border-bottom: none;
-  padding-top: 10px;
-  font-weight: 600;
-}
-
-/* Material Small et moins (tablette portrait / smartphone) : une seule colonne */
-@media (max-width: 959.98px) {
-  .grid {
-    grid-template-columns: 1fr;
+  button {
+    min-height: 42px;
+    padding-inline: 22px;
+    font-weight: 600;
   }
-  .parents-wrap {
-    grid-template-columns: 1fr;
+}
+
+/* —— Succès —— */
+.success-panel {
+  text-align: center;
+  padding: var(--sp-8) var(--sp-4);
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.success-panel__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  margin-bottom: var(--sp-3);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--app-primary) 10%, #fff);
+}
+
+.success-icon {
+  font-size: 52px;
+  width: 52px;
+  height: 52px;
+}
+
+.success-panel h2 {
+  margin: 0 0 var(--sp-3);
+  font-size: 1.4rem;
+  letter-spacing: -0.01em;
+}
+
+.success-lead {
+  margin: 0 0 var(--sp-6);
+  color: var(--app-text-secondary);
+  font-size: 15px;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.success-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  justify-content: center;
+
+  button {
+    min-height: 42px;
+    padding-inline: 20px;
+    border-radius: var(--radius-pill);
   }
+}
+
+/* —— Legacy / unused leftovers kept harmless —— */
+.photo-block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--app-border);
+}
+
+.student-photo,
+.photo-placeholder {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  border: 1px solid var(--app-border);
+}
+
+@include ds.lt(ds.$bp-small) {
+  .student-registration-page {
+    padding: var(--sp-3) var(--sp-3) var(--sp-6);
+  }
+
+  .reg-shell.mat-mdc-card {
+    padding: var(--sp-5) var(--sp-4) var(--sp-6);
+    border-radius: var(--radius-lg);
+  }
+
+  .grid,
+  .parents-wrap,
   .parents-summary {
     grid-template-columns: 1fr;
   }
-  .payment-row {
-    grid-template-columns: 1fr;
+
+  .reg-stepper ::ng-deep .mat-step-label {
+    font-size: 12px;
   }
 }
-

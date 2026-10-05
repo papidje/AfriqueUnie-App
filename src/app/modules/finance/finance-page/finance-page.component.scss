@@ -66,11 +66,48 @@
 
 table {
   width: 100%;
-  min-width: 1360px;
+  min-width: 1180px;
 }
 
 .finance-table {
   table-layout: fixed;
+
+  /* N° — compact */
+  .mat-column-index {
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
+    padding-left: 8px !important;
+    padding-right: 4px !important;
+    text-align: center;
+  }
+
+  /* Nom & Prénom — prioritaire */
+  .mat-column-fullName {
+    width: 22%;
+    min-width: 180px;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  /* Mois — réduits pour libérer de la place au nom */
+  .mat-column-OCT,
+  .mat-column-NOV,
+  .mat-column-DEC,
+  .mat-column-JAN,
+  .mat-column-FEB,
+  .mat-column-MAR,
+  .mat-column-APR,
+  .mat-column-MAY,
+  .mat-column-JUN {
+    width: 48px;
+    min-width: 48px;
+    max-width: 48px;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    text-align: center;
+    font-size: 0.75rem;
+  }
 }
 
 .class-tabs {
@@ -133,9 +170,9 @@ table {
 
 .month-cell {
   position: relative;
-  width: 72px;
-  min-width: 72px;
-  max-width: 72px;
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
   background: transparent;
   z-index: 0;
 }
@@ -148,8 +185,6 @@ table {
 
 /*
  * Piste = exactement 9 colonnes « mois » (OCT→JUN).
- * Ne pas utiliser calc(9 * 72px) : avec table-layout:fixed et table à 100%,
- * les cellules dépassent souvent 72px — la piste s’arrêtait alors vers avril.
  * 900% = 9 × la largeur réelle de la cellule OCT (même largeur que les autres mois).
  */
 .months-progress-host {

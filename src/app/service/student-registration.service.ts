@@ -18,8 +18,14 @@ export class StudentRegistrationService {
     return this.http.post<StudentRegistrationResponse>(this.base, payload);
   }
 
-  previewFamily(fatherPhone: string, motherPhone: string): Observable<FamilyPreviewResponse> {
-    const params = new HttpParams().set('fatherPhone', fatherPhone).set('motherPhone', motherPhone);
+  previewFamily(fatherPhone?: string | null, motherPhone?: string | null): Observable<FamilyPreviewResponse> {
+    let params = new HttpParams();
+    if (fatherPhone) {
+      params = params.set('fatherPhone', fatherPhone);
+    }
+    if (motherPhone) {
+      params = params.set('motherPhone', motherPhone);
+    }
     return this.http.get<FamilyPreviewResponse>(`${this.base}/family-preview`, { params });
   }
 }

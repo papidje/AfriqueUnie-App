@@ -39,9 +39,60 @@
             <mat-form-field appearance="outline"><mat-label>Email communication</mat-label><input matInput formControlName="communicationEmail" [readonly]="!editGeneral" /></mat-form-field>
             <mat-form-field appearance="outline"><mat-label>N° de carte</mat-label><input matInput formControlName="cardNumber" [readonly]="!editGeneral" /></mat-form-field>
             <div class="full parents-block">
-              <h4>Parents</h4>
-              <p><strong>Père :</strong> {{ s.father?.lastName }} {{ s.father?.firstName }} · {{ s.father?.phone || '—' }} · {{ s.father?.email || '—' }}</p>
-              <p><strong>Mère :</strong> {{ s.mother?.lastName }} {{ s.mother?.firstName }} · {{ s.mother?.phone || '—' }} · {{ s.mother?.email || '—' }}</p>
+              <div class="parents-block__head">
+                <h4>Parents / tuteur</h4>
+                <p class="muted compact">Complétez le second parent ou le tuteur si besoin.</p>
+              </div>
+              <p>
+                <strong>Père :</strong>
+                <ng-container *ngIf="s.father as f">
+                  {{ f.lastName }} {{ f.firstName }} · {{ f.phone || '—' }} · {{ f.email || '—' }}
+                </ng-container>
+                <span *ngIf="!s.father" class="muted">Non renseigné</span>
+              </p>
+              <p>
+                <strong>Mère :</strong>
+                <ng-container *ngIf="s.mother as m">
+                  {{ m.lastName }} {{ m.firstName }} · {{ m.phone || '—' }} · {{ m.email || '—' }}
+                </ng-container>
+                <span *ngIf="!s.mother" class="muted">Non renseignée</span>
+              </p>
+              <p>
+                <strong>Tuteur :</strong>
+                <ng-container *ngIf="s.tutor as t">
+                  {{ t.lastName }} {{ t.firstName }} · {{ t.phone || '—' }} · {{ t.email || '—' }}
+                </ng-container>
+                <span *ngIf="!s.tutor" class="muted">Non renseigné</span>
+              </p>
+
+              <div class="link-parent" *ngIf="canWriteStudent && (!s.father || !s.mother || !s.tutor)">
+                <h5 *ngIf="!s.father">Ajouter le père</h5>
+                <form *ngIf="!s.father" class="grid link-parent-form" [formGroup]="linkFatherForm" (ngSubmit)="submitLinkFather()">
+                  <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput formControlName="lastName" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Prénom</mat-label><input matInput formControlName="firstName" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput formControlName="phone" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput formControlName="email" /></mat-form-field>
+                  <div class="full"><button mat-flat-button color="primary" type="submit" [disabled]="linkFatherForm.invalid || linkingParent">Enregistrer le père</button></div>
+                </form>
+
+                <h5 *ngIf="!s.mother">Ajouter la mère</h5>
+                <form *ngIf="!s.mother" class="grid link-parent-form" [formGroup]="linkMotherForm" (ngSubmit)="submitLinkMother()">
+                  <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput formControlName="lastName" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Prénom</mat-label><input matInput formControlName="firstName" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput formControlName="phone" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput formControlName="email" /></mat-form-field>
+                  <div class="full"><button mat-flat-button color="primary" type="submit" [disabled]="linkMotherForm.invalid || linkingParent">Enregistrer la mère</button></div>
+                </form>
+
+                <h5 *ngIf="!s.tutor">Ajouter le tuteur</h5>
+                <form *ngIf="!s.tutor" class="grid link-parent-form" [formGroup]="linkTutorForm" (ngSubmit)="submitLinkTutor()">
+                  <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput formControlName="lastName" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Prénom</mat-label><input matInput formControlName="firstName" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput formControlName="phone" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput formControlName="email" /></mat-form-field>
+                  <div class="full"><button mat-flat-button color="primary" type="submit" [disabled]="linkTutorForm.invalid || linkingParent">Enregistrer le tuteur</button></div>
+                </form>
+              </div>
             </div>
           </form>
           <div class="actions" *ngIf="editGeneral && generalForm.dirty"><button mat-flat-button color="primary" (click)="saveGeneral()">Enregistrer</button></div>
@@ -243,9 +294,10 @@
 
         <mat-tab label="Santé & Documents">
           <div class="tab-head">
-            <h3>Infos médicales et photo</h3>
+            <h3>Infos médicales, urgence et tuteur</h3>
             <button mat-stroked-button *ngIf="canWriteStudent" (click)="startEdit('health')">Modifier</button>
           </div>
+          <p class="muted tab-hint">Facultatif à l’inscription — à compléter ici si besoin (urgence, allergies, tuteur).</p>
           <div class="doc-actions">
             <button
               mat-raised-button
@@ -304,10 +356,6 @@
             <mat-form-field appearance="outline" class="full"><mat-label>Allergies</mat-label><textarea matInput rows="2" formControlName="allergies" [readonly]="!editHealth"></textarea></mat-form-field>
             <mat-form-field appearance="outline"><mat-label>Contact urgence (nom)</mat-label><input matInput formControlName="emergencyContactName" [readonly]="!editHealth" /></mat-form-field>
             <mat-form-field appearance="outline"><mat-label>Contact urgence (téléphone)</mat-label><input matInput formControlName="emergencyContactPhone" [readonly]="!editHealth" /></mat-form-field>
-            <mat-form-field appearance="outline"><mat-label>Tuteur</mat-label><input matInput formControlName="tutorName" [readonly]="!editHealth" /></mat-form-field>
-            <mat-form-field appearance="outline"><mat-label>Profession tuteur</mat-label><input matInput formControlName="tutorProfession" [readonly]="!editHealth" /></mat-form-field>
-            <mat-form-field appearance="outline"><mat-label>Téléphone tuteur</mat-label><input matInput formControlName="tutorPhone" [readonly]="!editHealth" /></mat-form-field>
-            <mat-form-field appearance="outline"><mat-label>Email tuteur</mat-label><input matInput formControlName="tutorEmail" [readonly]="!editHealth" /></mat-form-field>
           </form>
           <div class="actions" *ngIf="editHealth && healthForm.dirty"><button mat-flat-button color="primary" (click)="saveHealth()">Enregistrer</button></div>
         </mat-tab>

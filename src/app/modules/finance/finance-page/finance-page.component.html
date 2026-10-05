@@ -87,18 +87,34 @@
                   [lastName]="row.lastName"
                   [firstName]="row.firstName"
                   [civilityOrRole]="row.civility"
+                  [matTooltip]="nameTooltip(row)"
+                  [matTooltipDisabled]="!nameTooltip(row)"
                 ></app-person-identity-link>
               </td>
             </ng-container>
 
             <ng-container matColumnDef="matricule">
               <th mat-header-cell *matHeaderCellDef>Matricule</th>
-              <td mat-cell *matCellDef="let row">{{ row.matricule }}</td>
+              <td
+                mat-cell
+                *matCellDef="let row"
+                [matTooltip]="row.matricule || ''"
+                [matTooltipDisabled]="!row.matricule"
+              >
+                {{ row.matricule }}
+              </td>
             </ng-container>
 
             <ng-container matColumnDef="phone">
               <th mat-header-cell *matHeaderCellDef>Tel</th>
-              <td mat-cell *matCellDef="let row">{{ row.phone || '—' }}</td>
+              <td
+                mat-cell
+                *matCellDef="let row"
+                [matTooltip]="row.phone || ''"
+                [matTooltipDisabled]="!row.phone"
+              >
+                {{ row.phone || '—' }}
+              </td>
             </ng-container>
 
             <ng-container matColumnDef="insReins">

@@ -17,6 +17,7 @@ import { sortSchoolClassesByLevel } from '../../core/class-level-group-order';
 import { studentBirthDateBounds } from '../../util/date-input-bounds.util';
 import {
   FamilyPreviewResponse,
+  LegalGuardianRelation,
   StudentRegistrationResponse
 } from '../../models/student-registration.models';
 import { prepareStudentPhotoFile } from '../../util/student-photo-upload.util';
@@ -43,16 +44,15 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
   loading = false;
   submitting = false;
   familyLoading = false;
+  showStudentExtras = false;
   private readonly destroy$ = new Subject<void>();
 
   schoolId: number | null = null;
   schoolName: string | null = null;
   activeYear: SchoolYearDto | null = null;
   classes: SchoolClassDto[] = [];
-  /** Classe préselectionnée (ex. onglet courant sur la liste élèves). */
   private preferredClassId: number | null = null;
 
-  /** Après inscription réussie (sans paiement à cette étape). */
   registrationComplete = false;
   registeredStudentId: number | null = null;
   registeredStudentSummary = '';
@@ -78,27 +78,15 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     cardNumber: ['']
   });
 
-  readonly stepParents = this.fb.group({
-    fatherLastName: ['', Validators.required],
-    fatherFirstName: ['', Validators.required],
-    fatherPhone: ['', [Validators.required, guineaPhoneValidator()]],
-    fatherEmail: ['', optionalEmailValidator()],
-    fatherProfession: [''],
-    fatherAddress: [''],
-
-    motherLastName: ['', Validators.required],
-    motherFirstName: ['', Validators.required],
-    motherPhone: ['', [Validators.required, guineaPhoneValidator()]],
-    motherEmail: ['', optionalEmailValidator()],
-    motherProfession: [''],
-    motherAddress: ['']
-  });
-
-  readonly stepEmergency = this.fb.group({
-    emergencyContactName: [''],
-    emergencyContactPhone: ['', guineaPhoneValidator()],
-    bloodGroup: [''],
-    allergies: ['']
+  readonly stepGuardian = this.fb.group({
+    relation: ['PERE' as LegalGuardianRelation, Validators.required],
+    civility: ['MONSIEUR' as Civility, Validators.required],
+    lastName: ['', Validators.required],
+    firstName: ['', Validators.required],
+    phone: ['', guineaPhoneValidator()],
+    email: ['', optionalEmailValidator()],
+    profession: [''],
+    address: ['']
   });
 
   readonly stepTuition = this.fb.group({
@@ -143,6 +131,9 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
       const selected = (vm.schools ?? []).find((s: { id: number }) => s.id === vm.selectedId);
       this.schoolName = selected?.name ?? null;
     });
+    this.stepGuardian.controls.relation.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((rel) => {
+      this.syncGuardianCivilityFromRelation(rel);
+    });
     this.reloadContext();
   }
 
@@ -182,18 +173,24 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     return tuitionTotalExpected(this.feeStructure, this.tuitionPayablePercent);
   }
 
-  get fatherDisplayName(): string {
-    const p = this.stepParents.getRawValue();
-    return `${(p.fatherFirstName || '').trim()} ${(p.fatherLastName || '').trim()}`.trim() || 'Père';
+  get guardianDisplayName(): string {
+    const g = this.stepGuardian.getRawValue();
+    return `${(g.firstName || '').trim()} ${(g.lastName || '').trim()}`.trim() || 'Représentant';
   }
 
-  get motherDisplayName(): string {
-    const p = this.stepParents.getRawValue();
-    return `${(p.motherFirstName || '').trim()} ${(p.motherLastName || '').trim()}`.trim() || 'Mère';
+  get guardianRelationLabel(): string {
+    switch (this.stepGuardian.controls.relation.value) {
+      case 'MERE':
+        return 'Mère';
+      case 'TUTEUR':
+        return 'Tuteur';
+      default:
+        return 'Père';
+    }
   }
 
-  lookupFather(): void {
-    const phone = compactGuineaPhone(this.stepParents.controls.fatherPhone.value || '');
+  lookupGuardian(): void {
+    const phone = compactGuineaPhone(this.stepGuardian.controls.phone.value || '');
     if (!phone) {
       return;
     }
@@ -202,33 +199,12 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
         if (!p) {
           return;
         }
-        this.stepParents.patchValue({
-          fatherLastName: p.lastName,
-          fatherFirstName: p.firstName,
-          fatherEmail: p.email || '',
-          fatherProfession: p.profession || '',
-          fatherAddress: p.address || ''
-        });
-      }
-    });
-  }
-
-  lookupMother(): void {
-    const phone = compactGuineaPhone(this.stepParents.controls.motherPhone.value || '');
-    if (!phone) {
-      return;
-    }
-    this.parentApi.findByPhone(phone).subscribe({
-      next: (p) => {
-        if (!p) {
-          return;
-        }
-        this.stepParents.patchValue({
-          motherLastName: p.lastName,
-          motherFirstName: p.firstName,
-          motherEmail: p.email || '',
-          motherProfession: p.profession || '',
-          motherAddress: p.address || ''
+        this.stepGuardian.patchValue({
+          lastName: p.lastName,
+          firstName: p.firstName,
+          email: p.email || '',
+          profession: p.profession || '',
+          address: p.address || ''
         });
       }
     });
@@ -242,7 +218,6 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Chargé à l’entrée de l’étape scolarité. */
   loadTuitionStepContext(): void {
     this.loadFamilyPreview();
     this.loadFeeStructureForSelectedClass();
@@ -286,21 +261,14 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     if (!this.schoolId) {
       return;
     }
-    if (
-      this.stepStudent.invalid ||
-      this.stepParents.invalid ||
-      this.stepEmergency.invalid ||
-      this.stepTuition.invalid
-    ) {
+    if (this.stepStudent.invalid || this.stepGuardian.invalid || this.stepTuition.invalid) {
       this.stepStudent.markAllAsTouched();
-      this.stepParents.markAllAsTouched();
-      this.stepEmergency.markAllAsTouched();
+      this.stepGuardian.markAllAsTouched();
       this.stepTuition.markAllAsTouched();
       return;
     }
     const s = this.stepStudent.getRawValue();
-    const p = this.stepParents.getRawValue();
-    const e = this.stepEmergency.getRawValue();
+    const g = this.stepGuardian.getRawValue();
 
     const clazz = this.selectedClass;
     const classLabel = clazz
@@ -329,29 +297,17 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
           address: trimOrNull(s.address),
           communicationPhone: trimOrNull(s.communicationPhone) ? compactGuineaPhone(s.communicationPhone!) : null,
           communicationEmail: trimOrNull(s.communicationEmail),
-          emergencyContactName: trimOrNull(e.emergencyContactName),
-          emergencyContactPhone: trimOrNull(e.emergencyContactPhone)
-            ? compactGuineaPhone(e.emergencyContactPhone!)
-            : null,
-          bloodGroup: trimOrNull(e.bloodGroup),
-          allergies: trimOrNull(e.allergies),
           cardNumber: trimOrNull(s.cardNumber)
         },
-        father: {
-          lastName: (p.fatherLastName || '').trim(),
-          firstName: (p.fatherFirstName || '').trim(),
-          phone: compactGuineaPhone(p.fatherPhone || ''),
-          email: (p.fatherEmail || '').trim() || null,
-          profession: (p.fatherProfession || '').trim() || null,
-          address: (p.fatherAddress || '').trim() || null
-        },
-        mother: {
-          lastName: (p.motherLastName || '').trim(),
-          firstName: (p.motherFirstName || '').trim(),
-          phone: compactGuineaPhone(p.motherPhone || ''),
-          email: (p.motherEmail || '').trim() || null,
-          profession: (p.motherProfession || '').trim() || null,
-          address: (p.motherAddress || '').trim() || null
+        legalGuardian: {
+          relation: g.relation as LegalGuardianRelation,
+          civility: g.civility as Civility,
+          lastName: (g.lastName || '').trim(),
+          firstName: (g.firstName || '').trim(),
+          phone: trimOrNull(g.phone) ? compactGuineaPhone(g.phone!) : null,
+          email: trimOrNull(g.email),
+          profession: trimOrNull(g.profession),
+          address: trimOrNull(g.address)
         }
       })
       .pipe(
@@ -402,6 +358,13 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     void this.router.navigate(['/finance', 'payment', this.registeredStudentId]);
   }
 
+  goToStudentFiche(): void {
+    if (this.registeredStudentId == null) {
+      return;
+    }
+    void this.router.navigate(['/students', this.registeredStudentId]);
+  }
+
   startAnotherRegistration(): void {
     this.registrationComplete = false;
     this.registeredStudentId = null;
@@ -409,6 +372,7 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
     this.familyPreview = null;
     this.feeStructure = null;
     this.feeStructureMissing = false;
+    this.showStudentExtras = false;
     this.clearPendingPhoto();
     this.stepStudent.reset({
       civility: 'MONSIEUR',
@@ -423,33 +387,38 @@ export class StudentRegistrationComponent implements OnInit, OnDestroy {
       classId: this.resolvePreferredClassId(),
       cardNumber: ''
     });
-    this.stepParents.reset({
-      fatherLastName: '',
-      fatherFirstName: '',
-      fatherPhone: '',
-      fatherEmail: '',
-      fatherProfession: '',
-      fatherAddress: '',
-      motherLastName: '',
-      motherFirstName: '',
-      motherPhone: '',
-      motherEmail: '',
-      motherProfession: '',
-      motherAddress: ''
-    });
-    this.stepEmergency.reset({
-      emergencyContactName: '',
-      emergencyContactPhone: '',
-      bloodGroup: '',
-      allergies: ''
+    this.stepGuardian.reset({
+      relation: 'PERE',
+      civility: 'MONSIEUR',
+      lastName: '',
+      firstName: '',
+      phone: '',
+      email: '',
+      profession: '',
+      address: ''
     });
     this.stepTuition.reset({ tuitionPayablePercent: 100 });
   }
 
+  private syncGuardianCivilityFromRelation(rel: LegalGuardianRelation | null): void {
+    if (rel === 'MERE') {
+      this.stepGuardian.patchValue({ civility: 'MADAME' }, { emitEvent: false });
+    } else if (rel === 'PERE') {
+      this.stepGuardian.patchValue({ civility: 'MONSIEUR' }, { emitEvent: false });
+    }
+  }
+
   private loadFamilyPreview(): void {
-    const fatherPhone = compactGuineaPhone(this.stepParents.controls.fatherPhone.value || '');
-    const motherPhone = compactGuineaPhone(this.stepParents.controls.motherPhone.value || '');
-    if (!fatherPhone || !motherPhone) {
+    const g = this.stepGuardian.getRawValue();
+    const phone = compactGuineaPhone(g.phone || '');
+    if (!phone) {
+      this.familyPreview = null;
+      return;
+    }
+    const fatherPhone = g.relation === 'PERE' ? phone : null;
+    const motherPhone = g.relation === 'MERE' ? phone : null;
+    if (!fatherPhone && !motherPhone) {
+      // Tuteur : pas de fratrie Parent
       this.familyPreview = null;
       return;
     }

@@ -283,6 +283,15 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
     return !!this.info?.tuitionPercentLocked;
   }
 
+  get tuitionPercentTooltip(): string {
+    return (
+      `Scolarité à ${this.draftPayablePercent} % ` +
+      `(verrouillé après un premier encaissement de scolarité). ` +
+      `Barème : ${this.asMoney(this.tuitionCatalogExpected)} GNF → dû : ` +
+      `${this.asMoney(this.tuitionPayablePreview)} GNF.`
+    );
+  }
+
   get tuitionCatalogExpected(): number {
     return Number(this.info?.tuitionCatalogExpected ?? 0);
   }

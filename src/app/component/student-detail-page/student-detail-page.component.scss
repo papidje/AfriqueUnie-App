@@ -152,6 +152,13 @@
 .grid .full { grid-column: 1 / -1; }
 .actions { margin: 12px 0; display:flex; justify-content:flex-end; }
 .parents-block { background:var(--app-surface-2); border:1px solid var(--app-border); border-radius:8px; padding:12px; }
+
+.parents-block__head h4 { margin: 0 0 4px; }
+.parents-block .compact { margin: 0 0 10px; font-size: 13px; }
+.link-parent { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--app-border); }
+.link-parent h5 { margin: 12px 0 8px; font-size: 14px; }
+.link-parent-form { margin-bottom: 8px; }
+.tab-hint { margin: 0 0 12px; font-size: 13px; }
 .finance-actions {
   display: flex;
   justify-content: flex-end;

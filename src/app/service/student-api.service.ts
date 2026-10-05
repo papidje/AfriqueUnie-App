@@ -61,6 +61,61 @@ export class StudentApiService {
     );
   }
 
+  linkFather(
+    studentId: number,
+    body: {
+      lastName: string;
+      firstName: string;
+      phone?: string | null;
+      email?: string | null;
+      profession?: string | null;
+      address?: string | null;
+    }
+  ): Observable<StudentDetailDto> {
+    return this.http
+      .put<StudentDetailDto>(`${this.base}/${studentId}/father`, body)
+      .pipe(catchError((err: HttpErrorResponse) => throwError(() => err)));
+  }
+
+  linkMother(
+    studentId: number,
+    body: {
+      lastName: string;
+      firstName: string;
+      phone?: string | null;
+      email?: string | null;
+      profession?: string | null;
+      address?: string | null;
+    }
+  ): Observable<StudentDetailDto> {
+    return this.http
+      .put<StudentDetailDto>(`${this.base}/${studentId}/mother`, body)
+      .pipe(catchError((err: HttpErrorResponse) => throwError(() => err)));
+  }
+
+  unlinkTutor(studentId: number): Observable<void> {
+    return this.http.delete(`${this.base}/${studentId}/tutor`, { observe: 'response' }).pipe(
+      map(() => undefined),
+      catchError((err: HttpErrorResponse) => throwError(() => err))
+    );
+  }
+
+  linkTutor(
+    studentId: number,
+    body: {
+      lastName: string;
+      firstName: string;
+      phone?: string | null;
+      email?: string | null;
+      profession?: string | null;
+      address?: string | null;
+    }
+  ): Observable<StudentDetailDto> {
+    return this.http
+      .put<StudentDetailDto>(`${this.base}/${studentId}/tutor`, body)
+      .pipe(catchError((err: HttpErrorResponse) => throwError(() => err)));
+  }
+
   getUnassignedBySchool(schoolId: number): Observable<StudentListRow[]> {
     return this.http
       .get<StudentListRow[]>(`${this.base}/school/${schoolId}/unassigned`)

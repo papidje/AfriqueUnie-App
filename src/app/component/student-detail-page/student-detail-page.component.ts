@@ -68,6 +68,7 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
 
   editGeneral = false;
   editHealth = false;
+  linkingParent = false;
 
   readonly canWriteStudent = this.authUtils.hasAnyRole([...ROLES_STUDENT_WRITE]);
   readonly canLifecycleAdmin = this.authUtils.hasAnyRole([AppRoles.ADMIN_ECOLE, AppRoles.DIRECTOR]);
@@ -105,11 +106,28 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     emergencyContactName: [''],
     emergencyContactPhone: [''],
     bloodGroup: [''],
-    allergies: [''],
-    tutorName: [''],
-    tutorProfession: [''],
-    tutorPhone: [''],
-    tutorEmail: ['']
+    allergies: ['']
+  });
+
+  readonly linkFatherForm = this.fb.group({
+    lastName: ['', Validators.required],
+    firstName: ['', Validators.required],
+    phone: [''],
+    email: ['']
+  });
+
+  readonly linkMotherForm = this.fb.group({
+    lastName: ['', Validators.required],
+    firstName: ['', Validators.required],
+    phone: [''],
+    email: ['']
+  });
+
+  readonly linkTutorForm = this.fb.group({
+    lastName: ['', Validators.required],
+    firstName: ['', Validators.required],
+    phone: [''],
+    email: ['']
   });
 
   readonly paymentColumns = [
@@ -217,6 +235,90 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
       next: (s) => { this.applyStudent(s); this.editHealth = false; this.snackBar.open('Santé & documents mis à jour.', 'Fermer', { duration: 2500 }); },
       error: (err) => this.snackBar.open(err?.error?.message || 'Mise à jour impossible.', 'Fermer', { duration: 5000 })
     });
+  }
+
+  submitLinkFather(): void {
+    if (!this.studentId || this.linkFatherForm.invalid || this.linkingParent) {
+      return;
+    }
+    const v = this.linkFatherForm.getRawValue();
+    this.linkingParent = true;
+    this.studentApi
+      .linkFather(this.studentId, {
+        lastName: (v.lastName || '').trim(),
+        firstName: (v.firstName || '').trim(),
+        phone: (v.phone || '').trim() || null,
+        email: (v.email || '').trim() || null
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (s) => {
+          this.linkingParent = false;
+          this.applyStudent(s);
+          this.linkFatherForm.reset({ lastName: '', firstName: '', phone: '', email: '' });
+          this.snackBar.open('Père enregistré.', 'Fermer', { duration: 2500 });
+        },
+        error: (err) => {
+          this.linkingParent = false;
+          this.snackBar.open(err?.error?.message || 'Enregistrement impossible.', 'Fermer', { duration: 5000 });
+        }
+      });
+  }
+
+  submitLinkMother(): void {
+    if (!this.studentId || this.linkMotherForm.invalid || this.linkingParent) {
+      return;
+    }
+    const v = this.linkMotherForm.getRawValue();
+    this.linkingParent = true;
+    this.studentApi
+      .linkMother(this.studentId, {
+        lastName: (v.lastName || '').trim(),
+        firstName: (v.firstName || '').trim(),
+        phone: (v.phone || '').trim() || null,
+        email: (v.email || '').trim() || null
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (s) => {
+          this.linkingParent = false;
+          this.applyStudent(s);
+          this.linkMotherForm.reset({ lastName: '', firstName: '', phone: '', email: '' });
+          this.snackBar.open('Mère enregistrée.', 'Fermer', { duration: 2500 });
+        },
+        error: (err) => {
+          this.linkingParent = false;
+          this.snackBar.open(err?.error?.message || 'Enregistrement impossible.', 'Fermer', { duration: 5000 });
+        }
+      });
+  }
+
+  submitLinkTutor(): void {
+    if (!this.studentId || this.linkTutorForm.invalid || this.linkingParent) {
+      return;
+    }
+    const v = this.linkTutorForm.getRawValue();
+    this.linkingParent = true;
+    this.studentApi
+      .linkTutor(this.studentId, {
+        lastName: (v.lastName || '').trim(),
+        firstName: (v.firstName || '').trim(),
+        phone: (v.phone || '').trim() || null,
+        email: (v.email || '').trim() || null
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (s) => {
+          this.linkingParent = false;
+          this.applyStudent(s);
+          this.linkTutorForm.reset({ lastName: '', firstName: '', phone: '', email: '' });
+          this.snackBar.open('Tuteur enregistré.', 'Fermer', { duration: 2500 });
+        },
+        error: (err) => {
+          this.linkingParent = false;
+          this.snackBar.open(err?.error?.message || 'Enregistrement impossible.', 'Fermer', { duration: 5000 });
+        }
+      });
   }
 
   onPhotoSelected(event: Event): void {
@@ -612,11 +714,7 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
       emergencyContactName: s.emergencyContactName ?? '',
       emergencyContactPhone: s.emergencyContactPhone ?? '',
       bloodGroup: s.bloodGroup ?? '',
-      allergies: s.allergies ?? '',
-      tutorName: s.tutorName ?? '',
-      tutorProfession: s.tutorProfession ?? '',
-      tutorPhone: s.tutorPhone ?? '',
-      tutorEmail: s.tutorEmail ?? ''
+      allergies: s.allergies ?? ''
     }, { emitEvent: false });
     this.generalForm.markAsPristine();
     this.schoolingForm.markAsPristine();

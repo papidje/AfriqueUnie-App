@@ -6,13 +6,24 @@
     </div>
 
     <mat-card class="payment-card" *ngIf="info">
-      <mat-card-title>Paiement</mat-card-title>
-      <p class="percent-hint" *ngIf="tuitionPercentLocked">
-        Scolarité à {{ draftPayablePercent }}&nbsp;%
-        (verrouillé après un premier encaissement de scolarité).
-        Barème : {{ asMoney(tuitionCatalogExpected) }} GNF → dû :
-        {{ asMoney(tuitionPayablePreview) }} GNF.
-      </p>
+      <div class="payment-title-row">
+        <mat-card-title>Paiement</mat-card-title>
+        <ng-container *ngIf="tuitionPercentLocked">
+          <span class="percent-inline">
+            scolarité à {{ draftPayablePercent }}&nbsp;% (verrouillé)
+          </span>
+          <button
+            type="button"
+            class="percent-info"
+            mat-icon-button
+            [matTooltip]="tuitionPercentTooltip"
+            matTooltipShowDelay="200"
+            aria-label="Détail du pourcentage de scolarité"
+          >
+            <mat-icon>help_outline</mat-icon>
+          </button>
+        </ng-container>
+      </div>
       <ng-container *ngIf="!tuitionPercentLocked">
         <div class="payable-bar">
           <span class="bar-label">Complet</span>
@@ -114,7 +125,7 @@
             [attr.max]="maxRemaining"
           />
           <span matTextSuffix>GNF</span>
-          <mat-hint>Plafond : {{ asMoney(maxRemaining) }} GNF (reliquat dû)</mat-hint>
+          <mat-hint>Reliquat : {{ asMoney(maxRemaining) }} GNF</mat-hint>
           <mat-error *ngIf="form.get('amountToCollect')?.hasError('max')">
             Le montant ne peut pas dépasser le reliquat dû ({{ asMoney(maxRemaining) }} GNF).
           </mat-error>

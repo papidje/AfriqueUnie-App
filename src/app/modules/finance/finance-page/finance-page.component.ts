@@ -164,6 +164,10 @@ export class FinancePageComponent implements OnInit, OnDestroy {
     return `${label} : ${this.insReinsPercent(row)}% payé`;
   }
 
+  nameTooltip(row: StudentPaymentStatusDto): string {
+    return `${row.lastName || ''} ${row.firstName || ''}`.trim();
+  }
+
   showSuppliesColumn(classId: number): boolean {
     const rows = this.rows(classId);
     if (rows.length === 0) {

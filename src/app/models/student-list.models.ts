@@ -28,7 +28,7 @@ export interface ParentChildRowDto {
   matricule?: string | null;
   className?: string | null;
   enrollmentStatus?: string | null;
-  /** PERE | MERE | PERE_ET_MERE */
+  /** PERE | MERE | PERE_ET_MERE | TUTEUR */
   relation?: string | null;
   /** MONSIEUR | MADAME */
   civility?: string | null;
@@ -52,10 +52,6 @@ export interface StudentDetailDto {
   emergencyContactPhone: string | null;
   bloodGroup?: string | null;
   allergies?: string | null;
-  tutorName?: string | null;
-  tutorProfession?: string | null;
-  tutorPhone?: string | null;
-  tutorEmail?: string | null;
   photoPath?: string | null;
   enrollmentStatus?: string | null;
   classHistory?: string | null;
@@ -66,6 +62,7 @@ export interface StudentDetailDto {
   schoolYearLabel?: string | null;
   father: ParentDetailDto | null;
   mother: ParentDetailDto | null;
+  tutor: ParentDetailDto | null;
 }
 
 export interface StudentProfileUpdatePayload {
@@ -82,10 +79,6 @@ export interface StudentProfileUpdatePayload {
   emergencyContactPhone?: string | null;
   bloodGroup?: string | null;
   allergies?: string | null;
-  tutorName?: string | null;
-  tutorProfession?: string | null;
-  tutorPhone?: string | null;
-  tutorEmail?: string | null;
   enrollmentStatus?: string | null;
   classHistory?: string | null;
   cardNumber?: string | null;

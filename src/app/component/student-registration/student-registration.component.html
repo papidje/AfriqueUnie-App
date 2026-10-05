@@ -1,230 +1,230 @@
 <section class="student-registration-page">
-  <mat-card>
-    <div class="head">
-      <div>
+  <mat-card class="reg-shell">
+    <header class="reg-head">
+      <div class="reg-head__text">
+        <p class="reg-kicker">Scolarité</p>
         <h1>Inscription d’un élève</h1>
-        <p *ngIf="activeYear">Année active : <strong>{{ activeYear.label }}</strong></p>
+        <p *ngIf="activeYear" class="reg-year">
+          Année active
+          <span class="reg-year__badge">{{ activeYear.label }}</span>
+        </p>
         <p *ngIf="!schoolId" class="muted">Sélectionnez d’abord un établissement actif.</p>
         <p *ngIf="schoolId && !activeYear && !loading" class="muted">Aucune année scolaire active trouvée.</p>
       </div>
-    </div>
+    </header>
 
     <div *ngIf="loading" class="loading">Chargement...</div>
 
     <div *ngIf="registrationComplete" class="success-panel">
-      <mat-icon class="success-icon" color="primary">check_circle</mat-icon>
+      <div class="success-panel__icon-wrap">
+        <mat-icon class="success-icon" color="primary">check_circle</mat-icon>
+      </div>
       <h2>Inscription validée</h2>
       <p class="success-lead">
-        L’inscription de <strong>{{ registeredStudentSummary }}</strong> est enregistrée. L’encaissement des frais se fait
-        depuis la page dédiée (comptabilité).
+        L’inscription de <strong>{{ registeredStudentSummary }}</strong> est enregistrée. Vous pourrez compléter le
+        second parent, le tuteur et les infos d’urgence sur la
+        <strong>fiche élève</strong>. L’encaissement se fait depuis la page comptabilité.
       </p>
       <div class="success-actions">
-        <button mat-raised-button color="primary" type="button" (click)="goToEncaissement()">
+        <button mat-flat-button color="primary" type="button" (click)="goToEncaissement()">
           Aller à l’encaissement
         </button>
+        <button mat-stroked-button type="button" (click)="goToStudentFiche()">Ouvrir la fiche</button>
         <button mat-stroked-button type="button" (click)="startAnotherRegistration()">Nouvelle inscription</button>
       </div>
     </div>
 
-    <mat-stepper *ngIf="!registrationComplete && !loading && schoolId && activeYear" [linear]="true" class="stepper">
+    <mat-stepper
+      *ngIf="!registrationComplete && !loading && schoolId && activeYear"
+      [linear]="true"
+      class="reg-stepper"
+      animationDuration="280ms"
+    >
+      <!-- Étape 1 — Élève -->
       <mat-step [stepControl]="stepStudent">
         <form [formGroup]="stepStudent">
-          <ng-template matStepLabel>Informations élève</ng-template>
+          <ng-template matStepLabel>Élève</ng-template>
 
-          <div class="grid">
-            <mat-form-field appearance="outline">
-              <mat-label>Civilité</mat-label>
-              <mat-select formControlName="civility">
-                <mat-option value="MONSIEUR">Garçon</mat-option>
-                <mat-option value="MADAME">Fille</mat-option>
-              </mat-select>
-            </mat-form-field>
+          <div class="step-body">
+            <div class="step-intro">
+              <h2 class="step-title">Identité de l’élève</h2>
+              <p class="step-desc">Saisissez l’essentiel. Le reste pourra être complété plus tard sur la fiche.</p>
+            </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Nom</mat-label>
-              <input matInput formControlName="lastName" />
-              <mat-error *ngIf="stepStudent.controls.lastName.hasError('required')">Requis</mat-error>
-            </mat-form-field>
+            <div class="grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Civilité</mat-label>
+                <mat-select formControlName="civility">
+                  <mat-option value="MONSIEUR">Garçon</mat-option>
+                  <mat-option value="MADAME">Fille</mat-option>
+                </mat-select>
+              </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Prénom</mat-label>
-              <input matInput formControlName="firstName" />
-              <mat-error *ngIf="stepStudent.controls.firstName.hasError('required')">Requis</mat-error>
-            </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Nom</mat-label>
+                <input matInput formControlName="lastName" />
+                <mat-error *ngIf="stepStudent.controls.lastName.hasError('required')">Requis</mat-error>
+              </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Date de naissance</mat-label>
-              <input
-                matInput
-                type="date"
-                formControlName="birthDate"
-                [min]="studentBirthMin"
-                [max]="studentBirthMax"
-              />
-              <mat-error *ngIf="stepStudent.controls.birthDate.hasError('required')">Requis</mat-error>
-            </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Prénom</mat-label>
+                <input matInput formControlName="firstName" />
+                <mat-error *ngIf="stepStudent.controls.firstName.hasError('required')">Requis</mat-error>
+              </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Lieu de naissance</mat-label>
-              <input matInput formControlName="birthPlace" />
-            </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Date de naissance</mat-label>
+                <input
+                  matInput
+                  type="date"
+                  formControlName="birthDate"
+                  [min]="studentBirthMin"
+                  [max]="studentBirthMax"
+                />
+                <mat-error *ngIf="stepStudent.controls.birthDate.hasError('required')">Requis</mat-error>
+              </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Nationalité</mat-label>
-              <input matInput formControlName="nationality" />
-            </mat-form-field>
+              <mat-form-field appearance="outline" class="full">
+                <mat-label>Classe</mat-label>
+                <mat-select formControlName="classId">
+                  <mat-option *ngFor="let c of classes" [value]="c.id">
+                    {{ c.name }} <span *ngIf="c.level">— {{ c.level.code }} {{ c.level.name }}</span>
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="stepStudent.controls.classId.hasError('required')">Requis</mat-error>
+              </mat-form-field>
+            </div>
 
-            <mat-form-field appearance="outline" class="full">
-              <mat-label>Adresse</mat-label>
-              <input matInput formControlName="address" />
-            </mat-form-field>
+            <button
+              type="button"
+              mat-button
+              class="extras-toggle"
+              (click)="showStudentExtras = !showStudentExtras"
+            >
+              <mat-icon>{{ showStudentExtras ? 'expand_less' : 'expand_more' }}</mat-icon>
+              {{ showStudentExtras ? 'Masquer les informations complémentaires' : 'Informations complémentaires (optionnel)' }}
+            </button>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Téléphone communication</mat-label>
-              <input matInput formControlName="communicationPhone" />
-              <mat-error *ngIf="phoneControlError(stepStudent.controls.communicationPhone) as err">{{ err }}</mat-error>
-            </mat-form-field>
+            <div class="grid extras-panel" *ngIf="showStudentExtras">
+              <mat-form-field appearance="outline">
+                <mat-label>Lieu de naissance</mat-label>
+                <input matInput formControlName="birthPlace" />
+              </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Email communication</mat-label>
-              <input matInput type="email" formControlName="communicationEmail" />
-              <mat-error *ngIf="emailControlError(stepStudent.controls.communicationEmail) as err">{{ err }}</mat-error>
-            </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Nationalité</mat-label>
+                <input matInput formControlName="nationality" />
+              </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full">
-              <mat-label>Classe</mat-label>
-              <mat-select formControlName="classId">
-                <mat-option *ngFor="let c of classes" [value]="c.id">
-                  {{ c.name }} <span *ngIf="c.level">— {{ c.level.code }} {{ c.level.name }}</span>
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="stepStudent.controls.classId.hasError('required')">Requis</mat-error>
-            </mat-form-field>
+              <mat-form-field appearance="outline" class="full">
+                <mat-label>Adresse</mat-label>
+                <input matInput formControlName="address" />
+              </mat-form-field>
 
-            <mat-form-field appearance="outline">
-              <mat-label>N° de carte</mat-label>
-              <input matInput formControlName="cardNumber" />
-              <mat-hint>Carte scolaire remise à l’élève (modifiable plus tard en cas de perte)</mat-hint>
-            </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Téléphone communication</mat-label>
+                <input matInput formControlName="communicationPhone" />
+                <mat-error *ngIf="phoneControlError(stepStudent.controls.communicationPhone) as err">{{ err }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Email communication</mat-label>
+                <input matInput type="email" formControlName="communicationEmail" />
+                <mat-error *ngIf="emailControlError(stepStudent.controls.communicationEmail) as err">{{ err }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>N° de carte</mat-label>
+                <input matInput formControlName="cardNumber" />
+                <mat-hint>Carte scolaire (modifiable plus tard)</mat-hint>
+              </mat-form-field>
+            </div>
           </div>
 
           <div class="actions">
-            <button mat-raised-button color="primary" matStepperNext [disabled]="stepStudent.invalid">Suivant</button>
+            <button mat-flat-button color="primary" matStepperNext [disabled]="stepStudent.invalid">Suivant</button>
           </div>
         </form>
       </mat-step>
 
-      <mat-step [stepControl]="stepParents">
-        <form [formGroup]="stepParents">
-          <ng-template matStepLabel>Parents</ng-template>
+      <!-- Étape 2 — Représentant légal -->
+      <mat-step [stepControl]="stepGuardian">
+        <form [formGroup]="stepGuardian">
+          <ng-template matStepLabel>Représentant</ng-template>
 
-          <div class="parents-wrap">
-            <mat-card class="parent-card">
-              <mat-card-title>Père</mat-card-title>
+          <div class="step-body">
+            <div class="step-intro">
+              <h2 class="step-title">Représentant légal</h2>
+              <p class="step-desc">
+                Une seule personne pour démarrer. Vous pourrez ajouter le second parent sur la fiche élève.
+              </p>
+            </div>
+
+            <mat-card class="soft-card">
               <div class="grid">
                 <mat-form-field appearance="outline">
-                  <mat-label>Téléphone</mat-label>
-                  <input matInput formControlName="fatherPhone" (blur)="lookupFather()" />
-                  <mat-error *ngIf="phoneControlError(stepParents.controls.fatherPhone, true) as err">{{ err }}</mat-error>
+                  <mat-label>Lien avec l’élève</mat-label>
+                  <mat-select formControlName="relation">
+                    <mat-option value="PERE">Père</mat-option>
+                    <mat-option value="MERE">Mère</mat-option>
+                    <mat-option value="TUTEUR">Tuteur</mat-option>
+                  </mat-select>
                 </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Civilité</mat-label>
+                  <mat-select formControlName="civility">
+                    <mat-option value="MONSIEUR">Monsieur</mat-option>
+                    <mat-option value="MADAME">Madame</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
                 <mat-form-field appearance="outline">
                   <mat-label>Nom</mat-label>
-                  <input matInput formControlName="fatherLastName" />
+                  <input matInput formControlName="lastName" />
+                  <mat-error *ngIf="stepGuardian.controls.lastName.hasError('required')">Requis</mat-error>
                 </mat-form-field>
+
                 <mat-form-field appearance="outline">
                   <mat-label>Prénom</mat-label>
-                  <input matInput formControlName="fatherFirstName" />
+                  <input matInput formControlName="firstName" />
+                  <mat-error *ngIf="stepGuardian.controls.firstName.hasError('required')">Requis</mat-error>
                 </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Téléphone (optionnel)</mat-label>
+                  <input matInput formControlName="phone" (blur)="lookupGuardian()" />
+                  <mat-hint>Si renseigné : recherche dans l’annuaire parents</mat-hint>
+                  <mat-error *ngIf="phoneControlError(stepGuardian.controls.phone) as err">{{ err }}</mat-error>
+                </mat-form-field>
+
                 <mat-form-field appearance="outline">
                   <mat-label>Email</mat-label>
-                  <input matInput formControlName="fatherEmail" />
-                  <mat-error *ngIf="emailControlError(stepParents.controls.fatherEmail) as err">{{ err }}</mat-error>
+                  <input matInput formControlName="email" />
+                  <mat-error *ngIf="emailControlError(stepGuardian.controls.email) as err">{{ err }}</mat-error>
                 </mat-form-field>
+
                 <mat-form-field appearance="outline">
                   <mat-label>Profession</mat-label>
-                  <input matInput formControlName="fatherProfession" />
+                  <input matInput formControlName="profession" />
                 </mat-form-field>
+
                 <mat-form-field appearance="outline" class="full">
                   <mat-label>Adresse</mat-label>
-                  <input matInput formControlName="fatherAddress" />
+                  <input matInput formControlName="address" />
                 </mat-form-field>
               </div>
             </mat-card>
-
-            <mat-card class="parent-card">
-              <mat-card-title>Mère</mat-card-title>
-              <div class="grid">
-                <mat-form-field appearance="outline">
-                  <mat-label>Téléphone</mat-label>
-                  <input matInput formControlName="motherPhone" (blur)="lookupMother()" />
-                  <mat-error *ngIf="phoneControlError(stepParents.controls.motherPhone, true) as err">{{ err }}</mat-error>
-                </mat-form-field>
-                <mat-form-field appearance="outline">
-                  <mat-label>Nom</mat-label>
-                  <input matInput formControlName="motherLastName" />
-                </mat-form-field>
-                <mat-form-field appearance="outline">
-                  <mat-label>Prénom</mat-label>
-                  <input matInput formControlName="motherFirstName" />
-                </mat-form-field>
-                <mat-form-field appearance="outline">
-                  <mat-label>Email</mat-label>
-                  <input matInput formControlName="motherEmail" />
-                  <mat-error *ngIf="emailControlError(stepParents.controls.motherEmail) as err">{{ err }}</mat-error>
-                </mat-form-field>
-                <mat-form-field appearance="outline">
-                  <mat-label>Profession</mat-label>
-                  <input matInput formControlName="motherProfession" />
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="full">
-                  <mat-label>Adresse</mat-label>
-                  <input matInput formControlName="motherAddress" />
-                </mat-form-field>
-              </div>
-            </mat-card>
-          </div>
-
-          <div class="actions">
-            <button mat-stroked-button matStepperPrevious type="button">Retour</button>
-            <button mat-raised-button color="primary" matStepperNext [disabled]="stepParents.invalid">Suivant</button>
-          </div>
-        </form>
-      </mat-step>
-
-      <mat-step [stepControl]="stepEmergency">
-        <form [formGroup]="stepEmergency">
-          <ng-template matStepLabel>Urgence</ng-template>
-
-          <div class="grid">
-            <mat-form-field appearance="outline" class="full">
-              <mat-label>Contact d'urgence</mat-label>
-              <input matInput formControlName="emergencyContactName" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Téléphone d'urgence</mat-label>
-              <input matInput formControlName="emergencyContactPhone" />
-              <mat-error *ngIf="phoneControlError(stepEmergency.controls.emergencyContactPhone) as err">{{ err }}</mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Groupe sanguin</mat-label>
-              <input matInput formControlName="bloodGroup" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full">
-              <mat-label>Allergies</mat-label>
-              <textarea matInput rows="2" formControlName="allergies"></textarea>
-            </mat-form-field>
           </div>
 
           <div class="actions">
             <button mat-stroked-button matStepperPrevious type="button">Retour</button>
             <button
-              mat-raised-button
+              mat-flat-button
               color="primary"
               type="button"
               matStepperNext
-              [disabled]="stepEmergency.invalid"
+              [disabled]="stepGuardian.invalid"
               (click)="loadTuitionStepContext()"
             >
               Suivant
@@ -233,126 +233,113 @@
         </form>
       </mat-step>
 
+      <!-- Étape 3 — Scolarité -->
       <mat-step [stepControl]="stepTuition">
         <form [formGroup]="stepTuition">
           <ng-template matStepLabel>Scolarité</ng-template>
 
-          <p class="step-final-hint">
-            Vérifiez la composition familiale pour décider d’une éventuelle réduction sur la <strong>scolarité</strong>
-            uniquement (l’inscription n’est pas concernée). Puis validez l’inscription — l’encaissement se fait ensuite
-            sur la page dédiée.
-          </p>
+          <div class="step-body">
+            <div class="step-intro">
+              <h2 class="step-title">Validation &amp; scolarité</h2>
+              <p class="step-desc">
+                Vérifiez le représentant et ajustez éventuellement le pourcentage de scolarité à payer. L’encaissement
+                se fait ensuite sur la page dédiée.
+              </p>
+            </div>
 
-          <div class="parents-summary">
-            <mat-card class="parent-card">
-              <mat-card-title>Père — {{ fatherDisplayName }}</mat-card-title>
-              <p class="muted compact">
-                {{ stepParents.controls.fatherPhone.value }}
-                <span *ngIf="stepParents.controls.fatherProfession.value">
-                  · {{ stepParents.controls.fatherProfession.value }}</span
+            <mat-card class="soft-card parent-card--summary">
+              <div class="soft-card__head">
+                <span class="soft-card__icon" aria-hidden="true"><mat-icon>badge</mat-icon></span>
+                <h3 class="soft-card__title">{{ guardianRelationLabel }} — {{ guardianDisplayName }}</h3>
+              </div>
+              <p class="compact">
+                {{ stepGuardian.controls.phone.value || 'Sans téléphone' }}
+                <span *ngIf="stepGuardian.controls.profession.value">
+                  · {{ stepGuardian.controls.profession.value }}</span
                 >
               </p>
               <p class="muted compact" *ngIf="familyPreview?.father as f">
-                {{ f.knownInDirectory ? 'Déjà connu dans l’annuaire' : 'Nouveau parent (sera créé à l’inscription)' }}
-              </p>
-            </mat-card>
-            <mat-card class="parent-card">
-              <mat-card-title>Mère — {{ motherDisplayName }}</mat-card-title>
-              <p class="muted compact">
-                {{ stepParents.controls.motherPhone.value }}
-                <span *ngIf="stepParents.controls.motherProfession.value">
-                  · {{ stepParents.controls.motherProfession.value }}</span
-                >
+                <ng-container *ngIf="stepGuardian.controls.relation.value === 'PERE'">
+                  {{ f.knownInDirectory ? 'Déjà connu dans l’annuaire' : 'Nouveau parent (sera créé)' }}
+                </ng-container>
               </p>
               <p class="muted compact" *ngIf="familyPreview?.mother as m">
-                {{ m.knownInDirectory ? 'Déjà connue dans l’annuaire' : 'Nouveau parent (sera créé à l’inscription)' }}
+                <ng-container *ngIf="stepGuardian.controls.relation.value === 'MERE'">
+                  {{ m.knownInDirectory ? 'Déjà connue dans l’annuaire' : 'Nouveau parent (sera créé)' }}
+                </ng-container>
+              </p>
+            </mat-card>
+
+            <div *ngIf="familyLoading" class="muted family-loading">Chargement de la fratrie…</div>
+
+            <div class="sibling-lists" *ngIf="familyPreview && !familyLoading">
+              <mat-card class="soft-card sibling-card" *ngIf="familyPreview.siblingsBothParents.length">
+                <h3 class="soft-card__title">Fratrie (même père et même mère)</h3>
+                <ul>
+                  <li *ngFor="let s of familyPreview.siblingsBothParents">
+                    {{ s.firstName }} {{ s.lastName }}
+                    <span class="muted" *ngIf="s.className"> — {{ s.className }}</span>
+                  </li>
+                </ul>
+              </mat-card>
+
+              <mat-card class="soft-card sibling-card" *ngIf="familyPreview.siblingsFatherOnly.length">
+                <h3 class="soft-card__title">Autres enfants du père</h3>
+                <ul>
+                  <li *ngFor="let s of familyPreview.siblingsFatherOnly">
+                    {{ s.firstName }} {{ s.lastName }}
+                    <span class="muted" *ngIf="s.className"> — {{ s.className }}</span>
+                  </li>
+                </ul>
+              </mat-card>
+
+              <mat-card class="soft-card sibling-card" *ngIf="familyPreview.siblingsMotherOnly.length">
+                <h3 class="soft-card__title">Autres enfants de la mère</h3>
+                <ul>
+                  <li *ngFor="let s of familyPreview.siblingsMotherOnly">
+                    {{ s.firstName }} {{ s.lastName }}
+                    <span class="muted" *ngIf="s.className"> — {{ s.className }}</span>
+                  </li>
+                </ul>
+              </mat-card>
+            </div>
+
+            <mat-card class="soft-card payment-card">
+              <div class="soft-card__head">
+                <span class="soft-card__icon" aria-hidden="true"><mat-icon>payments</mat-icon></span>
+                <h3 class="soft-card__title">Paiement scolarité</h3>
+              </div>
+              <p class="muted compact" *ngIf="feeStructureMissing">
+                Aucun barème de scolarité trouvé pour ce niveau — configurez les frais avant l’encaissement.
+              </p>
+              <p class="muted compact" *ngIf="feeStructure && !feeStructureMissing">
+                Scolarité barème : {{ asMoney(tuitionCatalogAmount) }} GNF — hors inscription.
+              </p>
+
+              <div class="payable-bar">
+                <span class="bar-label">Complet</span>
+                <input
+                  class="payable-range"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  [value]="tuitionPayablePercent"
+                  (input)="onTuitionPercentInput($event)"
+                />
+                <span class="bar-label">Exempté</span>
+              </div>
+              <p class="payable-percent">À payer : <strong>{{ tuitionPayablePercent }}&nbsp;%</strong></p>
+              <p class="payable-amount">
+                Montant scolarité : <strong>{{ asMoney(tuitionAmountToPay) }} GNF</strong>
               </p>
             </mat-card>
           </div>
-
-          <div *ngIf="familyLoading" class="muted" style="margin-top: 12px">Chargement de la fratrie…</div>
-
-          <div class="sibling-lists" *ngIf="familyPreview && !familyLoading">
-            <mat-card class="sibling-card" *ngIf="familyPreview.siblingsBothParents.length">
-              <mat-card-title>Fratrie (même père et même mère)</mat-card-title>
-              <ul>
-                <li *ngFor="let s of familyPreview.siblingsBothParents">
-                  {{ s.firstName }} {{ s.lastName }}
-                  <span class="muted" *ngIf="s.className"> — {{ s.className }}</span>
-                  <span class="muted" *ngIf="s.matricule"> · {{ s.matricule }}</span>
-                </li>
-              </ul>
-            </mat-card>
-
-            <mat-card class="sibling-card" *ngIf="familyPreview.siblingsFatherOnly.length">
-              <mat-card-title>Autres enfants du père</mat-card-title>
-              <ul>
-                <li *ngFor="let s of familyPreview.siblingsFatherOnly">
-                  {{ s.firstName }} {{ s.lastName }}
-                  <span class="muted" *ngIf="s.className"> — {{ s.className }}</span>
-                  <span class="muted" *ngIf="s.matricule"> · {{ s.matricule }}</span>
-                </li>
-              </ul>
-            </mat-card>
-
-            <mat-card class="sibling-card" *ngIf="familyPreview.siblingsMotherOnly.length">
-              <mat-card-title>Autres enfants de la mère</mat-card-title>
-              <ul>
-                <li *ngFor="let s of familyPreview.siblingsMotherOnly">
-                  {{ s.firstName }} {{ s.lastName }}
-                  <span class="muted" *ngIf="s.className"> — {{ s.className }}</span>
-                  <span class="muted" *ngIf="s.matricule"> · {{ s.matricule }}</span>
-                </li>
-              </ul>
-            </mat-card>
-
-            <p
-              class="muted"
-              *ngIf="
-                !familyPreview.siblingsBothParents.length &&
-                !familyPreview.siblingsFatherOnly.length &&
-                !familyPreview.siblingsMotherOnly.length
-              "
-            >
-              Aucun autre élève déjà inscrit pour ces parents.
-            </p>
-          </div>
-
-          <mat-card class="payment-card">
-            <mat-card-title>Paiement</mat-card-title>
-            <p class="muted compact" *ngIf="feeStructureMissing">
-              Aucun barème de scolarité trouvé pour ce niveau — configurez les frais avant l’encaissement.
-            </p>
-            <p class="muted compact" *ngIf="feeStructure && !feeStructureMissing">
-              Scolarité barème : {{ asMoney(tuitionCatalogAmount) }} GNF
-              <span *ngIf="feeStructure.annualTuitionFee != null"> (annuelle)</span>
-              <span *ngIf="feeStructure.annualTuitionFee == null"> (mensuelle × 9)</span>
-              — hors inscription.
-            </p>
-
-            <div class="payable-bar">
-              <span class="bar-label">Complet</span>
-              <input
-                class="payable-range"
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                [value]="tuitionPayablePercent"
-                (input)="onTuitionPercentInput($event)"
-              />
-              <span class="bar-label">Exempté</span>
-            </div>
-            <p class="payable-percent">À payer : <strong>{{ tuitionPayablePercent }}&nbsp;%</strong></p>
-            <p class="payable-amount">
-              Montant scolarité : <strong>{{ asMoney(tuitionAmountToPay) }} GNF</strong>
-            </p>
-          </mat-card>
 
           <div class="actions">
             <button mat-stroked-button matStepperPrevious type="button">Retour</button>
             <button
-              mat-raised-button
+              mat-flat-button
               color="primary"
               type="button"
               (click)="submit()"

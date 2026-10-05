@@ -1,7 +1,11 @@
-export interface ParentRegistrationDto {
+export type LegalGuardianRelation = 'PERE' | 'MERE' | 'TUTEUR';
+
+export interface LegalGuardianRegistrationDto {
+  relation: LegalGuardianRelation;
+  civility: 'MONSIEUR' | 'MADAME';
   lastName: string;
   firstName: string;
-  phone: string;
+  phone?: string | null;
   email?: string | null;
   profession?: string | null;
   address?: string | null;
@@ -30,8 +34,7 @@ export type RegistrationPaymentMode = 'ESPECES' | 'ORANGE_MONEY' | 'MOOV_MONEY' 
 
 export interface RegistrationDto {
   student: StudentRegistrationDto;
-  father: ParentRegistrationDto;
-  mother: ParentRegistrationDto;
+  legalGuardian: LegalGuardianRegistrationDto;
   classId: number;
   /** 0 ou omis : pas de paiement à l’inscription (encaissement séparé). */
   amountPaid?: number | null;
@@ -75,7 +78,7 @@ export interface FamilyParentSummary {
   id: number | null;
   firstName: string | null;
   lastName: string | null;
-  phone: string;
+  phone: string | null;
   email?: string | null;
   profession?: string | null;
   address?: string | null;
