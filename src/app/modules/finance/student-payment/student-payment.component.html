@@ -56,26 +56,82 @@
     </mat-card>
 
     <ng-container *ngIf="maxRemaining > 0; else settledTpl">
-      <div class="debts-wrap">
-        <div class="debts-row">
+      <div class="progress-panel" *ngIf="segments.length > 0">
+        <div class="seg-labels" aria-hidden="true">
           <div
-            class="debt-tile"
-            *ngFor="let debt of debts; trackBy: trackDebtById"
-            [class.debt-tile--on]="debt.checked"
-            (click)="toggleDebt(debt, !debt.checked)"
+            class="seg-label"
+            *ngFor="let seg of segments; trackBy: trackSegmentById"
+            [style.flex-grow]="seg.due"
+            [style.flex-basis.px]="0"
+            [matTooltip]="seg.fullLabel + ' · ' + asMoney(seg.due) + ' GNF'"
+            matTooltipShowDelay="250"
           >
-            <mat-checkbox
-              class="debt-cb"
-              [checked]="debt.checked"
-              (click)="$event.stopPropagation()"
-              (change)="toggleDebt(debt, $event.checked)"
-            ></mat-checkbox>
-            <span class="debt-text">
-              <span class="debt-title">{{ debt.title }}</span>
-              <span class="debt-amt">{{ asMoney(debt.amount) }} GNF</span>
+            {{ seg.label }}
+          </div>
+        </div>
+
+        <div class="progress-track" role="group" aria-label="Progression des paiements">
+          <div class="fill fill-paid" [style.width.%]="paidPct"></div>
+          <div
+            class="fill fill-pending"
+            [style.left.%]="paidPct"
+            [style.width.%]="pendingPct"
+          ></div>
+
+          <div class="ticks" aria-hidden="true">
+            <span
+              class="tick"
+              *ngFor="let seg of segments; trackBy: trackSegmentById; let last = last"
+              [style.left.%]="totalDue > 0 ? (seg.endCumulative / totalDue) * 100 : 0"
+              [class.tick--end]="last"
+            ></span>
+          </div>
+
+          <input
+            *ngIf="remainingTrackPct > 0"
+            class="progress-slider"
+            type="range"
+            [min]="0"
+            [max]="maxRemaining"
+            step="1"
+            [value]="amountToCollect"
+            [style.left.%]="paidPct"
+            [style.width.%]="remainingTrackPct"
+            (input)="onSliderInput($event)"
+            (change)="onSliderRelease($event)"
+            aria-label="Montant à encaisser sur le reliquat"
+          />
+        </div>
+
+        <div class="seg-amounts" aria-hidden="true">
+          <div
+            class="amt-ins"
+            *ngIf="inscriptionDueAmount > 0"
+            [style.flex-grow]="inscriptionDueAmount"
+            [style.flex-basis.px]="0"
+          >
+            {{ asMoney(inscriptionDueAmount) }}
+          </div>
+          <div
+            class="amt-spacer"
+            *ngIf="totalDue > inscriptionDueAmount"
+            [style.flex-grow]="totalDue - inscriptionDueAmount"
+            [style.flex-basis.px]="0"
+          >
+            <span class="amt-month" *ngIf="monthlyUnitAmount > 0">
+              {{ asMoney(monthlyUnitAmount) }} GNF / mois
             </span>
           </div>
         </div>
+
+        <div class="progress-legend">
+          <span class="lg lg-paid">Payé</span>
+          <span class="lg lg-pending">À encaisser</span>
+          <span class="lg lg-rest">Reste</span>
+        </div>
+        <p class="progress-help">
+          Le paiement couvre les échéances dans l’ordre, jusqu’au montant saisi.
+        </p>
       </div>
 
       <form class="payment-form" [formGroup]="form">

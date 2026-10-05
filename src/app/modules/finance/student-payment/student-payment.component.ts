@@ -21,13 +21,15 @@ import {
 } from '../../../models/finance.models';
 import { FinanceApiService } from '../../../service/finance-api.service';
 
-interface DebtItem {
+interface ProgressSegment {
   id: string;
-  title: string;
-  amount: number;
-  checked: boolean;
+  label: string;
+  fullLabel: string;
+  due: number;
+  paid: number;
   kind: 'insReins' | 'supplies' | 'month';
-  monthCode?: string;
+  /** Cumul dû jusqu’à la fin de ce segment (inclus). */
+  endCumulative: number;
 }
 
 @Component({
@@ -38,20 +40,25 @@ interface DebtItem {
 export class StudentPaymentComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
-  /**
-   * `amount` : le montant saisi pilote les coches (ordre des dettes) et l’API `totalDeclaredAmount`.
-   * `checkbox` : les coches pilotent le montant (somme) et l’API « legacy » (lignes sélectionnées).
-   */
-  private paymentInputSource: 'amount' | 'checkbox' = 'amount';
-
   loading = true;
   submitting = false;
   savingPercent = false;
   studentId: number | null = null;
   info: StudentPaymentInfoDto | null = null;
-  debts: DebtItem[] = [];
-  /** Somme des reliquats (dettes listées) ; plafond du champ montant. */
+
+  /** Segments proportionnels (inscription, fournitures, mois). */
+  segments: ProgressSegment[] = [];
+  /** Total dû (payé + reliquat). */
+  totalDue = 0;
+  /** Déjà encaissé. */
+  paidTotal = 0;
+  /** Reliquat = totalDue - paidTotal. */
   maxRemaining = 0;
+  /** Montant typique d’une mensualité (affichage sous la barre). */
+  monthlyUnitAmount = 0;
+  /** Montant inscription / réinscription dû (affichage sous Ins.). */
+  inscriptionDueAmount = 0;
+
   /** Brouillon local du % (avant enregistrement API). */
   draftPayablePercent = 100;
 
@@ -76,6 +83,39 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
     return this.form.value.paymentMode !== 'ESPECES';
   }
 
+  get amountToCollect(): number {
+    const n = Number(this.form.value.amountToCollect);
+    if (!Number.isFinite(n) || n < 0) {
+      return 0;
+    }
+    return this.maxRemaining > 0 ? Math.min(n, this.maxRemaining) : 0;
+  }
+
+  /** % de la barre déjà payé (vert). */
+  get paidPct(): number {
+    if (this.totalDue <= 0) {
+      return 0;
+    }
+    return (this.paidTotal / this.totalDue) * 100;
+  }
+
+  /** % de la barre couvert par le montant à encaisser (bleu). */
+  get pendingPct(): number {
+    if (this.totalDue <= 0) {
+      return 0;
+    }
+    return (this.amountToCollect / this.totalDue) * 100;
+  }
+
+  /** Zone interactive (reliquat) en % de la barre. */
+  get remainingTrackPct(): number {
+    return Math.max(0, 100 - this.paidPct);
+  }
+
+  get inscriptionLabel(): string {
+    return this.info?.insReinsType === 'REINSCRIPTION' ? 'Réinscription' : 'Inscription';
+  }
+
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('studentId'));
     if (!id) {
@@ -95,18 +135,14 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
     this.form
       .get('amountToCollect')
       ?.valueChanges.pipe(
-        debounceTime(200),
+        debounceTime(120),
         distinctUntilChanged((a, b) => Number(a) === Number(b)),
         takeUntil(this.destroy$)
       )
       .subscribe((v) => {
-        this.paymentInputSource = 'amount';
         const n = Number(v);
         if (this.maxRemaining > 0 && Number.isFinite(n) && n > this.maxRemaining) {
           this.form.patchValue({ amountToCollect: this.maxRemaining }, { emitEvent: false });
-          this.applyAutoChecksFromAmount(this.maxRemaining);
-        } else {
-          this.applyAutoChecksFromAmount(v);
         }
         this.cdr.markForCheck();
       });
@@ -131,36 +167,50 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  toggleDebt(item: DebtItem, checked: boolean): void {
-    this.paymentInputSource = 'checkbox';
-    this.debts = this.debts.map((d) => (d.id === item.id ? { ...d, checked } : d));
-    const sum = this.selectedTotal();
-    this.form.patchValue({ amountToCollect: sum }, { emitEvent: false });
+  onSliderInput(event: Event): void {
+    const raw = Number((event.target as HTMLInputElement).value);
+    const amount = Number.isFinite(raw) ? Math.max(0, Math.min(this.maxRemaining, Math.round(raw))) : 0;
+    this.form.patchValue({ amountToCollect: amount }, { emitEvent: false });
     this.cdr.markForCheck();
   }
 
-  selectedTotal(): number {
-    return this.debts.filter((d) => d.checked).reduce((s, d) => s + (Number(d.amount) || 0), 0);
+  /** Aimantation légère aux bornes de segments au relâchement. */
+  onSliderRelease(event: Event): void {
+    const raw = Number((event.target as HTMLInputElement).value);
+    if (!Number.isFinite(raw) || this.maxRemaining <= 0) {
+      return;
+    }
+    const amount = Math.max(0, Math.min(this.maxRemaining, Math.round(raw)));
+    const boundaries = this.segments
+      .map((s) => s.endCumulative)
+      .filter((c) => c >= this.paidTotal && c <= this.totalDue);
+    const threshold = Math.max(500, Math.round(this.maxRemaining * 0.015));
+    let best = amount;
+    let bestDist = threshold + 1;
+    for (const b of boundaries) {
+      const candidate = Math.round(b - this.paidTotal);
+      const dist = Math.abs(candidate - amount);
+      if (dist <= threshold && dist < bestDist) {
+        bestDist = dist;
+        best = Math.max(0, Math.min(this.maxRemaining, candidate));
+      }
+    }
+    for (const edge of [0, this.maxRemaining]) {
+      const dist = Math.abs(edge - amount);
+      if (dist <= threshold && dist < bestDist) {
+        bestDist = dist;
+        best = edge;
+      }
+    }
+    if (best !== amount) {
+      this.form.patchValue({ amountToCollect: best }, { emitEvent: false });
+      (event.target as HTMLInputElement).value = String(best);
+      this.cdr.markForCheck();
+    }
   }
 
-  /** Coche uniquement les lignes entièrement couvertes par le montant saisi, dans l’ordre des dettes. */
-  applyAutoChecksFromAmount(raw: number | string | null | undefined): void {
-    let M = typeof raw === 'string' ? Number(String(raw).replace(',', '.')) : Number(raw);
-    if (!Number.isFinite(M) || M < 0) {
-      M = 0;
-    }
-    if (this.maxRemaining > 0) {
-      M = Math.min(M, this.maxRemaining);
-    }
-    let R = M;
-    this.debts = this.debts.map((d) => {
-      const line = Math.max(0, Number(d.amount) || 0);
-      const checked = line > 0 && R >= line;
-      if (checked) {
-        R -= line;
-      }
-      return { ...d, checked };
-    });
+  trackSegmentById(_index: number, seg: ProgressSegment): string {
+    return seg.id;
   }
 
   submitPayment(): void {
@@ -175,8 +225,6 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
     }
 
     const mode = this.form.value.paymentMode as CreateStudentPaymentPayload['paymentMode'];
-    let payload: CreateStudentPaymentPayload;
-
     const author = String(this.form.value.recordedBy ?? '').trim();
     if (!author) {
       this.snackBar.open('Indiquez l’auteur du paiement.', 'Fermer', { duration: 3500 });
@@ -192,37 +240,17 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.paymentInputSource === 'amount') {
-      payload = {
-        paymentMode: mode,
-        currency: 'GNF',
-        recordedBy: author,
-        paymentReference,
-        totalDeclaredAmount: amountNum,
-        payInsReins: false,
-        insReinsAmount: 0,
-        paySupplies: false,
-        months: []
-      };
-    } else {
-      const selected = this.debts.filter((d) => d.checked);
-      if (selected.length === 0) {
-        this.snackBar.open('Sélectionnez au moins une dette.', 'Fermer', { duration: 3500 });
-        return;
-      }
-      const insReins = selected.find((d) => d.kind === 'insReins');
-      const months = selected.filter((d) => d.kind === 'month' && d.monthCode).map((d) => d.monthCode!);
-      payload = {
-        paymentMode: mode,
-        currency: 'GNF',
-        recordedBy: author,
-        paymentReference,
-        payInsReins: !!insReins,
-        insReinsAmount: insReins?.amount ?? 0,
-        paySupplies: selected.some((d) => d.kind === 'supplies'),
-        months
-      };
-    }
+    const payload: CreateStudentPaymentPayload = {
+      paymentMode: mode,
+      currency: 'GNF',
+      recordedBy: author,
+      paymentReference,
+      totalDeclaredAmount: amountNum,
+      payInsReins: false,
+      insReinsAmount: 0,
+      paySupplies: false,
+      months: []
+    };
 
     this.submitting = true;
     this.financeApi.createPayment(this.studentId, payload)
@@ -337,10 +365,6 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
     });
   }
 
-  trackDebtById(_index: number, debt: DebtItem): string {
-    return debt.id;
-  }
-
   private loadInfo(studentId: number): void {
     this.loading = true;
     this.financeApi.getPaymentInfo(studentId)
@@ -352,8 +376,7 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
             info.tuitionPayablePercent != null && Number.isFinite(Number(info.tuitionPayablePercent))
               ? Math.round(Number(info.tuitionPayablePercent))
               : 100;
-          this.debts = this.buildDebts(info);
-          this.maxRemaining = this.computeTotalRemaining(info);
+          this.applyProgressModel(info);
           const amtCtrl = this.form.get('amountToCollect');
           if (this.maxRemaining > 0) {
             amtCtrl?.setValidators([
@@ -365,12 +388,10 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
             amtCtrl?.setValidators([Validators.required, Validators.min(0)]);
           }
           amtCtrl?.updateValueAndValidity({ emitEvent: false });
-          this.paymentInputSource = 'amount';
           const cur = Number(this.form.get('amountToCollect')?.value);
-          if (Number.isFinite(cur) && cur > this.maxRemaining) {
-            this.form.patchValue({ amountToCollect: this.maxRemaining }, { emitEvent: false });
+          if (!Number.isFinite(cur) || cur < 0 || cur > this.maxRemaining) {
+            this.form.patchValue({ amountToCollect: 0 }, { emitEvent: false });
           }
-          this.applyAutoChecksFromAmount(this.form.get('amountToCollect')?.value);
           this.loading = false;
           this.cdr.markForCheck();
         },
@@ -381,59 +402,93 @@ export class StudentPaymentComponent implements OnInit, OnDestroy {
       });
   }
 
-  private buildDebts(info: StudentPaymentInfoDto): DebtItem[] {
-    const rows: DebtItem[] = [];
-    if (info.insReinsRemaining > 0) {
+  private applyProgressModel(info: StudentPaymentInfoDto): void {
+    const rows: ProgressSegment[] = [];
+    let cumulative = 0;
+
+    const insDue = Math.max(0, Number(info.insReinsExpected || 0));
+    const insPaid = Math.max(0, Math.min(insDue, Number(info.insReinsPaid || 0)));
+    this.inscriptionDueAmount = insDue;
+    if (insDue > 0) {
+      cumulative += insDue;
+      const full = info.insReinsType === 'REINSCRIPTION' ? 'Réinscription' : 'Inscription';
       rows.push({
         id: 'ins-reins',
-        title: info.insReinsType === 'REINSCRIPTION' ? 'Réinscription' : 'Inscription',
-        amount: info.insReinsRemaining,
-        checked: false,
-        kind: 'insReins'
+        label: info.insReinsType === 'REINSCRIPTION' ? 'Réins.' : 'Ins.',
+        fullLabel: full,
+        due: insDue,
+        paid: insPaid,
+        kind: 'insReins',
+        endCumulative: cumulative
       });
     }
-    const suppliesColumnOn = info.suppliesColumnEnabled !== false;
-    const suppliesDue =
-      suppliesColumnOn && !info.suppliesPaid && Number(info.suppliesExpected || 0) > 0;
-    if (suppliesDue) {
+
+    const suppliesOn = info.suppliesColumnEnabled !== false;
+    const suppliesDue = suppliesOn ? Math.max(0, Number(info.suppliesExpected || 0)) : 0;
+    if (suppliesDue > 0) {
+      const suppliesPaid = info.suppliesPaid ? suppliesDue : 0;
+      cumulative += suppliesDue;
       rows.push({
         id: 'supplies',
-        title: 'Fournitures',
-        amount: Number(info.suppliesExpected || 0),
-        checked: false,
-        kind: 'supplies'
+        label: 'Four.',
+        fullLabel: 'Fournitures',
+        due: suppliesDue,
+        paid: suppliesPaid,
+        kind: 'supplies',
+        endCumulative: cumulative
       });
     }
-    info.monthlyTuition
-      .filter((m) => this.monthRemaining(m) > 0)
-      .forEach((m) => {
-        const rem = this.monthRemaining(m);
-        rows.push({
-          id: `month-${m.monthCode}`,
-          title: m.monthLabel,
-          amount: rem,
-          checked: false,
-          kind: 'month',
-          monthCode: m.monthCode
-        });
+
+    const monthAmounts: number[] = [];
+    for (const m of info.monthlyTuition ?? []) {
+      const due = Math.max(0, Number(m.dueAmount || 0));
+      if (due <= 0) {
+        continue;
+      }
+      const paid = Math.max(0, Math.min(due, Number(m.paidAmount || 0)));
+      cumulative += due;
+      monthAmounts.push(due);
+      rows.push({
+        id: `month-${m.monthCode}`,
+        label: this.abbreviateMonth(m),
+        fullLabel: m.monthLabel || m.monthCode,
+        due,
+        paid,
+        kind: 'month',
+        endCumulative: cumulative
       });
-    return rows;
-  }
-
-  private monthRemaining(month: MonthlyTuitionStatusDto): number {
-    return Math.max(0, Number(month.dueAmount || 0) - Number(month.paidAmount || 0));
-  }
-
-  private computeTotalRemaining(info: StudentPaymentInfoDto): number {
-    let s = Math.max(0, Number(info.insReinsRemaining || 0));
-    if (info.suppliesColumnEnabled !== false && !info.suppliesPaid) {
-      s += Number(info.suppliesExpected || 0);
     }
-    for (const m of info.monthlyTuition) {
-      s += this.monthRemaining(m);
-    }
-    return Math.max(0, s);
+
+    this.segments = rows;
+    this.totalDue = cumulative;
+    this.paidTotal = rows.reduce((s, r) => s + r.paid, 0);
+    this.maxRemaining = Math.max(0, this.totalDue - this.paidTotal);
+    this.monthlyUnitAmount =
+      monthAmounts.length > 0
+        ? Math.round(monthAmounts.reduce((a, b) => a + b, 0) / monthAmounts.length)
+        : 0;
   }
 
+  private abbreviateMonth(m: MonthlyTuitionStatusDto): string {
+    const code = (m.monthCode || '').toUpperCase();
+    const byCode: Record<string, string> = {
+      OCT: 'Oct',
+      NOV: 'Nov',
+      DEC: 'Déc',
+      JAN: 'Jan',
+      FEB: 'Fév',
+      MAR: 'Mar',
+      APR: 'Avr',
+      MAY: 'Mai',
+      JUN: 'Juin'
+    };
+    if (byCode[code]) {
+      return byCode[code];
+    }
+    const label = (m.monthLabel || '').trim();
+    if (label.length <= 4) {
+      return label;
+    }
+    return label.slice(0, 3);
+  }
 }
-
