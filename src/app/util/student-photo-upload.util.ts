@@ -1,10 +1,11 @@
 /**
- * Prépare une photo d’élève pour l’upload : côté serveur la photo est recadrée en 200×200,
- * mais l’appareil photo mobile envoie souvent des fichiers de plusieurs Mo, ce qui peut
- * dépasser la limite multipart (Spring) et inutilement surcharger l’envoi.
+ * Prépare une photo d’élève pour l’upload : côté serveur la photo est redimensionnée
+ * (côté le plus long ≤ 300 px, ratio d’aspect conservé), mais l’appareil photo mobile
+ * envoie souvent des fichiers de plusieurs Mo, ce qui peut dépasser la limite multipart
+ * (Spring) et inutilement surcharger l’envoi.
  *
- * Redimensionne (côté le plus long ≤ 1920) et réencode en JPEG. En cas d’échec (certains
- * HEIC, etc.), retourne le fichier d’origine.
+ * Redimensionne (côté le plus long ≤ 1920) et réencode en JPEG en conservant le ratio.
+ * En cas d’échec (certains HEIC, etc.), retourne le fichier d’origine.
  */
 const MAX_LONG_SIDE = 1920;
 const JPEG_QUALITY = 0.88;

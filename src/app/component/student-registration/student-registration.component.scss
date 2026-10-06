@@ -424,8 +424,17 @@
   width: 96px;
   height: 96px;
   border-radius: var(--radius-lg);
-  object-fit: cover;
   border: 1px solid var(--app-border);
+  background: var(--app-surface-2);
+}
+
+.student-photo {
+  width: auto;
+  height: auto;
+  max-width: 96px;
+  max-height: 96px;
+  object-fit: contain;
+  background: transparent;
 }
 
 @include ds.lt(ds.$bp-small) {

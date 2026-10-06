@@ -10,220 +10,302 @@
     </div>
 
     <mat-card class="shell">
-      <div class="head">
-        <div>
-          <h1>{{ s.lastName }} {{ s.firstName }}</h1>
-          <p class="sub">
-            Matricule {{ s.matricule }}
-            <span *ngIf="s.cardNumber"> · Carte {{ s.cardNumber }}</span>
-            · <ng-container *ngIf="s.birthDate">Né(e) le {{ s.birthDate | displayDate }}</ng-container>
-            <ng-container *ngIf="!s.birthDate">Date de naissance non renseignée</ng-container>
-          </p>
-        </div>
-      </div>
+      <header class="page-heading">
+        <h1>Fiche élève</h1>
+        <p class="subtitle">État civil, scolarité, finances et documents.</p>
+      </header>
 
       <mat-tab-group>
         <mat-tab label="Général">
-          <div class="tab-head">
-            <h3>État civil et coordonnées</h3>
-            <div class="tab-head__actions" *ngIf="canWriteStudent">
-              <ng-container *ngIf="!editGeneral">
-                <button mat-stroked-button type="button" (click)="startEdit('general')">
-                  <mat-icon>edit</mat-icon>
-                  Modifier
-                </button>
-              </ng-container>
-              <ng-container *ngIf="editGeneral">
-                <button mat-button type="button" (click)="cancelEdit('general')">Annuler</button>
-                <button
-                  mat-flat-button
-                  color="primary"
-                  type="button"
-                  [disabled]="generalForm.invalid || !generalForm.dirty"
-                  (click)="saveGeneral()"
-                >
-                  Enregistrer
-                </button>
-              </ng-container>
-            </div>
-          </div>
+          <div class="general-dashboard">
+            <!-- Identité / photo -->
+            <aside class="general-col general-col-identity">
+              <div class="identity-card">
+                <div class="identity-photo-frame">
+                  <img *ngIf="photoUrl; else identityFallback" [src]="photoUrl" class="identity-photo" alt="Photo élève" />
+                  <ng-template #identityFallback>
+                    <div class="identity-avatar-fallback" aria-hidden="true">{{ studentInitials(s) }}</div>
+                  </ng-template>
+                </div>
+                <h2 class="identity-name">{{ s.lastName }} {{ s.firstName }}</h2>
+                <p class="identity-meta">Matricule {{ s.matricule }}</p>
+                <p class="identity-meta" *ngIf="s.schoolClassName">{{ s.schoolClassName }}</p>
 
-          <!-- Lecture -->
-          <div class="field-list" *ngIf="!editGeneral">
-            <div class="field">
-              <span class="field__label">Civilité</span>
-              <span class="field__value">{{ civilityLabel(s.civility) }}</span>
-            </div>
-            <div class="field">
-              <span class="field__label">Nom</span>
-              <span class="field__value">{{ displayOrDash(s.lastName) }}</span>
-            </div>
-            <div class="field">
-              <span class="field__label">Prénom</span>
-              <span class="field__value">{{ displayOrDash(s.firstName) }}</span>
-            </div>
-            <div class="field">
-              <span class="field__label">Date de naissance</span>
-              <span class="field__value">{{ s.birthDate ? (s.birthDate | displayDate) : '—' }}</span>
-            </div>
-            <div class="field">
-              <span class="field__label">Lieu de naissance</span>
-              <span class="field__value">{{ displayOrDash(s.birthPlace) }}</span>
-            </div>
-            <div class="field">
-              <span class="field__label">Nationalité</span>
-              <span class="field__value">{{ displayOrDash(s.nationality) }}</span>
-            </div>
-            <div class="field field--full">
-              <span class="field__label">Adresse</span>
-              <span class="field__value">{{ displayOrDash(s.address) }}</span>
-            </div>
-            <div class="field">
-              <span class="field__label">Téléphone</span>
-              <span class="field__value">{{ displayOrDash(s.communicationPhone) }}</span>
-            </div>
-            <div class="field">
-              <span class="field__label">Email</span>
-              <span class="field__value">{{ displayOrDash(s.communicationEmail) }}</span>
-            </div>
-            <div class="field">
-              <span class="field__label">N° de carte</span>
-              <span class="field__value">{{ displayOrDash(s.cardNumber) }}</span>
-            </div>
-          </div>
+                <mat-divider class="identity-divider"></mat-divider>
 
-          <!-- Édition -->
-          <form class="grid" *ngIf="editGeneral" [formGroup]="generalForm">
-            <mat-form-field appearance="outline">
-              <mat-label>Civilité</mat-label>
-              <mat-select formControlName="civility">
-                <mat-option value="MONSIEUR">Garçon</mat-option>
-                <mat-option value="MADAME">Fille</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Nom</mat-label>
-              <input matInput formControlName="lastName" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Prénom</mat-label>
-              <input matInput formControlName="firstName" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Date naissance</mat-label>
-              <input matInput type="date" formControlName="birthDate" [min]="studentBirthMin" [max]="studentBirthMax" />
-              <mat-hint>Optionnel</mat-hint>
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Lieu naissance</mat-label>
-              <input matInput formControlName="birthPlace" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Nationalité</mat-label>
-              <input matInput formControlName="nationality" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="full">
-              <mat-label>Adresse</mat-label>
-              <input matInput formControlName="address" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Téléphone communication</mat-label>
-              <input matInput formControlName="communicationPhone" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Email communication</mat-label>
-              <input matInput formControlName="communicationEmail" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>N° de carte</mat-label>
-              <input matInput formControlName="cardNumber" />
-            </mat-form-field>
-          </form>
+                <dl class="identity-dl">
+                  <div class="identity-row">
+                    <dt>Statut</dt>
+                    <dd>{{ bannerEnrollmentLabel() }}</dd>
+                  </div>
+                  <div class="identity-row">
+                    <dt>N° de carte</dt>
+                    <dd>{{ displayOrDash(s.cardNumber) }}</dd>
+                  </div>
+                  <div class="identity-row">
+                    <dt>Civilité</dt>
+                    <dd>{{ civilityLabel(s.civility) }}</dd>
+                  </div>
+                </dl>
 
-          <div class="parents-block">
-            <div class="parents-block__head">
-              <h4>Parents / tuteur</h4>
-              <p class="muted compact">Complétez le second parent ou le tuteur si besoin.</p>
-            </div>
-            <div class="field-list field-list--compact">
-              <div class="field field--full">
-                <span class="field__label">Père</span>
-                <span class="field__value" *ngIf="s.father as f">
-                  {{ parentCivilityLabel(f.civility) }} {{ f.lastName }} {{ f.firstName }}
-                  <span class="field__meta">{{ f.phone || '—' }} · {{ f.email || '—' }}</span>
-                </span>
-                <span class="field__value muted" *ngIf="!s.father">Non renseigné</span>
+                <div class="photo-actions" *ngIf="canWriteStudent && editGeneral">
+                  <input
+                    #galleryInput
+                    type="file"
+                    accept="image/*"
+                    (change)="onPhotoSelected($event)"
+                    [disabled]="uploadingPhoto"
+                    hidden
+                  />
+                  <input
+                    #cameraInput
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    (change)="onPhotoSelected($event)"
+                    [disabled]="uploadingPhoto"
+                    hidden
+                  />
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="photo-action-btn"
+                    (click)="$event.stopPropagation(); galleryInput.click()"
+                    [disabled]="uploadingPhoto"
+                  >
+                    <mat-icon>add_photo_alternate</mat-icon>
+                    {{ uploadingPhoto ? 'Envoi…' : 'Galerie' }}
+                  </button>
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="photo-action-btn"
+                    (click)="$event.stopPropagation(); cameraInput.click()"
+                    [disabled]="uploadingPhoto"
+                  >
+                    <mat-icon>photo_camera</mat-icon>
+                    Photo
+                  </button>
+                </div>
               </div>
-              <div class="field field--full">
-                <span class="field__label">Mère</span>
-                <span class="field__value" *ngIf="s.mother as m">
-                  {{ parentCivilityLabel(m.civility) }} {{ m.lastName }} {{ m.firstName }}
-                  <span class="field__meta">{{ m.phone || '—' }} · {{ m.email || '—' }}</span>
-                </span>
-                <span class="field__value muted" *ngIf="!s.mother">Non renseignée</span>
+            </aside>
+
+            <!-- Informations + parents -->
+            <main class="general-col general-col-info">
+              <div class="info-card">
+                <div class="info-card-header">
+                  <div class="info-card-title-block">
+                    <h3>Informations générales</h3>
+                    <p class="info-card-sub">État civil et coordonnées — modifiez via le bouton ci-contre.</p>
+                  </div>
+                  <div class="info-card-actions" *ngIf="canWriteStudent">
+                    <ng-container *ngIf="!editGeneral">
+                      <button mat-stroked-button color="primary" type="button" (click)="startEdit('general')">
+                        <mat-icon>edit</mat-icon>
+                        Modifier
+                      </button>
+                    </ng-container>
+                    <ng-container *ngIf="editGeneral">
+                      <button mat-button type="button" (click)="cancelEdit('general')">Annuler</button>
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        [disabled]="generalForm.invalid || !generalForm.dirty"
+                        (click)="saveGeneral()"
+                      >
+                        Enregistrer
+                      </button>
+                    </ng-container>
+                  </div>
+                </div>
+
+                <dl class="personal-dl" *ngIf="!editGeneral">
+                  <div class="personal-row">
+                    <dt>Nom</dt>
+                    <dd>{{ displayOrDash(s.lastName) }}</dd>
+                  </div>
+                  <div class="personal-row">
+                    <dt>Prénom</dt>
+                    <dd>{{ displayOrDash(s.firstName) }}</dd>
+                  </div>
+                  <div class="personal-row">
+                    <dt>Civilité</dt>
+                    <dd>{{ civilityLabel(s.civility) }}</dd>
+                  </div>
+                  <div class="personal-row">
+                    <dt>Date de naissance</dt>
+                    <dd>
+                      <span class="birth-value">{{ s.birthDate ? (s.birthDate | displayDate) : '—' }}</span>
+                      <span class="age-inline" *ngIf="studentAgeYears(s.birthDate) as age">
+                        <span class="age-sep">·</span>
+                        {{ age }} ans
+                      </span>
+                    </dd>
+                  </div>
+                  <div class="personal-row">
+                    <dt>Lieu de naissance</dt>
+                    <dd>{{ displayOrDash(s.birthPlace) }}</dd>
+                  </div>
+                  <div class="personal-row">
+                    <dt>Nationalité</dt>
+                    <dd>{{ displayOrDash(s.nationality) }}</dd>
+                  </div>
+                  <div class="personal-row personal-row-wide">
+                    <dt>Adresse</dt>
+                    <dd>{{ displayOrDash(s.address) }}</dd>
+                  </div>
+                  <div class="personal-row">
+                    <dt>Téléphone</dt>
+                    <dd>{{ displayOrDash(s.communicationPhone) }}</dd>
+                  </div>
+                  <div class="personal-row">
+                    <dt>Email</dt>
+                    <dd>{{ displayOrDash(s.communicationEmail) }}</dd>
+                  </div>
+                  <div class="personal-row">
+                    <dt>N° de carte</dt>
+                    <dd>{{ displayOrDash(s.cardNumber) }}</dd>
+                  </div>
+                </dl>
+
+                <form class="grid edit-form" *ngIf="editGeneral" [formGroup]="generalForm">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Civilité</mat-label>
+                    <mat-select formControlName="civility">
+                      <mat-option value="MONSIEUR">Garçon</mat-option>
+                      <mat-option value="MADAME">Fille</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Nom</mat-label>
+                    <input matInput formControlName="lastName" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Prénom</mat-label>
+                    <input matInput formControlName="firstName" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Date naissance</mat-label>
+                    <input matInput type="date" formControlName="birthDate" [min]="studentBirthMin" [max]="studentBirthMax" />
+                    <mat-hint>Optionnel</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Lieu naissance</mat-label>
+                    <input matInput formControlName="birthPlace" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Nationalité</mat-label>
+                    <input matInput formControlName="nationality" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="full">
+                    <mat-label>Adresse</mat-label>
+                    <input matInput formControlName="address" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Téléphone communication</mat-label>
+                    <input matInput formControlName="communicationPhone" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Email communication</mat-label>
+                    <input matInput formControlName="communicationEmail" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>N° de carte</mat-label>
+                    <input matInput formControlName="cardNumber" />
+                  </mat-form-field>
+                </form>
               </div>
-              <div class="field field--full">
-                <span class="field__label">Tuteur</span>
-                <span class="field__value" *ngIf="s.tutor as t">
-                  {{ parentCivilityLabel(t.civility) }} {{ t.lastName }} {{ t.firstName }}
-                  <span class="field__meta">{{ t.phone || '—' }} · {{ t.email || '—' }}</span>
-                </span>
-                <span class="field__value muted" *ngIf="!s.tutor">Non renseigné</span>
+
+              <div class="info-card parents-card">
+                <div class="info-card-header">
+                  <div class="info-card-title-block">
+                    <h3>Parents / tuteur</h3>
+                    <p class="info-card-sub">Complétez le second parent ou le tuteur si besoin.</p>
+                  </div>
+                </div>
+
+                <dl class="personal-dl personal-dl--stacked">
+                  <div class="personal-row">
+                    <dt>Père</dt>
+                    <dd *ngIf="s.father as f">
+                      {{ parentCivilityLabel(f.civility) }} {{ f.lastName }} {{ f.firstName }}
+                      <span class="field-meta">{{ f.phone || '—' }} · {{ f.email || '—' }}</span>
+                    </dd>
+                    <dd class="muted" *ngIf="!s.father">Non renseigné</dd>
+                  </div>
+                  <div class="personal-row">
+                    <dt>Mère</dt>
+                    <dd *ngIf="s.mother as m">
+                      {{ parentCivilityLabel(m.civility) }} {{ m.lastName }} {{ m.firstName }}
+                      <span class="field-meta">{{ m.phone || '—' }} · {{ m.email || '—' }}</span>
+                    </dd>
+                    <dd class="muted" *ngIf="!s.mother">Non renseignée</dd>
+                  </div>
+                  <div class="personal-row">
+                    <dt>Tuteur</dt>
+                    <dd *ngIf="s.tutor as t">
+                      {{ parentCivilityLabel(t.civility) }} {{ t.lastName }} {{ t.firstName }}
+                      <span class="field-meta">{{ t.phone || '—' }} · {{ t.email || '—' }}</span>
+                    </dd>
+                    <dd class="muted" *ngIf="!s.tutor">Non renseigné</dd>
+                  </div>
+                </dl>
+
+                <div class="link-parent" *ngIf="canWriteStudent && (!s.father || !s.mother || !s.tutor)">
+                  <h5 *ngIf="!s.father">Ajouter le père</h5>
+                  <form *ngIf="!s.father" class="grid link-parent-form" [formGroup]="linkFatherForm" (ngSubmit)="submitLinkFather()">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Civilité</mat-label>
+                      <mat-select formControlName="civility">
+                        <mat-option value="MONSIEUR">Monsieur</mat-option>
+                        <mat-option value="MADAME">Madame</mat-option>
+                      </mat-select>
+                      <mat-error>Civilité obligatoire</mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput formControlName="lastName" /></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Prénom</mat-label><input matInput formControlName="firstName" /></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput formControlName="phone" /></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput formControlName="email" /></mat-form-field>
+                    <div class="full"><button mat-flat-button color="primary" type="submit" [disabled]="linkFatherForm.invalid || linkingParent">Enregistrer le père</button></div>
+                  </form>
+
+                  <h5 *ngIf="!s.mother">Ajouter la mère</h5>
+                  <form *ngIf="!s.mother" class="grid link-parent-form" [formGroup]="linkMotherForm" (ngSubmit)="submitLinkMother()">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Civilité</mat-label>
+                      <mat-select formControlName="civility">
+                        <mat-option value="MONSIEUR">Monsieur</mat-option>
+                        <mat-option value="MADAME">Madame</mat-option>
+                      </mat-select>
+                      <mat-error>Civilité obligatoire</mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput formControlName="lastName" /></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Prénom</mat-label><input matInput formControlName="firstName" /></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput formControlName="phone" /></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput formControlName="email" /></mat-form-field>
+                    <div class="full"><button mat-flat-button color="primary" type="submit" [disabled]="linkMotherForm.invalid || linkingParent">Enregistrer la mère</button></div>
+                  </form>
+
+                  <h5 *ngIf="!s.tutor">Ajouter le tuteur</h5>
+                  <form *ngIf="!s.tutor" class="grid link-parent-form" [formGroup]="linkTutorForm" (ngSubmit)="submitLinkTutor()">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Civilité</mat-label>
+                      <mat-select formControlName="civility">
+                        <mat-option value="MONSIEUR">Monsieur</mat-option>
+                        <mat-option value="MADAME">Madame</mat-option>
+                      </mat-select>
+                      <mat-error>Civilité obligatoire</mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput formControlName="lastName" /></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Prénom</mat-label><input matInput formControlName="firstName" /></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput formControlName="phone" /></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput formControlName="email" /></mat-form-field>
+                    <div class="full"><button mat-flat-button color="primary" type="submit" [disabled]="linkTutorForm.invalid || linkingParent">Enregistrer le tuteur</button></div>
+                  </form>
+                </div>
               </div>
-            </div>
-
-            <div class="link-parent" *ngIf="canWriteStudent && (!s.father || !s.mother || !s.tutor)">
-              <h5 *ngIf="!s.father">Ajouter le père</h5>
-              <form *ngIf="!s.father" class="grid link-parent-form" [formGroup]="linkFatherForm" (ngSubmit)="submitLinkFather()">
-                <mat-form-field appearance="outline">
-                  <mat-label>Civilité</mat-label>
-                  <mat-select formControlName="civility">
-                    <mat-option value="MONSIEUR">Monsieur</mat-option>
-                    <mat-option value="MADAME">Madame</mat-option>
-                  </mat-select>
-                  <mat-error>Civilité obligatoire</mat-error>
-                </mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput formControlName="lastName" /></mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Prénom</mat-label><input matInput formControlName="firstName" /></mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput formControlName="phone" /></mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput formControlName="email" /></mat-form-field>
-                <div class="full"><button mat-flat-button color="primary" type="submit" [disabled]="linkFatherForm.invalid || linkingParent">Enregistrer le père</button></div>
-              </form>
-
-              <h5 *ngIf="!s.mother">Ajouter la mère</h5>
-              <form *ngIf="!s.mother" class="grid link-parent-form" [formGroup]="linkMotherForm" (ngSubmit)="submitLinkMother()">
-                <mat-form-field appearance="outline">
-                  <mat-label>Civilité</mat-label>
-                  <mat-select formControlName="civility">
-                    <mat-option value="MONSIEUR">Monsieur</mat-option>
-                    <mat-option value="MADAME">Madame</mat-option>
-                  </mat-select>
-                  <mat-error>Civilité obligatoire</mat-error>
-                </mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput formControlName="lastName" /></mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Prénom</mat-label><input matInput formControlName="firstName" /></mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput formControlName="phone" /></mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput formControlName="email" /></mat-form-field>
-                <div class="full"><button mat-flat-button color="primary" type="submit" [disabled]="linkMotherForm.invalid || linkingParent">Enregistrer la mère</button></div>
-              </form>
-
-              <h5 *ngIf="!s.tutor">Ajouter le tuteur</h5>
-              <form *ngIf="!s.tutor" class="grid link-parent-form" [formGroup]="linkTutorForm" (ngSubmit)="submitLinkTutor()">
-                <mat-form-field appearance="outline">
-                  <mat-label>Civilité</mat-label>
-                  <mat-select formControlName="civility">
-                    <mat-option value="MONSIEUR">Monsieur</mat-option>
-                    <mat-option value="MADAME">Madame</mat-option>
-                  </mat-select>
-                  <mat-error>Civilité obligatoire</mat-error>
-                </mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput formControlName="lastName" /></mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Prénom</mat-label><input matInput formControlName="firstName" /></mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput formControlName="phone" /></mat-form-field>
-                <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput formControlName="email" /></mat-form-field>
-                <div class="full"><button mat-flat-button color="primary" type="submit" [disabled]="linkTutorForm.invalid || linkingParent">Enregistrer le tuteur</button></div>
-              </form>
-            </div>
+            </main>
           </div>
         </mat-tab>
 
@@ -426,125 +508,85 @@
         </mat-tab>
 
         <mat-tab label="Santé & Documents">
-          <div class="tab-head">
-            <h3>Infos médicales et urgence</h3>
-            <div class="tab-head__actions" *ngIf="canWriteStudent">
-              <ng-container *ngIf="!editHealth">
-                <button mat-stroked-button type="button" (click)="startEdit('health')">
-                  <mat-icon>edit</mat-icon>
-                  Modifier
-                </button>
-              </ng-container>
-              <ng-container *ngIf="editHealth">
-                <button mat-button type="button" (click)="cancelEdit('health')">Annuler</button>
-                <button
-                  mat-flat-button
-                  color="primary"
-                  type="button"
-                  [disabled]="healthForm.invalid || !healthForm.dirty"
-                  (click)="saveHealth()"
-                >
-                  Enregistrer
-                </button>
-              </ng-container>
+          <div class="info-card health-card">
+            <div class="info-card-header">
+              <div class="info-card-title-block">
+                <h3>Infos médicales et urgence</h3>
+                <p class="info-card-sub">Facultatif à l’inscription — à compléter ici si besoin.</p>
+              </div>
+              <div class="info-card-actions" *ngIf="canWriteStudent">
+                <ng-container *ngIf="!editHealth">
+                  <button mat-stroked-button color="primary" type="button" (click)="startEdit('health')">
+                    <mat-icon>edit</mat-icon>
+                    Modifier
+                  </button>
+                </ng-container>
+                <ng-container *ngIf="editHealth">
+                  <button mat-button type="button" (click)="cancelEdit('health')">Annuler</button>
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="button"
+                    [disabled]="healthForm.invalid || !healthForm.dirty"
+                    (click)="saveHealth()"
+                  >
+                    Enregistrer
+                  </button>
+                </ng-container>
+              </div>
             </div>
-          </div>
-          <p class="muted tab-hint">Facultatif à l’inscription — à compléter ici si besoin (urgence, allergies).</p>
 
-          <div class="doc-actions">
-            <button
-              mat-raised-button
-              color="primary"
-              type="button"
-              [disabled]="generatingEnrollmentCertificate"
-              (click)="generateEnrollmentCertificate()"
-            >
-              <mat-icon>description</mat-icon>
-              {{ generatingEnrollmentCertificate ? 'Génération...' : 'Attestation d’inscription' }}
-            </button>
-          </div>
-
-          <div class="photo-block">
-            <img *ngIf="photoUrl; else noPhoto" [src]="photoUrl" class="student-photo" alt="Photo élève" />
-            <ng-template #noPhoto><div class="photo-placeholder">Pas de photo</div></ng-template>
-            <div *ngIf="canWriteStudent" class="photo-actions">
-              <input
-                #galleryInput
-                type="file"
-                accept="image/*"
-                (change)="onPhotoSelected($event)"
-                [disabled]="uploadingPhoto"
-                hidden
-              />
-              <input
-                #cameraInput
-                type="file"
-                accept="image/*"
-                capture="environment"
-                (change)="onPhotoSelected($event)"
-                [disabled]="uploadingPhoto"
-                hidden
-              />
+            <div class="doc-actions">
               <button
-                mat-stroked-button
+                mat-raised-button
+                color="primary"
                 type="button"
-                (click)="$event.stopPropagation(); galleryInput.click()"
-                [disabled]="uploadingPhoto"
-                title="Galerie ou fichiers"
+                [disabled]="generatingEnrollmentCertificate"
+                (click)="generateEnrollmentCertificate()"
               >
-                <mat-icon>add_photo_alternate</mat-icon>
-              </button>
-              <button
-                mat-stroked-button
-                type="button"
-                (click)="$event.stopPropagation(); cameraInput.click()"
-                [disabled]="uploadingPhoto"
-                title="Ouvrir l’appareil photo"
-              >
-                <mat-icon>photo_camera</mat-icon>
+                <mat-icon>description</mat-icon>
+                {{ generatingEnrollmentCertificate ? 'Génération...' : 'Attestation d’inscription' }}
               </button>
             </div>
-          </div>
 
-          <!-- Lecture -->
-          <div class="field-list" *ngIf="!editHealth">
-            <div class="field">
-              <span class="field__label">Groupe sanguin</span>
-              <span class="field__value">{{ displayOrDash(s.bloodGroup) }}</span>
-            </div>
-            <div class="field field--full">
-              <span class="field__label">Allergies</span>
-              <span class="field__value">{{ displayOrDash(s.allergies) }}</span>
-            </div>
-            <div class="field">
-              <span class="field__label">Contact urgence</span>
-              <span class="field__value">{{ displayOrDash(s.emergencyContactName) }}</span>
-            </div>
-            <div class="field">
-              <span class="field__label">Téléphone urgence</span>
-              <span class="field__value">{{ displayOrDash(s.emergencyContactPhone) }}</span>
-            </div>
-          </div>
+            <dl class="personal-dl" *ngIf="!editHealth">
+              <div class="personal-row">
+                <dt>Groupe sanguin</dt>
+                <dd>{{ displayOrDash(s.bloodGroup) }}</dd>
+              </div>
+              <div class="personal-row personal-row-wide">
+                <dt>Allergies</dt>
+                <dd>{{ displayOrDash(s.allergies) }}</dd>
+              </div>
+              <div class="personal-row">
+                <dt>Contact urgence</dt>
+                <dd>{{ displayOrDash(s.emergencyContactName) }}</dd>
+              </div>
+              <div class="personal-row">
+                <dt>Téléphone urgence</dt>
+                <dd>{{ displayOrDash(s.emergencyContactPhone) }}</dd>
+              </div>
+            </dl>
 
-          <!-- Édition -->
-          <form class="grid" *ngIf="editHealth" [formGroup]="healthForm">
-            <mat-form-field appearance="outline">
-              <mat-label>Groupe sanguin</mat-label>
-              <input matInput formControlName="bloodGroup" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="full">
-              <mat-label>Allergies</mat-label>
-              <textarea matInput rows="2" formControlName="allergies"></textarea>
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Contact urgence (nom)</mat-label>
-              <input matInput formControlName="emergencyContactName" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Contact urgence (téléphone)</mat-label>
-              <input matInput formControlName="emergencyContactPhone" />
-            </mat-form-field>
-          </form>
+            <form class="grid edit-form" *ngIf="editHealth" [formGroup]="healthForm">
+              <mat-form-field appearance="outline">
+                <mat-label>Groupe sanguin</mat-label>
+                <input matInput formControlName="bloodGroup" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full">
+                <mat-label>Allergies</mat-label>
+                <textarea matInput rows="2" formControlName="allergies"></textarea>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Contact urgence (nom)</mat-label>
+                <input matInput formControlName="emergencyContactName" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Contact urgence (téléphone)</mat-label>
+                <input matInput formControlName="emergencyContactPhone" />
+              </mat-form-field>
+            </form>
+          </div>
         </mat-tab>
       </mat-tab-group>
     </mat-card>

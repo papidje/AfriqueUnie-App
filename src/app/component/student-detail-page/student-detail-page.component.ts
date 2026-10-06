@@ -290,6 +290,50 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     return this.displayOrDash(civility);
   }
 
+  studentInitials(s: { firstName?: string | null; lastName?: string | null } | null | undefined): string {
+    const last = (s?.lastName ?? '').trim();
+    const first = (s?.firstName ?? '').trim();
+    if (last && first) {
+      return `${last.charAt(0)}${first.charAt(0)}`.toUpperCase();
+    }
+    const name = `${last} ${first}`.trim();
+    return name ? name.slice(0, 2).toUpperCase() : '?';
+  }
+
+  studentAgeYears(birthDate: string | number[] | null | undefined): number | null {
+    if (birthDate == null) {
+      return null;
+    }
+    let y: number;
+    let m: number;
+    let d: number;
+    if (Array.isArray(birthDate) && birthDate.length >= 3) {
+      y = Number(birthDate[0]);
+      m = Number(birthDate[1]);
+      d = Number(birthDate[2]);
+    } else {
+      const raw = String(birthDate).trim();
+      const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
+      if (!match) {
+        return null;
+      }
+      y = Number(match[1]);
+      m = Number(match[2]);
+      d = Number(match[3]);
+    }
+    if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) {
+      return null;
+    }
+    const today = new Date();
+    let age = today.getFullYear() - y;
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    if (month < m || (month === m && day < d)) {
+      age -= 1;
+    }
+    return age >= 0 && age < 120 ? age : null;
+  }
+
   saveGeneral(): void {
     if (!this.studentId || this.generalForm.invalid || !this.generalForm.dirty) return;
     const raw = this.generalForm.getRawValue();
