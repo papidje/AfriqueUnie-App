@@ -15,7 +15,7 @@ export interface StudentRegistrationDto {
   civility: 'MONSIEUR' | 'MADAME';
   firstName: string;
   lastName: string;
-  birthDate: string; // yyyy-mm-dd
+  birthDate?: string | null; // yyyy-mm-dd, optionnel
   birthPlace?: string | null;
   nationality?: string | null;
   address?: string | null;

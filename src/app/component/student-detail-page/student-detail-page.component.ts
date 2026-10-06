@@ -88,18 +88,13 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     civility: ['MONSIEUR', Validators.required],
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
-    birthDate: ['', Validators.required],
+    birthDate: [''],
     birthPlace: [''],
     nationality: [''],
     address: [''],
     communicationPhone: [''],
     communicationEmail: [''],
     cardNumber: ['']
-  });
-
-  readonly schoolingForm = this.fb.group({
-    enrollmentStatus: ['INSCRIT', Validators.required],
-    classHistory: ['']
   });
 
   readonly healthForm = this.fb.group({
@@ -175,23 +170,6 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     return `${API_BASE_URL}${this.student.photoPath}`;
   }
 
-  get tuitionProgressPct(): number {
-    if (!this.paymentInfo) return 0;
-    const due = this.paymentInfo.monthlyTuition.reduce((s, m) => s + Number(m.dueAmount || 0), 0);
-    const paid = this.paymentInfo.monthlyTuition.reduce((s, m) => s + Number(m.paidAmount || 0), 0);
-    if (!due) return 0;
-    return Math.max(0, Math.min(100, (paid / due) * 100));
-  }
-
-  get insPieStyle(): string {
-    if (!this.paymentInfo) return '';
-    const exp = Number(this.paymentInfo.insReinsExpected || 0);
-    const paid = Math.min(exp, Number(this.paymentInfo.insReinsPaid || 0));
-    const pct = exp <= 0 ? 0 : Math.round((paid / exp) * 100);
-    return `background: conic-gradient(#1976d2 ${pct}%, #e0e0e0 ${pct}% 100%);`;
-  }
-
-  /** Reliquat (inscription, fournitures, mois) — masque Encaisser si tout est soldé. */
   get hasRemainingBalance(): boolean {
     const fi = this.paymentInfo;
     if (!fi) {
@@ -208,6 +186,14 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     return rem >= 1;
   }
 
+  get classHistoryLines(): string[] {
+    const raw = (this.student?.classHistory ?? '').toString();
+    return raw
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+  }
+
   goToEncaissement(): void {
     if (this.studentId == null || !this.canEncaisser) {
       return;
@@ -217,16 +203,65 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
 
   startEdit(section: 'general' | 'health'): void {
     if (!this.canWriteStudent) return;
-    if (section === 'general') this.editGeneral = true;
-    if (section === 'health') this.editHealth = true;
+    if (section === 'general') {
+      if (this.student) {
+        this.applyStudent(this.student);
+      }
+      this.editGeneral = true;
+    }
+    if (section === 'health') {
+      if (this.student) {
+        this.applyStudent(this.student);
+      }
+      this.editHealth = true;
+    }
+  }
+
+  cancelEdit(section: 'general' | 'health'): void {
+    if (this.student) {
+      this.applyStudent(this.student);
+    }
+    if (section === 'general') {
+      this.editGeneral = false;
+    }
+    if (section === 'health') {
+      this.editHealth = false;
+    }
+  }
+
+  displayOrDash(value: string | null | undefined): string {
+    const t = (value ?? '').toString().trim();
+    return t ? t : '—';
+  }
+
+  civilityLabel(civility: string | null | undefined): string {
+    if (civility === 'MADAME') {
+      return 'Fille';
+    }
+    if (civility === 'MONSIEUR') {
+      return 'Garçon';
+    }
+    return this.displayOrDash(civility);
   }
 
   saveGeneral(): void {
     if (!this.studentId || this.generalForm.invalid || !this.generalForm.dirty) return;
-    this.studentApi.updateProfile(this.studentId, this.generalForm.getRawValue()).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (s) => { this.applyStudent(s); this.editGeneral = false; this.snackBar.open('Informations générales mises à jour.', 'Fermer', { duration: 2500 }); },
-      error: (err) => this.snackBar.open(err?.error?.message || 'Mise à jour impossible.', 'Fermer', { duration: 5000 })
-    });
+    const raw = this.generalForm.getRawValue();
+    const birth = (raw.birthDate || '').toString().trim();
+    this.studentApi
+      .updateProfile(this.studentId, {
+        ...raw,
+        birthDate: birth
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (s) => {
+          this.applyStudent(s);
+          this.editGeneral = false;
+          this.snackBar.open('Informations générales mises à jour.', 'Fermer', { duration: 2500 });
+        },
+        error: (err) => this.snackBar.open(err?.error?.message || 'Mise à jour impossible.', 'Fermer', { duration: 5000 })
+      });
   }
 
   saveHealth(): void {
@@ -706,10 +741,6 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
       communicationEmail: s.communicationEmail ?? '',
       cardNumber: s.cardNumber ?? ''
     }, { emitEvent: false });
-    this.schoolingForm.patchValue({
-      enrollmentStatus: s.enrollmentStatus ?? 'INSCRIT',
-      classHistory: s.classHistory ?? ''
-    }, { emitEvent: false });
     this.healthForm.patchValue({
       emergencyContactName: s.emergencyContactName ?? '',
       emergencyContactPhone: s.emergencyContactPhone ?? '',
@@ -717,7 +748,6 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
       allergies: s.allergies ?? ''
     }, { emitEvent: false });
     this.generalForm.markAsPristine();
-    this.schoolingForm.markAsPristine();
     this.healthForm.markAsPristine();
   }
 

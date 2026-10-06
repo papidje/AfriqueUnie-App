@@ -72,18 +72,6 @@
                 <mat-error *ngIf="stepStudent.controls.firstName.hasError('required')">Requis</mat-error>
               </mat-form-field>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Date de naissance</mat-label>
-                <input
-                  matInput
-                  type="date"
-                  formControlName="birthDate"
-                  [min]="studentBirthMin"
-                  [max]="studentBirthMax"
-                />
-                <mat-error *ngIf="stepStudent.controls.birthDate.hasError('required')">Requis</mat-error>
-              </mat-form-field>
-
               <mat-form-field appearance="outline" class="full">
                 <mat-label>Classe</mat-label>
                 <mat-select formControlName="classId">
@@ -106,6 +94,17 @@
             </button>
 
             <div class="grid extras-panel" *ngIf="showStudentExtras">
+              <mat-form-field appearance="outline">
+                <mat-label>Date de naissance</mat-label>
+                <input
+                  matInput
+                  type="date"
+                  formControlName="birthDate"
+                  [min]="studentBirthMin"
+                  [max]="studentBirthMax"
+                />
+              </mat-form-field>
+
               <mat-form-field appearance="outline">
                 <mat-label>Lieu de naissance</mat-label>
                 <input matInput formControlName="birthPlace" />

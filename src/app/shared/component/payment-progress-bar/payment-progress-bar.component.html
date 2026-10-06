@@ -1,0 +1,67 @@
+<div class="progress-panel" *ngIf="model as m">
+  <div class="progress-summary" *ngIf="summaryLine">{{ summaryLine }}</div>
+
+  <div class="seg-labels" aria-hidden="true" *ngIf="m.segments.length">
+    <div
+      class="seg-label"
+      *ngFor="let seg of m.segments; trackBy: trackSegmentById"
+      [style.flex-grow]="seg.due"
+      [style.flex-basis.px]="0"
+      [matTooltip]="seg.fullLabel + ' · ' + asMoney(seg.due) + ' GNF'"
+      matTooltipShowDelay="250"
+    >
+      {{ seg.label }}
+    </div>
+  </div>
+
+  <div
+    class="progress-track"
+    role="img"
+    [attr.aria-label]="'Progression des paiements : ' + summaryLine"
+  >
+    <div class="fill fill-paid" [style.width.%]="paidPct"></div>
+    <div
+      *ngIf="interactive && pendingPct > 0"
+      class="fill fill-pending"
+      [style.left.%]="paidPct"
+      [style.width.%]="pendingPct"
+    ></div>
+
+    <div class="ticks" aria-hidden="true">
+      <span
+        class="tick"
+        *ngFor="let seg of m.segments; trackBy: trackSegmentById; let last = last"
+        [style.left.%]="m.totalDue > 0 ? (seg.endCumulative / m.totalDue) * 100 : 0"
+        [class.tick--end]="last"
+      ></span>
+    </div>
+  </div>
+
+  <div class="seg-amounts" aria-hidden="true">
+    <div
+      class="amt-ins"
+      *ngIf="m.inscriptionDueAmount > 0"
+      [style.flex-grow]="m.inscriptionDueAmount"
+      [style.flex-basis.px]="0"
+    >
+      {{ asMoney(m.inscriptionDueAmount) }}
+    </div>
+    <div
+      class="amt-spacer"
+      *ngIf="m.totalDue > m.inscriptionDueAmount"
+      [style.flex-grow]="m.totalDue - m.inscriptionDueAmount"
+      [style.flex-basis.px]="0"
+    >
+      <span class="amt-month" *ngIf="m.monthlyUnitAmount > 0">
+        {{ asMoney(m.monthlyUnitAmount) }} GNF / mois
+      </span>
+    </div>
+  </div>
+
+  <div class="progress-legend">
+    <span class="lg lg-paid">Payé</span>
+    <span class="lg lg-pending" *ngIf="interactive">À encaisser</span>
+    <span class="lg lg-rest">Reste</span>
+  </div>
+  <p class="progress-help" *ngIf="helpText">{{ helpText }}</p>
+</div>

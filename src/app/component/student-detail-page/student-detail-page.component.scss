@@ -89,7 +89,41 @@
   margin-bottom: 2px;
 }
 .schooling-banner__value { font-weight: 500; color: var(--app-text-strong); }
-.schooling-form { margin-top: 8px; }
+.history-card {
+  margin: 8px 0 16px;
+  padding: 12px 14px;
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+}
+.history-card__head {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+  margin-bottom: 8px;
+}
+.history-card__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.history-card__list li {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--app-text-strong);
+  padding-left: 12px;
+  border-left: 2px solid var(--app-border);
+}
+.history-card__empty {
+  margin: 0;
+  font-size: 14px;
+  color: var(--app-text-muted);
+}
 .schooling-hint { color: var(--app-text-muted); font-size: 14px; margin: 8px 0; }
 .grades-dashboard {
   margin-top: 20px;
@@ -147,11 +181,75 @@
 .subj-name { color: var(--app-text-muted); font-size: 0.9em; }
 .head h1 { margin: 0; }
 .sub { margin: 6px 0 12px; color: var(--app-text-muted); }
-.tab-head { display:flex; align-items:center; justify-content:space-between; margin: 12px 0; }
+.tab-head { display:flex; align-items:center; justify-content:space-between; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+.tab-head h3 { margin: 0; }
+.tab-head__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tab-head__actions button mat-icon {
+  margin-right: 4px;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+}
+
+.field-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 4px 28px;
+  margin: 4px 0 16px;
+  padding: 4px 0 8px;
+}
+.field-list--compact {
+  gap: 2px 20px;
+  margin: 0 0 8px;
+  padding: 0;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--app-border);
+  min-width: 0;
+}
+.field--full {
+  grid-column: 1 / -1;
+}
+.field__label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+.field__value {
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--app-text-strong);
+  word-break: break-word;
+}
+.field__value.muted {
+  color: var(--app-text-muted);
+  font-weight: 400;
+}
+.field__meta {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--app-text-secondary);
+}
+
 .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 16px; }
 .grid .full { grid-column: 1 / -1; }
 .actions { margin: 12px 0; display:flex; justify-content:flex-end; }
-.parents-block { background:var(--app-surface-2); border:1px solid var(--app-border); border-radius:8px; padding:12px; }
+.parents-block {
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-top: 8px;
+}
 
 .parents-block__head h4 { margin: 0 0 4px; }
 .parents-block .compact { margin: 0 0 10px; font-size: 13px; }
@@ -167,9 +265,10 @@
 .finance-actions button mat-icon {
   margin-right: 6px;
 }
-.finance-cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 12px 0; }
-.finance-cards .card { border:1px solid var(--app-border); border-radius:8px; padding:12px; }
-.pie { width:72px; height:72px; border-radius:50%; margin:8px 0; }
+.finance-progress {
+  display: block;
+  margin: 12px 0 8px;
+}
 .table-wrap { overflow-x:auto; margin-top:12px; }
 .payments-table { width:100%; }
 .align-end, th.align-end, td.align-end { text-align:right; }
