@@ -16,6 +16,7 @@
   margin-left: auto;
   margin-right: auto;
   box-sizing: border-box;
+  padding: 20px 24px 28px;
 }
 
 /* Désactive le scroll interne des onglets Material (évite le double scroll avec .content). */
@@ -30,11 +31,22 @@
   height: auto !important;
   min-height: 0;
 }
+:host ::ng-deep .mat-mdc-tab-group .mat-mdc-tab-body-content {
+  padding: 8px 0 4px;
+}
 :host ::ng-deep .shell.mat-mdc-card .mat-mdc-card-content,
 :host ::ng-deep .shell .mat-mdc-card-content {
   overflow: visible;
   max-height: none;
+  padding: 0;
 }
+
+.head {
+  margin-bottom: 4px;
+  padding: 0 2px;
+}
+.head h1 { margin: 0; }
+.sub { margin: 6px 0 12px; color: var(--app-text-muted); }
 .snapshot-disclaimer {
   display: flex;
   align-items: flex-start;
@@ -119,6 +131,9 @@
   padding-left: 12px;
   border-left: 2px solid var(--app-border);
 }
+.history-card__list li strong {
+  font-weight: 700;
+}
 .history-card__empty {
   margin: 0;
   font-size: 14px;
@@ -179,8 +194,6 @@
 }
 .subj-code { font-weight: 500; }
 .subj-name { color: var(--app-text-muted); font-size: 0.9em; }
-.head h1 { margin: 0; }
-.sub { margin: 6px 0 12px; color: var(--app-text-muted); }
 .tab-head { display:flex; align-items:center; justify-content:space-between; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
 .tab-head h3 { margin: 0; }
 .tab-head__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

@@ -15,6 +15,15 @@
 
       <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
         <mat-form-field appearance="outline">
+          <mat-label>Civilité</mat-label>
+          <mat-select formControlName="civility">
+            <mat-option value="MONSIEUR">Monsieur</mat-option>
+            <mat-option value="MADAME">Madame</mat-option>
+          </mat-select>
+          <mat-error>Civilité obligatoire</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
           <mat-label>Nom</mat-label>
           <input matInput formControlName="lastName" autocomplete="family-name" />
           <mat-error>Nom obligatoire</mat-error>

@@ -149,7 +149,7 @@
               <div class="field field--full">
                 <span class="field__label">Père</span>
                 <span class="field__value" *ngIf="s.father as f">
-                  {{ f.lastName }} {{ f.firstName }}
+                  {{ parentCivilityLabel(f.civility) }} {{ f.lastName }} {{ f.firstName }}
                   <span class="field__meta">{{ f.phone || '—' }} · {{ f.email || '—' }}</span>
                 </span>
                 <span class="field__value muted" *ngIf="!s.father">Non renseigné</span>
@@ -157,7 +157,7 @@
               <div class="field field--full">
                 <span class="field__label">Mère</span>
                 <span class="field__value" *ngIf="s.mother as m">
-                  {{ m.lastName }} {{ m.firstName }}
+                  {{ parentCivilityLabel(m.civility) }} {{ m.lastName }} {{ m.firstName }}
                   <span class="field__meta">{{ m.phone || '—' }} · {{ m.email || '—' }}</span>
                 </span>
                 <span class="field__value muted" *ngIf="!s.mother">Non renseignée</span>
@@ -165,7 +165,7 @@
               <div class="field field--full">
                 <span class="field__label">Tuteur</span>
                 <span class="field__value" *ngIf="s.tutor as t">
-                  {{ t.lastName }} {{ t.firstName }}
+                  {{ parentCivilityLabel(t.civility) }} {{ t.lastName }} {{ t.firstName }}
                   <span class="field__meta">{{ t.phone || '—' }} · {{ t.email || '—' }}</span>
                 </span>
                 <span class="field__value muted" *ngIf="!s.tutor">Non renseigné</span>
@@ -175,6 +175,14 @@
             <div class="link-parent" *ngIf="canWriteStudent && (!s.father || !s.mother || !s.tutor)">
               <h5 *ngIf="!s.father">Ajouter le père</h5>
               <form *ngIf="!s.father" class="grid link-parent-form" [formGroup]="linkFatherForm" (ngSubmit)="submitLinkFather()">
+                <mat-form-field appearance="outline">
+                  <mat-label>Civilité</mat-label>
+                  <mat-select formControlName="civility">
+                    <mat-option value="MONSIEUR">Monsieur</mat-option>
+                    <mat-option value="MADAME">Madame</mat-option>
+                  </mat-select>
+                  <mat-error>Civilité obligatoire</mat-error>
+                </mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput formControlName="lastName" /></mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Prénom</mat-label><input matInput formControlName="firstName" /></mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput formControlName="phone" /></mat-form-field>
@@ -184,6 +192,14 @@
 
               <h5 *ngIf="!s.mother">Ajouter la mère</h5>
               <form *ngIf="!s.mother" class="grid link-parent-form" [formGroup]="linkMotherForm" (ngSubmit)="submitLinkMother()">
+                <mat-form-field appearance="outline">
+                  <mat-label>Civilité</mat-label>
+                  <mat-select formControlName="civility">
+                    <mat-option value="MONSIEUR">Monsieur</mat-option>
+                    <mat-option value="MADAME">Madame</mat-option>
+                  </mat-select>
+                  <mat-error>Civilité obligatoire</mat-error>
+                </mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput formControlName="lastName" /></mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Prénom</mat-label><input matInput formControlName="firstName" /></mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput formControlName="phone" /></mat-form-field>
@@ -193,6 +209,14 @@
 
               <h5 *ngIf="!s.tutor">Ajouter le tuteur</h5>
               <form *ngIf="!s.tutor" class="grid link-parent-form" [formGroup]="linkTutorForm" (ngSubmit)="submitLinkTutor()">
+                <mat-form-field appearance="outline">
+                  <mat-label>Civilité</mat-label>
+                  <mat-select formControlName="civility">
+                    <mat-option value="MONSIEUR">Monsieur</mat-option>
+                    <mat-option value="MADAME">Madame</mat-option>
+                  </mat-select>
+                  <mat-error>Civilité obligatoire</mat-error>
+                </mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput formControlName="lastName" /></mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Prénom</mat-label><input matInput formControlName="firstName" /></mat-form-field>
                 <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput formControlName="phone" /></mat-form-field>
@@ -284,8 +308,12 @@
 
           <div class="history-card">
             <div class="history-card__head">Historique des classes</div>
-            <ul class="history-card__list" *ngIf="classHistoryLines.length; else emptyHistory">
-              <li *ngFor="let line of classHistoryLines">{{ line }}</li>
+            <ul class="history-card__list" *ngIf="classHistoryEntries.length; else emptyHistory">
+              <li *ngFor="let entry of classHistoryEntries">
+                <ng-container *ngIf="entry.dateLabel">
+                  <strong>{{ entry.dateLabel }}</strong> :
+                </ng-container>{{ entry.text }}
+              </li>
             </ul>
             <ng-template #emptyHistory>
               <p class="history-card__empty">Aucun historique pour le moment.</p>

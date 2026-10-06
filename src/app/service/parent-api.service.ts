@@ -7,6 +7,7 @@ import { ParentListRowDto } from '../models/parent-list.models';
 import { ParentDetailDto } from '../models/student-list.models';
 
 export interface ParentWritePayload {
+  civility: string;
   lastName: string;
   firstName: string;
   phone: string;

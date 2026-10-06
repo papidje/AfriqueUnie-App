@@ -30,6 +30,7 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
   readonly childColumns = ['index', 'name', 'matricule', 'className', 'relation', 'status'];
 
   readonly form = this.fb.nonNullable.group({
+    civility: ['MONSIEUR', Validators.required],
     lastName: ['', Validators.required],
     firstName: ['', Validators.required],
     phone: ['', [Validators.required, guineaPhoneValidator()]],
@@ -69,6 +70,7 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (p) => {
           this.form.patchValue({
+            civility: p.civility === 'MADAME' ? 'MADAME' : 'MONSIEUR',
             lastName: p.lastName,
             firstName: p.firstName,
             phone: p.phone,
@@ -100,6 +102,8 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
         return 'Mère';
       case 'PERE_ET_MERE':
         return 'Père et mère';
+      case 'TUTEUR':
+        return 'Tuteur';
       default:
         return '—';
     }
@@ -129,6 +133,7 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
     this.saving = true;
     this.parentApi
       .update(this.parentId, {
+        civility: v.civility,
         lastName: v.lastName.trim(),
         firstName: v.firstName.trim(),
         phone: compactGuineaPhone(v.phone),
@@ -141,6 +146,7 @@ export class ParentDetailPageComponent implements OnInit, OnDestroy {
         next: (updated) => {
           this.saving = false;
           this.form.patchValue({
+            civility: updated.civility === 'MADAME' ? 'MADAME' : 'MONSIEUR',
             lastName: updated.lastName,
             firstName: updated.firstName,
             phone: updated.phone,

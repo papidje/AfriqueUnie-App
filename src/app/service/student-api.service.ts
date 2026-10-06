@@ -64,6 +64,7 @@ export class StudentApiService {
   linkFather(
     studentId: number,
     body: {
+      civility: string;
       lastName: string;
       firstName: string;
       phone?: string | null;
@@ -80,6 +81,7 @@ export class StudentApiService {
   linkMother(
     studentId: number,
     body: {
+      civility: string;
       lastName: string;
       firstName: string;
       phone?: string | null;
@@ -103,6 +105,7 @@ export class StudentApiService {
   linkTutor(
     studentId: number,
     body: {
+      civility: string;
       lastName: string;
       firstName: string;
       phone?: string | null;

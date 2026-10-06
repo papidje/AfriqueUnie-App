@@ -12,6 +12,8 @@ export interface StudentListRow {
 export interface ParentDetailDto {
   id: number;
   tenantId?: number;
+  /** MONSIEUR | MADAME (peut être absent sur les fiches anciennes). */
+  civility?: string | null;
   lastName: string;
   firstName: string;
   phone: string;

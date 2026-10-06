@@ -105,6 +105,7 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
   });
 
   readonly linkFatherForm = this.fb.group({
+    civility: ['MONSIEUR', Validators.required],
     lastName: ['', Validators.required],
     firstName: ['', Validators.required],
     phone: [''],
@@ -112,6 +113,7 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
   });
 
   readonly linkMotherForm = this.fb.group({
+    civility: ['MADAME', Validators.required],
     lastName: ['', Validators.required],
     firstName: ['', Validators.required],
     phone: [''],
@@ -119,6 +121,7 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
   });
 
   readonly linkTutorForm = this.fb.group({
+    civility: ['MONSIEUR', Validators.required],
     lastName: ['', Validators.required],
     firstName: ['', Validators.required],
     phone: [''],
@@ -186,12 +189,44 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     return rem >= 1;
   }
 
-  get classHistoryLines(): string[] {
+  get classHistoryEntries(): { dateLabel: string | null; text: string }[] {
     const raw = (this.student?.classHistory ?? '').toString();
     return raw
       .split(/\r?\n/)
       .map((l) => l.trim())
-      .filter((l) => l.length > 0);
+      .filter((l) => l.length > 0)
+      .map((line) => this.parseClassHistoryLine(line));
+  }
+
+  /** Affiche {@code jj/mm/aaaa : …} ; gère aussi l’ancien format {@code … (yyyy-MM-dd)}. */
+  private parseClassHistoryLine(line: string): { dateLabel: string | null; text: string } {
+    const prefixed = /^(\d{4}-\d{2}-\d{2})\s*:\s*(.+)$/.exec(line);
+    if (prefixed) {
+      return {
+        dateLabel: this.formatIsoDateFr(prefixed[1]),
+        text: this.normalizeHistoryArrow(prefixed[2])
+      };
+    }
+    const legacy = /^(.+?)\s*\((\d{4}-\d{2}-\d{2})\)\s*$/.exec(line);
+    if (legacy) {
+      return {
+        dateLabel: this.formatIsoDateFr(legacy[2]),
+        text: this.normalizeHistoryArrow(legacy[1])
+      };
+    }
+    return { dateLabel: null, text: this.normalizeHistoryArrow(line) };
+  }
+
+  private formatIsoDateFr(iso: string): string {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+    if (!m) {
+      return iso;
+    }
+    return `${m[3]}/${m[2]}/${m[1]}`;
+  }
+
+  private normalizeHistoryArrow(text: string): string {
+    return text.replace(/\s*→\s*/g, ' à ');
   }
 
   goToEncaissement(): void {
@@ -244,6 +279,17 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     return this.displayOrDash(civility);
   }
 
+  /** Civilité parent / tuteur (Monsieur / Madame). */
+  parentCivilityLabel(civility: string | null | undefined): string {
+    if (civility === 'MADAME') {
+      return 'Madame';
+    }
+    if (civility === 'MONSIEUR') {
+      return 'Monsieur';
+    }
+    return this.displayOrDash(civility);
+  }
+
   saveGeneral(): void {
     if (!this.studentId || this.generalForm.invalid || !this.generalForm.dirty) return;
     const raw = this.generalForm.getRawValue();
@@ -280,6 +326,7 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     this.linkingParent = true;
     this.studentApi
       .linkFather(this.studentId, {
+        civility: (v.civility || '').toString(),
         lastName: (v.lastName || '').trim(),
         firstName: (v.firstName || '').trim(),
         phone: (v.phone || '').trim() || null,
@@ -290,7 +337,13 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
         next: (s) => {
           this.linkingParent = false;
           this.applyStudent(s);
-          this.linkFatherForm.reset({ lastName: '', firstName: '', phone: '', email: '' });
+          this.linkFatherForm.reset({
+            civility: 'MONSIEUR',
+            lastName: '',
+            firstName: '',
+            phone: '',
+            email: ''
+          });
           this.snackBar.open('Père enregistré.', 'Fermer', { duration: 2500 });
         },
         error: (err) => {
@@ -308,6 +361,7 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     this.linkingParent = true;
     this.studentApi
       .linkMother(this.studentId, {
+        civility: (v.civility || '').toString(),
         lastName: (v.lastName || '').trim(),
         firstName: (v.firstName || '').trim(),
         phone: (v.phone || '').trim() || null,
@@ -318,7 +372,13 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
         next: (s) => {
           this.linkingParent = false;
           this.applyStudent(s);
-          this.linkMotherForm.reset({ lastName: '', firstName: '', phone: '', email: '' });
+          this.linkMotherForm.reset({
+            civility: 'MADAME',
+            lastName: '',
+            firstName: '',
+            phone: '',
+            email: ''
+          });
           this.snackBar.open('Mère enregistrée.', 'Fermer', { duration: 2500 });
         },
         error: (err) => {
@@ -336,6 +396,7 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
     this.linkingParent = true;
     this.studentApi
       .linkTutor(this.studentId, {
+        civility: (v.civility || '').toString(),
         lastName: (v.lastName || '').trim(),
         firstName: (v.firstName || '').trim(),
         phone: (v.phone || '').trim() || null,
@@ -346,7 +407,13 @@ export class StudentDetailPageComponent implements OnInit, OnDestroy {
         next: (s) => {
           this.linkingParent = false;
           this.applyStudent(s);
-          this.linkTutorForm.reset({ lastName: '', firstName: '', phone: '', email: '' });
+          this.linkTutorForm.reset({
+            civility: 'MONSIEUR',
+            lastName: '',
+            firstName: '',
+            phone: '',
+            email: ''
+          });
           this.snackBar.open('Tuteur enregistré.', 'Fermer', { duration: 2500 });
         },
         error: (err) => {
