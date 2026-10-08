@@ -76,6 +76,23 @@
           <mat-label>Nom</mat-label>
           <input matInput formControlName="name" />
         </mat-form-field>
+        <div class="cycles-field full">
+          <div class="cycles-label">Cycles scolaires <span class="req">*</span></div>
+          <p class="cycles-hint">Obligatoire : la matière ne sera assignable qu’aux classes de ces cycles.</p>
+          <div class="cycles-chips">
+            <label class="cycle-chip" *ngFor="let g of levelGroups">
+              <input
+                type="checkbox"
+                [checked]="isLevelGroupSelected(g.code)"
+                (change)="toggleLevelGroup(g.code, $any($event.target).checked)"
+              />
+              <span>{{ g.name }} <small>({{ g.code }})</small></span>
+            </label>
+          </div>
+          <div class="cycles-error" *ngIf="form.controls.levelGroupCodes.touched && form.controls.levelGroupCodes.invalid">
+            Sélectionnez au moins un cycle.
+          </div>
+        </div>
         <div class="actions">
           <button mat-button type="button" (click)="cancelEdit()" [disabled]="saving">Annuler</button>
           <button mat-raised-button color="primary" type="submit" [disabled]="saving || form.invalid">
@@ -103,7 +120,7 @@
         <tr *ngFor="let s of subjects">
           <td>{{ s.code }}</td>
           <td>{{ s.name }}</td>
-          <td>{{ (s.levelGroupCodes || []).join(', ') || '—' }}</td>
+          <td>{{ cycleLabel(s.levelGroupCodes) }}</td>
           <td class="actions">
             <button mat-icon-button type="button" (click)="startEdit(s)" aria-label="Modifier">
               <mat-icon>edit</mat-icon>

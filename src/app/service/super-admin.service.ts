@@ -89,6 +89,65 @@ export interface SuperAdminSchoolRow {
   studentCount: number;
 }
 
+export interface SuperAdminSchoolCard {
+  id: number;
+  name: string;
+  logo: string | null;
+  active: boolean;
+  cityName: string | null;
+  regionName: string | null;
+  studentCount: number;
+  activeYearStudentCount: number;
+  classCount: number;
+  activeYearLabel: string | null;
+}
+
+export interface SuperAdminTenantDetail {
+  id: number;
+  name: string;
+  address: string | null;
+  logo: string | null;
+  createdAt: string;
+  active: boolean;
+  subscriptionEndsOn: string | null;
+  studentCount: number;
+  schoolCount: number;
+  activeSchoolCount: number;
+  admins: TenantAdminSummary[];
+  schools: SuperAdminSchoolCard[];
+}
+
+export interface SuperAdminSchoolYearSummary {
+  id: number;
+  label: string;
+  active: boolean;
+}
+
+export interface SuperAdminSchoolDetail {
+  id: number;
+  name: string;
+  adress: string | null;
+  contact: string | null;
+  openDate: string | null;
+  logo: string | null;
+  active: boolean;
+  createdAt: string | null;
+  tenantId: number | null;
+  tenantName: string | null;
+  tenantActive: boolean;
+  cityId: number | null;
+  cityName: string | null;
+  regionName: string | null;
+  studentCount: number;
+  activeYearStudentCount: number;
+  classCount: number;
+  capacity: number;
+  staffCount: number;
+  teacherCount: number;
+  activeYearLabel: string | null;
+  schoolYears: SuperAdminSchoolYearSummary[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class SuperAdminService {
   private readonly apiUrl = API_BASE_URL;
@@ -97,6 +156,10 @@ export class SuperAdminService {
 
   getTenantsWithSchools(): Observable<SuperAdminTenantRow[]> {
     return this.http.get<SuperAdminTenantRow[]>(`${this.apiUrl}/super-admin/tenants`);
+  }
+
+  getTenantDetail(id: number): Observable<SuperAdminTenantDetail> {
+    return this.http.get<SuperAdminTenantDetail>(`${this.apiUrl}/super-admin/tenants/${id}`);
   }
 
   setTenantActive(
@@ -114,21 +177,33 @@ export class SuperAdminService {
     return this.http.get<SuperAdminSchoolRow[]>(`${this.apiUrl}/super-admin/schools`);
   }
 
+  getSchoolDetail(id: number): Observable<SuperAdminSchoolDetail> {
+    return this.http.get<SuperAdminSchoolDetail>(`${this.apiUrl}/super-admin/schools/${id}`);
+  }
+
   getGeoStats(): Observable<SuperAdminGeoStats> {
     return this.http.get<SuperAdminGeoStats>(`${this.apiUrl}/super-admin/geo/stats`);
+  }
+
+  listLevelGroupOptions(): Observable<{ code: string; name: string }[]> {
+    return this.http.get<{ code: string; name: string }[]>(`${this.apiUrl}/super-admin/class-level-groups`);
   }
 
   listGlobalSubjects(): Observable<SchoolSubject[]> {
     return this.http.get<SchoolSubject[]>(`${this.apiUrl}/super-admin/subjects`);
   }
 
-  createGlobalSubject(body: Pick<SchoolSubject, 'code' | 'name'>): Observable<SchoolSubject> {
+  createGlobalSubject(body: {
+    code: string;
+    name: string;
+    levelGroupCodes: string[];
+  }): Observable<SchoolSubject> {
     return this.http.post<SchoolSubject>(`${this.apiUrl}/super-admin/subjects`, body);
   }
 
   updateGlobalSubject(
     id: number,
-    body: Pick<SchoolSubject, 'code' | 'name'>
+    body: { code: string; name: string; levelGroupCodes: string[] }
   ): Observable<SchoolSubject> {
     return this.http.put<SchoolSubject>(`${this.apiUrl}/super-admin/subjects/${id}`, body);
   }

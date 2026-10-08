@@ -35,6 +35,65 @@ h1 {
   align-items: start;
 }
 
+.grid-form .full {
+  grid-column: 1 / -1;
+}
+
+.cycles-field {
+  padding: 4px 0 8px;
+}
+
+.cycles-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-text-strong);
+  margin-bottom: 4px;
+}
+
+.cycles-label .req {
+  color: var(--danger-fg, #b91c1c);
+}
+
+.cycles-hint {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--app-text-muted);
+  line-height: 1.4;
+}
+
+.cycles-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cycle-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface-2, #f8fafc);
+  cursor: pointer;
+  font-size: 13px;
+  user-select: none;
+}
+
+.cycle-chip input {
+  margin: 0;
+}
+
+.cycle-chip small {
+  color: var(--app-text-muted);
+}
+
+.cycles-error {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--danger-fg, #b91c1c);
+}
+
 .actions {
   grid-column: 1 / -1;
   display: flex;

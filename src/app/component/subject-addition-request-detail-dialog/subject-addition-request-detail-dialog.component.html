@@ -47,6 +47,25 @@
         <mat-label>Nom (optionnel)</mat-label>
         <input matInput formControlName="name" />
       </mat-form-field>
+      <div class="cycles-field">
+        <div class="cycles-label">Cycles scolaires <span class="req">*</span></div>
+        <div class="cycles-chips">
+          <label class="cycle-chip" *ngFor="let g of levelGroups">
+            <input
+              type="checkbox"
+              [checked]="isLevelGroupSelected(g.code)"
+              (change)="toggleLevelGroup(g.code, $any($event.target).checked)"
+            />
+            <span>{{ g.name }}</span>
+          </label>
+        </div>
+        <div
+          class="cycles-error"
+          *ngIf="acceptForm.controls.levelGroupCodes.touched && acceptForm.controls.levelGroupCodes.invalid"
+        >
+          Sélectionnez au moins un cycle.
+        </div>
+      </div>
     </div>
   </ng-container>
 </mat-dialog-content>

@@ -53,7 +53,9 @@
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Tenant</th>
           <td mat-cell *matCellDef="let row">
-            <span class="tenant-name" [class.inactive]="row.active === false">{{ row.name }}</span>
+            <a class="tenant-name link" [class.inactive]="row.active === false" [routerLink]="['/super-admin/tenants', row.id]">
+              {{ row.name }}
+            </a>
           </td>
         </ng-container>
 

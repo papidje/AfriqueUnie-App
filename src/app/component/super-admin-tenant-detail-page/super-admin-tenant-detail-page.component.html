@@ -1,0 +1,136 @@
+<section class="sa-detail-page">
+  <div class="toolbar">
+    <button mat-stroked-button type="button" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Retour
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="state">Chargement…</div>
+
+  <ng-container *ngIf="!loading && detail as t">
+    <header class="page-heading">
+      <h1>Fiche tenant</h1>
+      <p class="subtitle">Vue d’ensemble opérationnelle pour le suivi plateforme (hors données financières des écoles).</p>
+    </header>
+
+    <div class="detail-dashboard">
+      <aside class="identity-card">
+        <div class="logo-frame">
+          <img *ngIf="logoUrl(t.logo) as src" [src]="src" [alt]="t.name" />
+          <div *ngIf="!logoUrl(t.logo)" class="logo-fallback" aria-hidden="true">{{ initials(t.name) }}</div>
+        </div>
+        <h2 class="identity-name">{{ t.name }}</h2>
+        <span class="status" [class.status--on]="t.active" [class.status--off]="!t.active">
+          {{ t.active ? 'Actif' : 'Inactif' }}
+        </span>
+
+        <mat-divider class="divider"></mat-divider>
+
+        <dl class="identity-dl">
+          <div class="identity-row">
+            <dt>Créé le</dt>
+            <dd>{{ t.createdAt | displayDate:'datetime' }}</dd>
+          </div>
+          <div class="identity-row">
+            <dt>Fin d’abonnement</dt>
+            <dd>{{ t.subscriptionEndsOn ? (t.subscriptionEndsOn | displayDate) : '—' }}</dd>
+          </div>
+          <div class="identity-row">
+            <dt>Adresse</dt>
+            <dd>{{ t.address || '—' }}</dd>
+          </div>
+        </dl>
+      </aside>
+
+      <main class="main-col">
+        <div class="kpi-row">
+          <div class="kpi">
+            <span class="kpi__label">Écoles</span>
+            <span class="kpi__value">{{ t.schoolCount }}</span>
+            <span class="kpi__hint">{{ t.activeSchoolCount }} active{{ t.activeSchoolCount > 1 ? 's' : '' }}</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi__label">Élèves</span>
+            <span class="kpi__value">{{ t.studentCount }}</span>
+            <span class="kpi__hint">Tous établissements</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi__label">Administrateurs</span>
+            <span class="kpi__value">{{ t.admins?.length || 0 }}</span>
+            <span class="kpi__hint">Organisation</span>
+          </div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Administrateurs organisation</h3>
+            <p class="panel-sub">Contacts pour l’accompagnement et la facturation plateforme.</p>
+          </div>
+          <ul class="admin-list" *ngIf="t.admins?.length; else noAdmins">
+            <li *ngFor="let a of t.admins">
+              <span class="admin-avatar" aria-hidden="true">{{ initials(a.fullname) }}</span>
+              <div>
+                <strong>{{ a.fullname }}</strong>
+                <span class="muted">{{ a.email || 'E-mail non renseigné' }}</span>
+              </div>
+            </li>
+          </ul>
+          <ng-template #noAdmins>
+            <p class="empty">Aucun administrateur organisation associé.</p>
+          </ng-template>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Établissements ({{ t.schools.length }})</h3>
+            <p class="panel-sub">Cliquez un nom pour ouvrir la fiche détaillée de l’école.</p>
+          </div>
+
+          <div class="school-grid" *ngIf="t.schools.length; else noSchools">
+            <button
+              type="button"
+              class="school-card"
+              *ngFor="let s of t.schools"
+              (click)="openSchool(s.id)"
+            >
+              <div class="school-card__top">
+                <div class="school-logo">
+                  <img *ngIf="logoUrl(s.logo) as src" [src]="src" alt="" />
+                  <mat-icon *ngIf="!logoUrl(s.logo)" aria-hidden="true">domain</mat-icon>
+                </div>
+                <div class="school-card__title">
+                  <span class="school-card__name">{{ s.name }}</span>
+                  <span class="school-card__place">{{ placeLabel(s.cityName, s.regionName) }}</span>
+                </div>
+                <span class="status status--sm" [class.status--on]="s.active" [class.status--off]="!s.active">
+                  {{ s.active ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+              <div class="school-card__stats">
+                <div>
+                  <span class="stat-label">Élèves</span>
+                  <span class="stat-value">{{ s.studentCount }}</span>
+                </div>
+                <div>
+                  <span class="stat-label">Année active</span>
+                  <span class="stat-value">{{ s.activeYearStudentCount }}</span>
+                </div>
+                <div>
+                  <span class="stat-label">Classes</span>
+                  <span class="stat-value">{{ s.classCount }}</span>
+                </div>
+              </div>
+              <div class="school-card__foot" *ngIf="s.activeYearLabel">
+                Année scolaire {{ s.activeYearLabel }}
+              </div>
+            </button>
+          </div>
+          <ng-template #noSchools>
+            <p class="empty">Aucune école rattachée à ce tenant.</p>
+          </ng-template>
+        </section>
+      </main>
+    </div>
+  </ng-container>
+</section>

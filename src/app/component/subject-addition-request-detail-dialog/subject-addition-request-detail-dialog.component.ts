@@ -6,11 +6,17 @@ import { SubjectAdditionRequestDetail } from '../../models/subject-addition-requ
 import { SubjectAdditionRequestService } from '../../service/subject-addition-request.service';
 import { SuperAdminService } from '../../service/super-admin.service';
 import { formatNotificationDateTime } from '../../shared/util/display-date.util';
+import { classLevelGroupSortKey } from '../../core/class-level-group-order';
 
 export interface SubjectAdditionRequestDetailDialogData {
   requestId: number;
   /** Mode super-admin : accept / refuse + API super-admin. */
   asSuperAdmin?: boolean;
+}
+
+interface LevelGroupOption {
+  code: string;
+  name: string;
 }
 
 @Component({
@@ -22,6 +28,7 @@ export class SubjectAdditionRequestDetailDialogComponent implements OnInit {
   loading = true;
   saving = false;
   detail: SubjectAdditionRequestDetail | null = null;
+  levelGroups: LevelGroupOption[] = [];
 
   readonly commentForm = this.fb.group({
     body: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2000)]]
@@ -29,7 +36,8 @@ export class SubjectAdditionRequestDetailDialogComponent implements OnInit {
 
   readonly acceptForm = this.fb.group({
     code: ['', [Validators.required, Validators.maxLength(50)]],
-    name: ['', [Validators.maxLength(200)]]
+    name: ['', [Validators.maxLength(200)]],
+    levelGroupCodes: this.fb.nonNullable.control<string[]>([], [Validators.required, Validators.minLength(1)])
   });
 
   constructor(
@@ -51,6 +59,15 @@ export class SubjectAdditionRequestDetailDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.reload();
+    if (this.asSuperAdmin) {
+      this.superAdminApi.listLevelGroupOptions().subscribe({
+        next: (rows) => {
+          this.levelGroups = [...(rows || [])].sort(
+            (a, b) => classLevelGroupSortKey(a.code) - classLevelGroupSortKey(b.code)
+          );
+        }
+      });
+    }
   }
 
   formatDt(value: string | null | undefined): string {
@@ -68,6 +85,23 @@ export class SubjectAdditionRequestDetailDialogComponent implements OnInit {
       default:
         return status || '—';
     }
+  }
+
+  toggleLevelGroup(code: string, checked: boolean): void {
+    const current = [...(this.acceptForm.controls.levelGroupCodes.value || [])];
+    const idx = current.indexOf(code);
+    if (checked && idx < 0) {
+      current.push(code);
+    } else if (!checked && idx >= 0) {
+      current.splice(idx, 1);
+    }
+    this.acceptForm.controls.levelGroupCodes.setValue(current);
+    this.acceptForm.controls.levelGroupCodes.markAsDirty();
+    this.acceptForm.controls.levelGroupCodes.updateValueAndValidity();
+  }
+
+  isLevelGroupSelected(code: string): boolean {
+    return (this.acceptForm.controls.levelGroupCodes.value || []).includes(code);
   }
 
   close(): void {
@@ -104,11 +138,17 @@ export class SubjectAdditionRequestDetailDialogComponent implements OnInit {
       return;
     }
     const v = this.acceptForm.getRawValue();
+    const levelGroupCodes = [...(v.levelGroupCodes || [])];
+    if (!levelGroupCodes.length) {
+      this.snackBar.open('Sélectionnez au moins un cycle scolaire.', 'Fermer', { duration: 4000 });
+      return;
+    }
     this.saving = true;
     this.superAdminApi
       .acceptSubjectAdditionRequest(this.detail.id, {
         code: (v.code || '').trim().toUpperCase(),
-        name: (v.name || '').trim() || this.detail.subjectName
+        name: (v.name || '').trim() || this.detail.subjectName,
+        levelGroupCodes
       })
       .subscribe({
         next: () => {
@@ -154,8 +194,15 @@ export class SubjectAdditionRequestDetailDialogComponent implements OnInit {
     req$.subscribe({
       next: (d) => {
         this.detail = d;
+        const patch: { name?: string; levelGroupCodes?: string[] } = {};
         if (!this.acceptForm.value.name) {
-          this.acceptForm.patchValue({ name: d.subjectName }, { emitEvent: false });
+          patch.name = d.subjectName;
+        }
+        if (!(this.acceptForm.controls.levelGroupCodes.value || []).length && d.levelGroupCode) {
+          patch.levelGroupCodes = [d.levelGroupCode];
+        }
+        if (Object.keys(patch).length) {
+          this.acceptForm.patchValue(patch, { emitEvent: false });
         }
         this.loading = false;
       },

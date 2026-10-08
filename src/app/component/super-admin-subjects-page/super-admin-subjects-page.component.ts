@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { SchoolSubject } from '../../models/subject.models';
 import { SubjectAdditionRequestSummary } from '../../models/subject-addition-request.models';
 import { SuperAdminService } from '../../service/super-admin.service';
@@ -11,6 +12,12 @@ import {
   SubjectAdditionRequestDetailDialogData
 } from '../subject-addition-request-detail-dialog/subject-addition-request-detail-dialog.component';
 import { formatNotificationDateTime } from '../../shared/util/display-date.util';
+import { classLevelGroupSortKey } from '../../core/class-level-group-order';
+
+interface LevelGroupOption {
+  code: string;
+  name: string;
+}
 
 @Component({
   selector: 'app-super-admin-subjects-page',
@@ -19,6 +26,7 @@ import { formatNotificationDateTime } from '../../shared/util/display-date.util'
 })
 export class SuperAdminSubjectsPageComponent implements OnInit {
   subjects: SchoolSubject[] = [];
+  levelGroups: LevelGroupOption[] = [];
   requests: SubjectAdditionRequestSummary[] = [];
   loading = true;
   loadingRequests = true;
@@ -29,7 +37,8 @@ export class SuperAdminSubjectsPageComponent implements OnInit {
 
   readonly form = this.fb.group({
     code: ['', [Validators.required, Validators.maxLength(50)]],
-    name: ['', [Validators.required, Validators.maxLength(200)]]
+    name: ['', [Validators.required, Validators.maxLength(200)]],
+    levelGroupCodes: this.fb.nonNullable.control<string[]>([], [Validators.required, Validators.minLength(1)])
   });
 
   constructor(
@@ -67,16 +76,50 @@ export class SuperAdminSubjectsPageComponent implements OnInit {
     }
   }
 
+  cycleLabel(codes: string[] | null | undefined): string {
+    if (!codes?.length) {
+      return '—';
+    }
+    const byCode = new Map(this.levelGroups.map((g) => [g.code, g.name]));
+    return [...codes]
+      .sort((a, b) => classLevelGroupSortKey(a) - classLevelGroupSortKey(b))
+      .map((c) => byCode.get(c) || c)
+      .join(', ');
+  }
+
   setRequestFilter(filter: 'OPEN' | 'CLOSED' | 'ALL'): void {
     this.requestFilter = filter;
     this.reloadRequests();
   }
 
+  toggleLevelGroup(code: string, checked: boolean): void {
+    const current = [...(this.form.controls.levelGroupCodes.value || [])];
+    const idx = current.indexOf(code);
+    if (checked && idx < 0) {
+      current.push(code);
+    } else if (!checked && idx >= 0) {
+      current.splice(idx, 1);
+    }
+    this.form.controls.levelGroupCodes.setValue(current);
+    this.form.controls.levelGroupCodes.markAsDirty();
+    this.form.controls.levelGroupCodes.updateValueAndValidity();
+  }
+
+  isLevelGroupSelected(code: string): boolean {
+    return (this.form.controls.levelGroupCodes.value || []).includes(code);
+  }
+
   reload(): void {
     this.loading = true;
-    this.superAdminService.listGlobalSubjects().subscribe({
-      next: (list) => {
-        this.subjects = list || [];
+    forkJoin({
+      subjects: this.superAdminService.listGlobalSubjects(),
+      groups: this.superAdminService.listLevelGroupOptions()
+    }).subscribe({
+      next: ({ subjects, groups }) => {
+        this.subjects = subjects || [];
+        this.levelGroups = [...(groups || [])].sort(
+          (a, b) => classLevelGroupSortKey(a.code) - classLevelGroupSortKey(b.code)
+        );
         this.loading = false;
       },
       error: () => {
@@ -122,19 +165,27 @@ export class SuperAdminSubjectsPageComponent implements OnInit {
   startCreate(): void {
     this.editingId = null;
     this.formOpen = true;
-    this.form.reset({ code: '', name: '' });
+    this.form.reset({
+      code: '',
+      name: '',
+      levelGroupCodes: this.levelGroups.map((g) => g.code)
+    });
   }
 
   startEdit(s: SchoolSubject): void {
     this.editingId = s.id;
     this.formOpen = true;
-    this.form.reset({ code: s.code, name: s.name });
+    this.form.reset({
+      code: s.code,
+      name: s.name,
+      levelGroupCodes: [...(s.levelGroupCodes || [])]
+    });
   }
 
   cancelEdit(): void {
     this.formOpen = false;
     this.editingId = null;
-    this.form.reset({ code: '', name: '' });
+    this.form.reset({ code: '', name: '', levelGroupCodes: [] });
   }
 
   save(): void {
@@ -145,8 +196,13 @@ export class SuperAdminSubjectsPageComponent implements OnInit {
     const v = this.form.getRawValue();
     const body = {
       code: (v.code || '').trim().toUpperCase(),
-      name: (v.name || '').trim()
+      name: (v.name || '').trim(),
+      levelGroupCodes: [...(v.levelGroupCodes || [])]
     };
+    if (!body.levelGroupCodes.length) {
+      this.snackBar.open('Sélectionnez au moins un cycle scolaire.', 'Fermer', { duration: 4000 });
+      return;
+    }
     this.saving = true;
     const req =
       this.editingId != null

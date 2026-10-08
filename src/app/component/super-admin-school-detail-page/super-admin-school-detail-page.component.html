@@ -1,0 +1,155 @@
+<section class="sa-detail-page">
+  <div class="toolbar">
+    <button mat-stroked-button type="button" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Retour
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="state">Chargement…</div>
+
+  <ng-container *ngIf="!loading && detail as s">
+    <header class="page-heading">
+      <h1>Fiche établissement</h1>
+      <p class="subtitle">
+        Indicateurs de structure et d’effectif utiles au suivi plateforme — aucune donnée financière n’est affichée.
+      </p>
+    </header>
+
+    <div class="detail-dashboard">
+      <aside class="identity-card">
+        <div class="logo-frame">
+          <img *ngIf="logoUrl(s.logo) as src" [src]="src" [alt]="s.name" />
+          <div *ngIf="!logoUrl(s.logo)" class="logo-fallback" aria-hidden="true">{{ initials(s.name) }}</div>
+        </div>
+        <h2 class="identity-name">{{ s.name }}</h2>
+        <span class="status" [class.status--on]="s.active" [class.status--off]="!s.active">
+          {{ s.active ? 'Active' : 'Inactive' }}
+        </span>
+
+        <mat-divider class="divider"></mat-divider>
+
+        <dl class="identity-dl">
+          <div class="identity-row">
+            <dt>Tenant</dt>
+            <dd>
+              <button
+                *ngIf="s.tenantId"
+                type="button"
+                class="linkish"
+                (click)="openTenant(s.tenantId)"
+              >
+                {{ s.tenantName || 'Tenant #' + s.tenantId }}
+              </button>
+              <span *ngIf="!s.tenantId">—</span>
+              <span class="meta-pill" *ngIf="s.tenantId" [class.on]="s.tenantActive" [class.off]="!s.tenantActive">
+                {{ s.tenantActive ? 'Tenant actif' : 'Tenant inactif' }}
+              </span>
+            </dd>
+          </div>
+          <div class="identity-row">
+            <dt>Localisation</dt>
+            <dd>{{ placeLabel() }}</dd>
+          </div>
+          <div class="identity-row">
+            <dt>Contact</dt>
+            <dd>{{ s.contact || '—' }}</dd>
+          </div>
+          <div class="identity-row">
+            <dt>Adresse</dt>
+            <dd>{{ s.adress || '—' }}</dd>
+          </div>
+          <div class="identity-row">
+            <dt>Ouverture</dt>
+            <dd>{{ s.openDate ? (s.openDate | displayDate) : '—' }}</dd>
+          </div>
+          <div class="identity-row">
+            <dt>Créée le</dt>
+            <dd>{{ s.createdAt ? (s.createdAt | displayDate:'datetime') : '—' }}</dd>
+          </div>
+          <div class="identity-row">
+            <dt>Année scolaire active</dt>
+            <dd>{{ s.activeYearLabel || 'Aucune année active' }}</dd>
+          </div>
+        </dl>
+      </aside>
+
+      <main class="main-col">
+        <div class="kpi-row">
+          <div class="kpi">
+            <span class="kpi__label">Élèves (total)</span>
+            <span class="kpi__value">{{ s.studentCount }}</span>
+            <span class="kpi__hint">Fiches élève</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi__label">Élèves année active</span>
+            <span class="kpi__value">{{ s.activeYearStudentCount }}</span>
+            <span class="kpi__hint">Affectés en classe</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi__label">Classes</span>
+            <span class="kpi__value">{{ s.classCount }}</span>
+            <span class="kpi__hint">Année active</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi__label">Capacité</span>
+            <span class="kpi__value">{{ s.capacity }}</span>
+            <span class="kpi__hint" *ngIf="occupancyPercent() as pct">Taux d’occupation {{ pct }}&nbsp;%</span>
+            <span class="kpi__hint" *ngIf="occupancyPercent() == null">Places déclarées</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi__label">Personnel</span>
+            <span class="kpi__value">{{ s.staffCount }}</span>
+            <span class="kpi__hint">Affiliations actives</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi__label">Enseignants</span>
+            <span class="kpi__value">{{ s.teacherCount }}</span>
+            <span class="kpi__hint">Rôle enseignant</span>
+          </div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Années scolaires</h3>
+            <p class="panel-sub">Historique des années configurées pour cet établissement.</p>
+          </div>
+          <div class="years-table-wrap" *ngIf="s.schoolYears?.length; else noYears">
+            <table class="years-table">
+              <thead>
+                <tr>
+                  <th>Libellé</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let y of s.schoolYears">
+                  <td>{{ y.label }}</td>
+                  <td>
+                    <span class="status status--sm" [class.status--on]="y.active" [class.status--off]="!y.active">
+                      {{ y.active ? 'Active' : 'Clôturée' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <ng-template #noYears>
+            <p class="empty">Aucune année scolaire enregistrée.</p>
+          </ng-template>
+        </section>
+
+        <section class="panel tip-panel">
+          <mat-icon>info</mat-icon>
+          <div>
+            <strong>Usage facturation plateforme</strong>
+            <p>
+              Ces volumes (écoles, élèves, classes, année active) servent à dimensionner l’abonnement
+              et le suivi par tenant. Les encaissements et tarifs restent confidentiels au niveau de chaque école.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </ng-container>
+</section>

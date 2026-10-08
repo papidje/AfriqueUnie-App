@@ -29,6 +29,8 @@ import { SuperAdminCitiesPageComponent } from "./component/super-admin-cities-pa
 import { SuperAdminSubjectsPageComponent } from "./component/super-admin-subjects-page/super-admin-subjects-page.component";
 import { SuperAdminGeoPageComponent } from "./component/super-admin-geo-page/super-admin-geo-page.component";
 import { SuperAdminSchoolsPageComponent } from "./component/super-admin-schools-page/super-admin-schools-page.component";
+import { SuperAdminTenantDetailPageComponent } from "./component/super-admin-tenant-detail-page/super-admin-tenant-detail-page.component";
+import { SuperAdminSchoolDetailPageComponent } from "./component/super-admin-school-detail-page/super-admin-school-detail-page.component";
 import { MyEstablishmentsComponent } from "./component/my-establishments/my-establishments.component";
 import { SchoolClassesPageComponent } from "./component/school-classes-page/school-classes-page.component";
 import { SchoolYearCreatePageComponent } from "./component/school-year-create-page/school-year-create-page.component";
@@ -128,8 +130,20 @@ const routes: Routes = [
         data: { roles: [AppRoles.SUPER_ADMIN] }
       },
       {
+        path: 'super-admin/tenants/:tenantId',
+        component: SuperAdminTenantDetailPageComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [AppRoles.SUPER_ADMIN] }
+      },
+      {
         path: 'super-admin/ecoles',
         component: SuperAdminSchoolsPageComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [AppRoles.SUPER_ADMIN] }
+      },
+      {
+        path: 'super-admin/ecoles/:schoolId',
+        component: SuperAdminSchoolDetailPageComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: { roles: [AppRoles.SUPER_ADMIN] }
       },

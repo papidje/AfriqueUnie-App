@@ -78,13 +78,18 @@
                   <mat-icon *ngIf="!logoUrl(s.logo)" aria-hidden="true">domain</mat-icon>
                 </div>
                 <div class="school-meta">
-                  <span class="school-name">{{ s.name }}</span>
+                  <a class="school-name link" [routerLink]="['/super-admin/ecoles', s.id]">{{ s.name }}</a>
                   <span class="school-adress muted">{{ s.adress || 'Adresse non renseignée' }}</span>
                 </div>
               </div>
             </td>
             <td>
-              <span class="tenant">{{ s.tenantName || '—' }}</span>
+              <a
+                *ngIf="s.tenantId"
+                class="tenant link"
+                [routerLink]="['/super-admin/tenants', s.tenantId]"
+              >{{ s.tenantName || '—' }}</a>
+              <span *ngIf="!s.tenantId" class="tenant">—</span>
             </td>
             <td>
               <span [class.muted]="!s.cityName">{{ placeLabel(s) }}</span>
