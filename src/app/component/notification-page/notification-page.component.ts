@@ -80,7 +80,7 @@ export class NotificationPageComponent implements OnInit, OnDestroy {
     }
     const queryParams = { requestId: n.linkId };
     if (this.authUtils.isSuperAdmin()) {
-      void this.router.navigate(['/super-admin/matieres'], { queryParams });
+      void this.router.navigate(['/super-admin/demandes'], { queryParams });
     } else {
       void this.router.navigate(['/matieres'], { queryParams });
     }

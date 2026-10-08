@@ -6,6 +6,7 @@ import {
   CityService,
   CityWritePayload,
   RegionDto,
+  RegionWritePayload,
   cityRegionLabel
 } from '../../service/city.service';
 
@@ -17,20 +18,32 @@ import {
 export class SuperAdminCitiesPageComponent implements OnInit {
   cities: CityDto[] = [];
   regions: RegionDto[] = [];
-  loading = true;
-  saving = false;
-  /** Formulaire visible uniquement après « Nouvelle ville » ou « Modifier ». */
-  formOpen = false;
-  editingId: number | null = null;
+  citySearch = '';
+  loadingCities = true;
+  loadingRegions = true;
+  savingCity = false;
+  savingRegion = false;
+  /** Formulaire ville visible uniquement après « Nouvelle ville » ou « Modifier ». */
+  cityFormOpen = false;
+  cityEditingId: number | null = null;
+  /** Formulaire région visible uniquement après « Nouvelle région » ou « Modifier ». */
+  regionFormOpen = false;
+  regionEditingId: number | null = null;
 
   readonly regionLabel = cityRegionLabel;
 
-  readonly form = this.fb.group({
+  readonly cityForm = this.fb.group({
     code: ['', [Validators.required, Validators.maxLength(32)]],
     name: ['', [Validators.required, Validators.maxLength(120)]],
     regionId: [null as number | null, Validators.required],
     latitude: [0 as number, Validators.required],
     longitude: [0 as number, Validators.required],
+    active: [true]
+  });
+
+  readonly regionForm = this.fb.group({
+    code: ['', [Validators.required, Validators.maxLength(32)]],
+    name: ['', [Validators.required, Validators.maxLength(120)]],
     active: [true]
   });
 
@@ -41,35 +54,168 @@ export class SuperAdminCitiesPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.reloadRegions();
+    this.reloadCities();
+  }
+
+  get filteredCities(): CityDto[] {
+    const q = (this.citySearch || '').trim().toLowerCase();
+    if (!q) {
+      return this.cities;
+    }
+    return this.cities.filter((c) => {
+      const name = (c.name || '').toLowerCase();
+      const code = (c.code || '').toLowerCase();
+      const region = this.regionLabel(c).toLowerCase();
+      const regionCode = (c.regionCode || c.region?.code || '').toLowerCase();
+      return (
+        name.includes(q) ||
+        code.includes(q) ||
+        region.includes(q) ||
+        regionCode.includes(q)
+      );
+    });
+  }
+
+  reloadRegions(): void {
+    this.loadingRegions = true;
     this.cityService.listRegionsAdmin().subscribe({
-      next: (list) => (this.regions = list || []),
+      next: (list) => {
+        this.regions = list || [];
+        this.loadingRegions = false;
+      },
       error: () => {
         this.regions = [];
+        this.loadingRegions = false;
         this.snackBar.open('Impossible de charger les régions.', 'Fermer', { duration: 4000 });
       }
     });
-    this.reload();
   }
 
-  reload(): void {
-    this.loading = true;
+  reloadCities(): void {
+    this.loadingCities = true;
     this.cityService.listAllAdmin().subscribe({
       next: (list) => {
         this.cities = list || [];
-        this.loading = false;
+        this.loadingCities = false;
       },
       error: () => {
         this.cities = [];
-        this.loading = false;
+        this.loadingCities = false;
         this.snackBar.open('Impossible de charger les villes.', 'Fermer', { duration: 4000 });
       }
     });
   }
 
-  startCreate(): void {
-    this.editingId = null;
-    this.formOpen = true;
-    this.form.reset({
+  // —— Régions ——
+
+  startCreateRegion(): void {
+    this.regionEditingId = null;
+    this.regionFormOpen = true;
+    this.regionForm.reset({ code: '', name: '', active: true });
+  }
+
+  startEditRegion(region: RegionDto): void {
+    this.regionEditingId = region.id;
+    this.regionFormOpen = true;
+    this.regionForm.reset({
+      code: region.code,
+      name: region.name,
+      active: region.active !== false
+    });
+  }
+
+  cancelRegionEdit(): void {
+    this.regionFormOpen = false;
+    this.regionEditingId = null;
+    this.regionForm.reset({ code: '', name: '', active: true });
+  }
+
+  saveRegion(): void {
+    if (this.regionForm.invalid) {
+      this.regionForm.markAllAsTouched();
+      return;
+    }
+    const v = this.regionForm.getRawValue();
+    const body: RegionWritePayload = {
+      code: (v.code || '').trim().toUpperCase(),
+      name: (v.name || '').trim(),
+      active: !!v.active
+    };
+    this.savingRegion = true;
+    const req =
+      this.regionEditingId != null
+        ? this.cityService.updateRegion(this.regionEditingId, body)
+        : this.cityService.createRegion(body);
+    req.subscribe({
+      next: () => {
+        this.savingRegion = false;
+        this.snackBar.open(
+          this.regionEditingId != null ? 'Région mise à jour.' : 'Région ajoutée.',
+          'Fermer',
+          { duration: 2500 }
+        );
+        this.cancelRegionEdit();
+        this.reloadRegions();
+      },
+      error: (err) => {
+        this.savingRegion = false;
+        const msg =
+          err?.error?.message || err?.error?.error || 'Enregistrement impossible.';
+        this.snackBar.open(msg, 'Fermer', { duration: 5000 });
+      }
+    });
+  }
+
+  toggleRegionActive(region: RegionDto): void {
+    const next = !(region.active !== false);
+    this.cityService.setRegionActive(region.id, next).subscribe({
+      next: () => {
+        this.snackBar.open(next ? 'Région activée.' : 'Région désactivée.', 'Fermer', {
+          duration: 2500
+        });
+        this.reloadRegions();
+      },
+      error: () =>
+        this.snackBar.open('Changement de statut impossible.', 'Fermer', { duration: 4000 })
+    });
+  }
+
+  deleteRegion(region: RegionDto): void {
+    const count = region.cityCount ?? 0;
+    if (count > 0) {
+      this.snackBar.open(
+        `Impossible : ${count} ville(s) rattachée(s). Désactivez plutôt la région.`,
+        'Fermer',
+        { duration: 4500 }
+      );
+      return;
+    }
+    if (!confirm(`Supprimer la région « ${region.name} » ?`)) {
+      return;
+    }
+    this.cityService.deleteRegion(region.id).subscribe({
+      next: () => {
+        this.snackBar.open('Région supprimée.', 'Fermer', { duration: 2500 });
+        if (this.regionEditingId === region.id) {
+          this.cancelRegionEdit();
+        }
+        this.reloadRegions();
+      },
+      error: (err) => {
+        const msg =
+          err?.error?.message || err?.error?.error || 'Suppression impossible.';
+        this.snackBar.open(msg, 'Fermer', { duration: 5000 });
+      }
+    });
+  }
+
+  // —— Villes ——
+
+  startCreateCity(): void {
+    this.cityEditingId = null;
+    this.cityFormOpen = true;
+    this.cityForm.reset({
       code: '',
       name: '',
       regionId: null,
@@ -79,10 +225,10 @@ export class SuperAdminCitiesPageComponent implements OnInit {
     });
   }
 
-  startEdit(city: CityDto): void {
-    this.editingId = city.id;
-    this.formOpen = true;
-    this.form.reset({
+  startEditCity(city: CityDto): void {
+    this.cityEditingId = city.id;
+    this.cityFormOpen = true;
+    this.cityForm.reset({
       code: city.code,
       name: city.name,
       regionId: city.regionId ?? city.region?.id ?? null,
@@ -92,10 +238,10 @@ export class SuperAdminCitiesPageComponent implements OnInit {
     });
   }
 
-  cancelEdit(): void {
-    this.formOpen = false;
-    this.editingId = null;
-    this.form.reset({
+  cancelCityEdit(): void {
+    this.cityFormOpen = false;
+    this.cityEditingId = null;
+    this.cityForm.reset({
       code: '',
       name: '',
       regionId: null,
@@ -105,12 +251,12 @@ export class SuperAdminCitiesPageComponent implements OnInit {
     });
   }
 
-  save(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  saveCity(): void {
+    if (this.cityForm.invalid) {
+      this.cityForm.markAllAsTouched();
       return;
     }
-    const v = this.form.getRawValue();
+    const v = this.cityForm.getRawValue();
     const body: CityWritePayload = {
       code: (v.code || '').trim().toUpperCase(),
       name: (v.name || '').trim(),
@@ -119,24 +265,25 @@ export class SuperAdminCitiesPageComponent implements OnInit {
       longitude: Number(v.longitude),
       active: !!v.active
     };
-    this.saving = true;
+    this.savingCity = true;
     const req =
-      this.editingId != null
-        ? this.cityService.update(this.editingId, body)
+      this.cityEditingId != null
+        ? this.cityService.update(this.cityEditingId, body)
         : this.cityService.create(body);
     req.subscribe({
       next: () => {
-        this.saving = false;
+        this.savingCity = false;
         this.snackBar.open(
-          this.editingId != null ? 'Ville mise à jour.' : 'Ville ajoutée.',
+          this.cityEditingId != null ? 'Ville mise à jour.' : 'Ville ajoutée.',
           'Fermer',
           { duration: 2500 }
         );
-        this.cancelEdit();
-        this.reload();
+        this.cancelCityEdit();
+        this.reloadCities();
+        this.reloadRegions();
       },
       error: (err) => {
-        this.saving = false;
+        this.savingCity = false;
         const msg =
           err?.error?.message || err?.error?.error || 'Enregistrement impossible.';
         this.snackBar.open(msg, 'Fermer', { duration: 5000 });
@@ -144,21 +291,21 @@ export class SuperAdminCitiesPageComponent implements OnInit {
     });
   }
 
-  toggleActive(city: CityDto): void {
+  toggleCityActive(city: CityDto): void {
     const next = !(city.active !== false);
     this.cityService.setActive(city.id, next).subscribe({
       next: () => {
         this.snackBar.open(next ? 'Ville activée.' : 'Ville désactivée.', 'Fermer', {
           duration: 2500
         });
-        this.reload();
+        this.reloadCities();
       },
       error: () =>
         this.snackBar.open('Changement de statut impossible.', 'Fermer', { duration: 4000 })
     });
   }
 
-  delete(city: CityDto): void {
+  deleteCity(city: CityDto): void {
     const count = city.schoolCount ?? 0;
     if (count > 0) {
       this.snackBar.open(
@@ -174,10 +321,11 @@ export class SuperAdminCitiesPageComponent implements OnInit {
     this.cityService.delete(city.id).subscribe({
       next: () => {
         this.snackBar.open('Ville supprimée.', 'Fermer', { duration: 2500 });
-        if (this.editingId === city.id) {
-          this.cancelEdit();
+        if (this.cityEditingId === city.id) {
+          this.cancelCityEdit();
         }
-        this.reload();
+        this.reloadCities();
+        this.reloadRegions();
       },
       error: (err) => {
         const msg =

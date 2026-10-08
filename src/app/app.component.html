@@ -317,13 +317,28 @@
                 routerLink="/super-admin/villes"
                 routerLinkActive="sidenav-link-active"
                 [routerLinkActiveOptions]="{ exact: false }"
-                matTooltip="Villes"
+                matTooltip="Régions / Villes"
                 [matTooltipDisabled]="sidebarExpanded"
                 matTooltipPosition="right"
               >
                 <div class="nav-item-stack">
                   <mat-icon>location_city</mat-icon>
-                  <span *ngIf="sidebarExpanded">Villes</span>
+                  <span *ngIf="sidebarExpanded">Régions / Villes</span>
+                </div>
+              </a>
+              <a
+                mat-list-item
+                *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
+                routerLink="/super-admin/cycles-niveaux"
+                routerLinkActive="sidenav-link-active"
+                [routerLinkActiveOptions]="{ exact: false }"
+                matTooltip="Cycles / Niveaux"
+                [matTooltipDisabled]="sidebarExpanded"
+                matTooltipPosition="right"
+              >
+                <div class="nav-item-stack">
+                  <mat-icon>school</mat-icon>
+                  <span *ngIf="sidebarExpanded">Cycles / Niveaux</span>
                 </div>
               </a>
               <a
@@ -339,6 +354,21 @@
                 <div class="nav-item-stack">
                   <mat-icon>menu_book</mat-icon>
                   <span *ngIf="sidebarExpanded">Matières</span>
+                </div>
+              </a>
+              <a
+                mat-list-item
+                *ngIf="hasRole(AppRoles.SUPER_ADMIN)"
+                routerLink="/super-admin/demandes"
+                routerLinkActive="sidenav-link-active"
+                [routerLinkActiveOptions]="{ exact: false }"
+                matTooltip="Demandes"
+                [matTooltipDisabled]="sidebarExpanded"
+                matTooltipPosition="right"
+              >
+                <div class="nav-item-stack">
+                  <mat-icon>inbox</mat-icon>
+                  <span *ngIf="sidebarExpanded">Demandes</span>
                 </div>
               </a>
               <a

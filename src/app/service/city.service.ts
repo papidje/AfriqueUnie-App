@@ -8,6 +8,13 @@ export interface RegionDto {
   code: string;
   name: string;
   active?: boolean;
+  cityCount?: number;
+}
+
+export interface RegionWritePayload {
+  code: string;
+  name: string;
+  active?: boolean;
 }
 
 export interface CityDto {
@@ -54,6 +61,22 @@ export class CityService {
 
   listRegionsAdmin(): Observable<RegionDto[]> {
     return this.http.get<RegionDto[]>(this.regionsAdminBase);
+  }
+
+  createRegion(body: RegionWritePayload): Observable<RegionDto> {
+    return this.http.post<RegionDto>(this.regionsAdminBase, body);
+  }
+
+  updateRegion(id: number, body: RegionWritePayload): Observable<RegionDto> {
+    return this.http.put<RegionDto>(`${this.regionsAdminBase}/${id}`, body);
+  }
+
+  setRegionActive(id: number, active: boolean): Observable<RegionDto> {
+    return this.http.patch<RegionDto>(`${this.regionsAdminBase}/${id}/active/${active}`, {});
+  }
+
+  deleteRegion(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.regionsAdminBase}/${id}`);
   }
 
   create(body: CityWritePayload): Observable<CityDto> {

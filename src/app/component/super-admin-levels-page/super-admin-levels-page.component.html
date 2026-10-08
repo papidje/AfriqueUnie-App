@@ -1,0 +1,207 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1>Cycles / Niveaux</h1>
+      <p class="subtitle">
+        Référentiel pédagogique global : cycles scolaires et niveaux de classe.
+      </p>
+    </div>
+  </div>
+
+  <mat-tab-group animationDuration="0ms" class="tabs">
+    <!-- —— Cycles —— -->
+    <mat-tab label="Cycles">
+      <div class="tab-toolbar">
+        <button mat-raised-button color="primary" type="button" (click)="startCreateGroup()">
+          <mat-icon>add</mat-icon>
+          Nouveau cycle
+        </button>
+      </div>
+
+      <mat-card class="form-card" *ngIf="groupFormOpen">
+        <mat-card-title>
+          {{ groupEditingId != null ? 'Modifier le cycle' : 'Ajouter un cycle' }}
+        </mat-card-title>
+        <mat-card-content>
+          <form [formGroup]="groupForm" class="grid-form" (ngSubmit)="saveGroup()">
+            <mat-form-field appearance="outline">
+              <mat-label>Code</mat-label>
+              <input matInput formControlName="code" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Nom</mat-label>
+              <input matInput formControlName="name" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Ordre d’affichage</mat-label>
+              <input matInput type="number" formControlName="sortOrder" />
+            </mat-form-field>
+            <div class="actions">
+              <button mat-button type="button" (click)="cancelGroupEdit()" [disabled]="savingGroup">
+                Annuler
+              </button>
+              <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="savingGroup || groupForm.invalid"
+              >
+                {{
+                  savingGroup
+                    ? 'Enregistrement…'
+                    : groupEditingId != null
+                      ? 'Mettre à jour'
+                      : 'Ajouter'
+                }}
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <div *ngIf="loadingGroups" class="state">Chargement…</div>
+
+      <div class="table-wrap" *ngIf="!loadingGroups">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Ordre</th>
+              <th>Code</th>
+              <th>Nom</th>
+              <th>Niveaux</th>
+              <th class="actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let g of groups">
+              <td>{{ g.sortOrder }}</td>
+              <td>{{ g.code }}</td>
+              <td>{{ g.name }}</td>
+              <td>{{ g.levelCount ?? 0 }}</td>
+              <td class="actions">
+                <button mat-icon-button type="button" (click)="startEditGroup(g)" aria-label="Modifier">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  (click)="deleteGroup(g)"
+                  aria-label="Supprimer"
+                  [disabled]="(g.levelCount ?? 0) > 0"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p *ngIf="!groups.length" class="empty">Aucun cycle.</p>
+      </div>
+    </mat-tab>
+
+    <!-- —— Niveaux —— -->
+    <mat-tab label="Niveaux">
+      <div class="tab-toolbar">
+        <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+          <mat-label>Rechercher (niveau ou cycle)</mat-label>
+          <input matInput [(ngModel)]="levelSearch" name="levelSearch" autocomplete="off" />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="button" (click)="startCreateLevel()">
+          <mat-icon>add</mat-icon>
+          Nouveau niveau
+        </button>
+      </div>
+
+      <mat-card class="form-card" *ngIf="levelFormOpen">
+        <mat-card-title>
+          {{ levelEditingId != null ? 'Modifier le niveau' : 'Ajouter un niveau' }}
+        </mat-card-title>
+        <mat-card-content>
+          <form [formGroup]="levelForm" class="grid-form" (ngSubmit)="saveLevel()">
+            <mat-form-field appearance="outline">
+              <mat-label>Code</mat-label>
+              <input matInput formControlName="code" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Nom</mat-label>
+              <input matInput formControlName="name" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Cycle</mat-label>
+              <mat-select formControlName="groupId">
+                <mat-option *ngFor="let g of groups" [value]="g.id">{{ g.name }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Ordre d’affichage</mat-label>
+              <input matInput type="number" formControlName="sortOrder" />
+            </mat-form-field>
+            <div class="actions">
+              <button mat-button type="button" (click)="cancelLevelEdit()" [disabled]="savingLevel">
+                Annuler
+              </button>
+              <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="savingLevel || levelForm.invalid"
+              >
+                {{
+                  savingLevel
+                    ? 'Enregistrement…'
+                    : levelEditingId != null
+                      ? 'Mettre à jour'
+                      : 'Ajouter'
+                }}
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <div *ngIf="loadingLevels" class="state">Chargement…</div>
+
+      <div class="table-wrap" *ngIf="!loadingLevels">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Ordre</th>
+              <th>Code</th>
+              <th>Nom</th>
+              <th>Cycle</th>
+              <th>Usages</th>
+              <th class="actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let l of filteredLevels">
+              <td>{{ l.sortOrder }}</td>
+              <td>{{ l.code }}</td>
+              <td>{{ l.name }}</td>
+              <td>{{ l.groupName || l.groupCode || '—' }}</td>
+              <td>{{ l.usageCount ?? 0 }}</td>
+              <td class="actions">
+                <button mat-icon-button type="button" (click)="startEditLevel(l)" aria-label="Modifier">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  (click)="deleteLevel(l)"
+                  aria-label="Supprimer"
+                  [disabled]="(l.usageCount ?? 0) > 0"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p *ngIf="!filteredLevels.length" class="empty">
+          {{ levelSearch.trim() ? 'Aucun niveau ne correspond à la recherche.' : 'Aucun niveau.' }}
+        </p>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

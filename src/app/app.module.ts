@@ -55,6 +55,8 @@ import { SuperAdminDashboardComponent } from './component/super-admin-dashboard/
 import { TenantSubscriptionDialogComponent } from './component/super-admin-dashboard/tenant-subscription-dialog.component';
 import { SuperAdminCitiesPageComponent } from './component/super-admin-cities-page/super-admin-cities-page.component';
 import { SuperAdminSubjectsPageComponent } from './component/super-admin-subjects-page/super-admin-subjects-page.component';
+import { SuperAdminRequestsPageComponent } from './component/super-admin-requests-page/super-admin-requests-page.component';
+import { SuperAdminLevelsPageComponent } from './component/super-admin-levels-page/super-admin-levels-page.component';
 import { SuperAdminGeoPageComponent } from './component/super-admin-geo-page/super-admin-geo-page.component';
 import { SuperAdminSchoolsPageComponent } from './component/super-admin-schools-page/super-admin-schools-page.component';
 import { SuperAdminTenantDetailPageComponent } from './component/super-admin-tenant-detail-page/super-admin-tenant-detail-page.component';
@@ -133,6 +135,8 @@ export function initializeAuthFactory(authService: AuthService) {
     SuperAdminSchoolDetailPageComponent,
     SuperAdminCitiesPageComponent,
     SuperAdminSubjectsPageComponent,
+    SuperAdminRequestsPageComponent,
+    SuperAdminLevelsPageComponent,
     SuperAdminGeoPageComponent,
     MyEstablishmentsComponent,
     CreateSchoolDialogComponent,

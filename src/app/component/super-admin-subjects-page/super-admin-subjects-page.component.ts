@@ -1,22 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { SchoolSubject } from '../../models/subject.models';
-import { SubjectAdditionRequestSummary } from '../../models/subject-addition-request.models';
 import { SuperAdminService } from '../../service/super-admin.service';
-import {
-  SubjectAdditionRequestDetailDialogComponent,
-  SubjectAdditionRequestDetailDialogData
-} from '../subject-addition-request-detail-dialog/subject-addition-request-detail-dialog.component';
-import { formatNotificationDateTime } from '../../shared/util/display-date.util';
 import { classLevelGroupSortKey } from '../../core/class-level-group-order';
 
 interface LevelGroupOption {
   code: string;
   name: string;
+  sortOrder?: number;
 }
 
 @Component({
@@ -27,13 +20,10 @@ interface LevelGroupOption {
 export class SuperAdminSubjectsPageComponent implements OnInit {
   subjects: SchoolSubject[] = [];
   levelGroups: LevelGroupOption[] = [];
-  requests: SubjectAdditionRequestSummary[] = [];
   loading = true;
-  loadingRequests = true;
   saving = false;
   formOpen = false;
   editingId: number | null = null;
-  requestFilter: 'OPEN' | 'CLOSED' | 'ALL' = 'OPEN';
 
   readonly form = this.fb.group({
     code: ['', [Validators.required, Validators.maxLength(50)]],
@@ -44,36 +34,11 @@ export class SuperAdminSubjectsPageComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     private readonly superAdminService: SuperAdminService,
-    private readonly snackBar: MatSnackBar,
-    private readonly dialog: MatDialog,
-    private readonly route: ActivatedRoute
+    private readonly snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
     this.reload();
-    this.reloadRequests();
-    const raw = this.route.snapshot.queryParamMap.get('requestId');
-    const id = raw != null ? Number(raw) : NaN;
-    if (Number.isFinite(id) && id > 0) {
-      this.openRequest(id);
-    }
-  }
-
-  formatDt(value: string | null | undefined): string {
-    return formatNotificationDateTime(value);
-  }
-
-  statusLabel(status: string): string {
-    switch (status) {
-      case 'OPEN':
-        return 'Ouverte';
-      case 'ACCEPTED':
-        return 'Acceptée';
-      case 'REFUSED':
-        return 'Refusée';
-      default:
-        return status;
-    }
   }
 
   cycleLabel(codes: string[] | null | undefined): string {
@@ -85,11 +50,6 @@ export class SuperAdminSubjectsPageComponent implements OnInit {
       .sort((a, b) => classLevelGroupSortKey(a) - classLevelGroupSortKey(b))
       .map((c) => byCode.get(c) || c)
       .join(', ');
-  }
-
-  setRequestFilter(filter: 'OPEN' | 'CLOSED' | 'ALL'): void {
-    this.requestFilter = filter;
-    this.reloadRequests();
   }
 
   toggleLevelGroup(code: string, checked: boolean): void {
@@ -117,9 +77,11 @@ export class SuperAdminSubjectsPageComponent implements OnInit {
     }).subscribe({
       next: ({ subjects, groups }) => {
         this.subjects = subjects || [];
-        this.levelGroups = [...(groups || [])].sort(
-          (a, b) => classLevelGroupSortKey(a.code) - classLevelGroupSortKey(b.code)
-        );
+        this.levelGroups = [...(groups || [])].sort((a, b) => {
+          const ao = a.sortOrder ?? classLevelGroupSortKey(a.code);
+          const bo = b.sortOrder ?? classLevelGroupSortKey(b.code);
+          return ao - bo;
+        });
         this.loading = false;
       },
       error: () => {
@@ -128,38 +90,6 @@ export class SuperAdminSubjectsPageComponent implements OnInit {
         this.snackBar.open('Impossible de charger les matières.', 'Fermer', { duration: 4000 });
       }
     });
-  }
-
-  reloadRequests(): void {
-    this.loadingRequests = true;
-    this.superAdminService.listSubjectAdditionRequests(this.requestFilter).subscribe({
-      next: (rows) => {
-        this.requests = rows || [];
-        this.loadingRequests = false;
-      },
-      error: () => {
-        this.requests = [];
-        this.loadingRequests = false;
-      }
-    });
-  }
-
-  openRequest(id: number): void {
-    const data: SubjectAdditionRequestDetailDialogData = { requestId: id, asSuperAdmin: true };
-    this.dialog
-      .open(SubjectAdditionRequestDetailDialogComponent, {
-        data,
-        width: '680px',
-        maxWidth: '95vw',
-        autoFocus: false
-      })
-      .afterClosed()
-      .subscribe((changed) => {
-        this.reloadRequests();
-        if (changed) {
-          this.reload();
-        }
-      });
   }
 
   startCreate(): void {

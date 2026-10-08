@@ -222,23 +222,30 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
   }
 
   private buildLevelGroups(levels: ClassLevel[]): ClassLevelGroupOption[] {
-    const byCode = new Map<string, { groupLabel: string; levels: ClassLevel[] }>();
+    const byCode = new Map<
+      string,
+      { groupLabel: string; groupSort: number; levels: ClassLevel[] }
+    >();
     for (const level of levels) {
       const code = level.group?.code ?? '_';
       const groupLabel = level.group?.name ?? 'Autres';
+      const groupSort =
+        level.group?.sortOrder ?? classLevelGroupSortKey(level.group?.code);
       if (!byCode.has(code)) {
-        byCode.set(code, { groupLabel, levels: [] });
+        byCode.set(code, { groupLabel, groupSort, levels: [] });
       }
       byCode.get(code)!.levels.push(level);
     }
 
-    // Ordre métier : Pré scolaire → Maternelle → Primaire → Collège → Lycée
     return Array.from(byCode.entries())
       .map(([groupCode, value]) => ({
         groupCode,
         groupLabel: value.groupLabel,
+        groupSort: value.groupSort,
         levels: value.levels.slice().sort((a, b) => {
-          const byLevel = classLevelCodeSortKey(a.code) - classLevelCodeSortKey(b.code);
+          const byLevel =
+            (a.sortOrder ?? classLevelCodeSortKey(a.code)) -
+            (b.sortOrder ?? classLevelCodeSortKey(b.code));
           if (byLevel !== 0) {
             return byLevel;
           }
@@ -246,11 +253,10 @@ export class SchoolClassesPageComponent implements OnInit, OnDestroy {
         })
       }))
       .sort((a, b) => {
-        const ao = classLevelGroupSortKey(a.groupCode);
-        const bo = classLevelGroupSortKey(b.groupCode);
-        if (ao !== bo) return ao - bo;
+        if (a.groupSort !== b.groupSort) return a.groupSort - b.groupSort;
         return a.groupLabel.localeCompare(b.groupLabel, 'fr');
-      });
+      })
+      .map(({ groupCode, groupLabel, levels: lv }) => ({ groupCode, groupLabel, levels: lv }));
   }
 
   /** Recharge la liste après création (même établissement). */

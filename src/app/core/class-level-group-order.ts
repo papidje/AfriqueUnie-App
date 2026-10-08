@@ -40,6 +40,16 @@ export function classLevelGroupSortKey(groupCode: string | null | undefined): nu
   return CLASS_LEVEL_GROUP_ORDER[groupCode] ?? Number.MAX_SAFE_INTEGER;
 }
 
+/** Préfère {@code sortOrder} administrable, sinon tables de codes historiques. */
+export function classLevelGroupSortKeyFrom(
+  group: { code?: string | null; sortOrder?: number | null } | null | undefined
+): number {
+  if (group?.sortOrder != null && Number.isFinite(group.sortOrder)) {
+    return group.sortOrder;
+  }
+  return classLevelGroupSortKey(group?.code);
+}
+
 export function classLevelCodeSortKey(levelCode: string | null | undefined): number {
   if (!levelCode) {
     return Number.MAX_SAFE_INTEGER;
@@ -47,9 +57,18 @@ export function classLevelCodeSortKey(levelCode: string | null | undefined): num
   return CLASS_LEVEL_CODE_ORDER[levelCode] ?? Number.MAX_SAFE_INTEGER;
 }
 
+export function classLevelSortKeyFrom(level: ClassLevelSortable | null | undefined): number {
+  if (level?.sortOrder != null && Number.isFinite(level.sortOrder)) {
+    return level.sortOrder;
+  }
+  return classLevelCodeSortKey(level?.code);
+}
+
 export interface ClassLevelSortable {
   code?: string | null;
-  group?: { code?: string | null } | null;
+  /** Ordre administrable (prioritaire sur les tables de codes). */
+  sortOrder?: number | null;
+  group?: { code?: string | null; sortOrder?: number | null } | null;
 }
 
 export interface SchoolClassSortable {
@@ -58,13 +77,13 @@ export interface SchoolClassSortable {
   level?: ClassLevelSortable | null;
 }
 
-/** Groupe puis niveau (codes pédagogiques), puis code alphabétique. */
+/** Groupe puis niveau (sortOrder / codes pédagogiques), puis code alphabétique. */
 export function compareClassLevelsByPedagogy(a: ClassLevelSortable, b: ClassLevelSortable): number {
-  const byGroup = classLevelGroupSortKey(a.group?.code) - classLevelGroupSortKey(b.group?.code);
+  const byGroup = classLevelGroupSortKeyFrom(a.group) - classLevelGroupSortKeyFrom(b.group);
   if (byGroup !== 0) {
     return byGroup;
   }
-  const byLevel = classLevelCodeSortKey(a.code) - classLevelCodeSortKey(b.code);
+  const byLevel = classLevelSortKeyFrom(a) - classLevelSortKeyFrom(b);
   if (byLevel !== 0) {
     return byLevel;
   }

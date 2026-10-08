@@ -9,6 +9,38 @@ import {
   SubjectAdditionRequestSummary
 } from '../models/subject-addition-request.models';
 
+export interface ClassLevelGroupAdminDto {
+  id: number;
+  code: string;
+  name: string;
+  sortOrder: number;
+  levelCount?: number;
+}
+
+export interface ClassLevelGroupWritePayload {
+  code: string;
+  name: string;
+  sortOrder?: number;
+}
+
+export interface ClassLevelAdminDto {
+  id: number;
+  code: string;
+  name: string;
+  sortOrder: number;
+  groupId: number | null;
+  groupCode?: string | null;
+  groupName?: string | null;
+  usageCount?: number;
+}
+
+export interface ClassLevelWritePayload {
+  code: string;
+  name: string;
+  groupId: number;
+  sortOrder?: number;
+}
+
 export interface TenantSchoolSummary {
   id: number;
   name: string;
@@ -185,8 +217,48 @@ export class SuperAdminService {
     return this.http.get<SuperAdminGeoStats>(`${this.apiUrl}/super-admin/geo/stats`);
   }
 
-  listLevelGroupOptions(): Observable<{ code: string; name: string }[]> {
-    return this.http.get<{ code: string; name: string }[]>(`${this.apiUrl}/super-admin/class-level-groups`);
+  listLevelGroupOptions(): Observable<{ code: string; name: string; sortOrder?: number }[]> {
+    return this.http.get<{ code: string; name: string; sortOrder?: number }[]>(
+      `${this.apiUrl}/super-admin/class-level-groups`
+    );
+  }
+
+  listClassLevelGroupsAdmin(): Observable<ClassLevelGroupAdminDto[]> {
+    return this.http.get<ClassLevelGroupAdminDto[]>(`${this.apiUrl}/super-admin/class-level-groups`);
+  }
+
+  createClassLevelGroup(body: ClassLevelGroupWritePayload): Observable<ClassLevelGroupAdminDto> {
+    return this.http.post<ClassLevelGroupAdminDto>(`${this.apiUrl}/super-admin/class-level-groups`, body);
+  }
+
+  updateClassLevelGroup(
+    id: number,
+    body: ClassLevelGroupWritePayload
+  ): Observable<ClassLevelGroupAdminDto> {
+    return this.http.put<ClassLevelGroupAdminDto>(
+      `${this.apiUrl}/super-admin/class-level-groups/${id}`,
+      body
+    );
+  }
+
+  deleteClassLevelGroup(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/super-admin/class-level-groups/${id}`);
+  }
+
+  listClassLevelsAdmin(): Observable<ClassLevelAdminDto[]> {
+    return this.http.get<ClassLevelAdminDto[]>(`${this.apiUrl}/super-admin/class-levels`);
+  }
+
+  createClassLevel(body: ClassLevelWritePayload): Observable<ClassLevelAdminDto> {
+    return this.http.post<ClassLevelAdminDto>(`${this.apiUrl}/super-admin/class-levels`, body);
+  }
+
+  updateClassLevel(id: number, body: ClassLevelWritePayload): Observable<ClassLevelAdminDto> {
+    return this.http.put<ClassLevelAdminDto>(`${this.apiUrl}/super-admin/class-levels/${id}`, body);
+  }
+
+  deleteClassLevel(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/super-admin/class-levels/${id}`);
   }
 
   listGlobalSubjects(): Observable<SchoolSubject[]> {

@@ -2,12 +2,14 @@ export interface ClassLevelGroupRef {
   id: number;
   code: string;
   name: string;
+  sortOrder?: number;
 }
 
 export interface ClassLevel {
   id: number;
   code: string;
   name: string;
+  sortOrder?: number;
   group?: ClassLevelGroupRef | null;
 }
 

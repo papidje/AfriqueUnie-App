@@ -27,6 +27,8 @@ import {
 import { SuperAdminDashboardComponent } from "./component/super-admin-dashboard/super-admin-dashboard.component";
 import { SuperAdminCitiesPageComponent } from "./component/super-admin-cities-page/super-admin-cities-page.component";
 import { SuperAdminSubjectsPageComponent } from "./component/super-admin-subjects-page/super-admin-subjects-page.component";
+import { SuperAdminRequestsPageComponent } from "./component/super-admin-requests-page/super-admin-requests-page.component";
+import { SuperAdminLevelsPageComponent } from "./component/super-admin-levels-page/super-admin-levels-page.component";
 import { SuperAdminGeoPageComponent } from "./component/super-admin-geo-page/super-admin-geo-page.component";
 import { SuperAdminSchoolsPageComponent } from "./component/super-admin-schools-page/super-admin-schools-page.component";
 import { SuperAdminTenantDetailPageComponent } from "./component/super-admin-tenant-detail-page/super-admin-tenant-detail-page.component";
@@ -156,6 +158,18 @@ const routes: Routes = [
       {
         path: 'super-admin/matieres',
         component: SuperAdminSubjectsPageComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [AppRoles.SUPER_ADMIN] }
+      },
+      {
+        path: 'super-admin/demandes',
+        component: SuperAdminRequestsPageComponent,
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: [AppRoles.SUPER_ADMIN] }
+      },
+      {
+        path: 'super-admin/cycles-niveaux',
+        component: SuperAdminLevelsPageComponent,
         canActivate: [AuthGuard, RoleGuard],
         data: { roles: [AppRoles.SUPER_ADMIN] }
       },

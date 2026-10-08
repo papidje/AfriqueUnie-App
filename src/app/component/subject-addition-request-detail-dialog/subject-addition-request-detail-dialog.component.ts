@@ -17,6 +17,7 @@ export interface SubjectAdditionRequestDetailDialogData {
 interface LevelGroupOption {
   code: string;
   name: string;
+  sortOrder?: number;
 }
 
 @Component({
@@ -62,9 +63,11 @@ export class SubjectAdditionRequestDetailDialogComponent implements OnInit {
     if (this.asSuperAdmin) {
       this.superAdminApi.listLevelGroupOptions().subscribe({
         next: (rows) => {
-          this.levelGroups = [...(rows || [])].sort(
-            (a, b) => classLevelGroupSortKey(a.code) - classLevelGroupSortKey(b.code)
-          );
+          this.levelGroups = [...(rows || [])].sort((a, b) => {
+            const ao = a.sortOrder ?? classLevelGroupSortKey(a.code);
+            const bo = b.sortOrder ?? classLevelGroupSortKey(b.code);
+            return ao - bo;
+          });
         }
       });
     }

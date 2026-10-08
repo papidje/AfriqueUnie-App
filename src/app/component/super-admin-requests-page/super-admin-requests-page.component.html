@@ -1,0 +1,94 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1>Demandes</h1>
+      <p class="subtitle">Demandes provenant des établissements à traiter par le super administrateur.</p>
+    </div>
+  </div>
+
+  <mat-tab-group animationDuration="0ms" class="tabs">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span class="tab-label">
+          Matière
+          <span
+            class="tab-badge"
+            *ngIf="openRequestCount > 0"
+            [attr.aria-label]="openRequestCount + ' demande(s) ouverte(s)'"
+          >
+            {{ openRequestCount > 99 ? '99+' : openRequestCount }}
+          </span>
+        </span>
+      </ng-template>
+
+      <div class="tab-body">
+        <div class="requests-head">
+          <h2>Demandes d’ajout de matière</h2>
+          <div class="filters">
+            <button
+              mat-stroked-button
+              type="button"
+              [class.active]="requestFilter === 'OPEN'"
+              (click)="setRequestFilter('OPEN')"
+            >
+              Ouvertes
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              [class.active]="requestFilter === 'CLOSED'"
+              (click)="setRequestFilter('CLOSED')"
+            >
+              Fermées
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              [class.active]="requestFilter === 'ALL'"
+              (click)="setRequestFilter('ALL')"
+            >
+              Toutes
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="loadingRequests" class="state">Chargement des demandes…</div>
+
+        <div class="table-wrap" *ngIf="!loadingRequests && requests.length">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Matière</th>
+                <th>École</th>
+                <th>Niveau</th>
+                <th>Demandeur</th>
+                <th>Statut</th>
+                <th>Créée le</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of requests">
+                <td>{{ r.subjectName }}</td>
+                <td>{{ r.schoolName }}</td>
+                <td>{{ r.levelGroupName }} · {{ r.classLevelName }}</td>
+                <td>{{ r.requestedByFullName }}</td>
+                <td>{{ statusLabel(r.status) }}</td>
+                <td>{{ formatDt(r.createdAt) }}</td>
+                <td class="actions">
+                  <button mat-button color="primary" type="button" (click)="openRequest(r.id)">
+                    Ouvrir
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p *ngIf="!loadingRequests && !requests.length" class="empty">
+          Aucune demande pour ce filtre.
+        </p>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
