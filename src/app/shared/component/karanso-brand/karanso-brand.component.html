@@ -5,10 +5,19 @@
   aria-label="Karanso — accueil"
 >
   <img
+    class="kb__mark"
     src="assets/branding/karanso-logo.png"
-    alt="Karanso"
+    alt=""
     decoding="async"
-    [attr.width]="variant === 'hero' ? 500 : variant === 'header' ? 156 : 320"
-    [attr.height]="variant === 'hero' ? 128 : variant === 'header' ? 40 : 82"
+    [attr.width]="markWidth"
+    [attr.height]="markHeight"
   />
+  <span class="kb__text">
+    <span class="kb__name" aria-hidden="true">Karanso</span>
+    <span class="kb__tagline" *ngIf="displayTagline">
+      <span class="kb__rule" aria-hidden="true"></span>
+      Votre école, tout simplement
+      <span class="kb__rule" aria-hidden="true"></span>
+    </span>
+  </span>
 </a>

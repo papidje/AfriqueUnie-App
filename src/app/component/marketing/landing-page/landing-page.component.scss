@@ -21,11 +21,11 @@
   align-items: flex-end;
   overflow: hidden;
   color: #f4efe6;
+  /* Illustration Tombouctou + drapeau Guinée (état avant animation) */
   background:
-    linear-gradient(115deg, rgba(10, 44, 33, 0.88) 0%, rgba(15, 61, 46, 0.55) 48%, rgba(20, 35, 28, 0.35) 100%),
-    radial-gradient(ellipse 80% 60% at 70% 30%, rgba(201, 162, 39, 0.22), transparent 55%),
-    url('https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80')
-      center / cover no-repeat;
+    linear-gradient(115deg, rgba(10, 44, 33, 0.9) 0%, rgba(15, 61, 46, 0.58) 46%, rgba(20, 35, 28, 0.28) 100%),
+    radial-gradient(ellipse 70% 55% at 78% 42%, rgba(201, 162, 39, 0.2), transparent 58%),
+    url('/assets/marketing/landing-hero.jpg') right center / cover no-repeat;
   animation: hero-in 0.9s ease-out both;
 }
 
